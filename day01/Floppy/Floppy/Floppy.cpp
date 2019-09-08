@@ -157,7 +157,7 @@ int main() {
 	flp.write(Floppy::MAGNETIC::HEAD_0, 0, 0, headInfo);
 
 	// 写入(0, 1, 2)
-	char str[] = "FafAFAfa";
+	char str[] = "Hello os on windows, my name is luosirui";
 	flp.write(Floppy::MAGNETIC::HEAD_0, 1, 1, str);
 
 	// 写入文件

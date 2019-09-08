@@ -142,14 +142,25 @@ private:
 
 };
 
+// 工作路径
+const string path = "D:/D_box/learning/workspace/OS/day01/";
+
 int main() {
 	Floppy flp;
 
-	char str[] = "FafAFAfa";
+	// 从文件中读取头部
+	ifstream ifo(path + "boot.img", ios::binary);
+	char headInfo[Floppy::SECTOR::SIZE]{};
+	ifo.read(headInfo, Floppy::SECTOR::SIZE);
+	ifo.close();
+
+	flp.write(Floppy::MAGNETIC::HEAD_0, 0, 0, headInfo);
 
 	// 写入(0, 1, 2)
+	char str[] = "FafAFAfa";
 	flp.write(Floppy::MAGNETIC::HEAD_0, 1, 1, str);
-	flp.writeIntoFile("D:/D_box/learning/workspace/OS/day01/floppy.img", true);
 
+	// 写入文件
+	flp.writeIntoFile(path + "floppy.img", true);
 	return 0;
 }

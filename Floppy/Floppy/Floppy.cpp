@@ -84,8 +84,10 @@ public:
 	}
 
 	// 生成二进制文件
-	void writeIntoFile(string filename, bool flag=false) throw(FileWriteError) {
+	void writeIntoFile(string filename, bool flag = false) throw(FileWriteError) {
 		ofstream of(filename, ios::binary);
+		// 只写一次55aa
+		bool icon = true;
 		// 读取柱面
 		for (int cylinder = 0; cylinder < CYLINDER::COUNT; ++cylinder) {
 			// 翻面
@@ -95,7 +97,15 @@ public:
 				for (int sector = 0; sector < SECTOR::COUNT; ++sector) {
 					auto buf = read(head, cylinder, sector);
 					if (!flag) {
-						of.write(buf.data(), SECTOR::SIZE);
+						if (icon) {
+							of.write(buf.data(), SECTOR::SIZE - 2);
+							char endcode[2]{ 0x55, 0xAA };
+							of.write(endcode, 2);
+							icon = false;
+						}
+						else {
+							of.write(buf.data(), SECTOR::SIZE);
+						}
 					}
 					else {
 						of.write(buf.data(), SECTOR::SIZE - 4);
@@ -111,6 +121,21 @@ public:
 
 		}
 		of.close();
+	}
+
+	// 从文件写入磁盘一个扇区
+	void readFile(string filename, MAGNETIC magneticID, int cylinderID, int sectorID) {
+		assert(cylinderID >= 0 && cylinderID < CYLINDER::COUNT);
+		assert(sectorID >= 0 && sectorID < SECTOR::COUNT);
+
+		// 从文件中读取头部
+		char buf[Floppy::SECTOR::SIZE]{};
+
+		ifstream ifo(filename, ios::binary);
+		ifo.read(buf, Floppy::SECTOR::SIZE);
+		ifo.close();
+
+		write(magneticID, cylinderID, sectorID, buf);
 	}
 
 private:
@@ -143,24 +168,22 @@ private:
 };
 
 // 工作路径
-const string path = "D:/D_box/learning/workspace/OS/day01/";
+const string day01_path = "D:/D_box/learning/workspace/OS/day01/";
+const string day02_path = "D:/D_box/learning/workspace/OS/day02/";
+const string day03_path = "D:/D_box/learning/workspace/OS/day03/";
 
-int main() {
+const string path = day02_path;
+
+int main(int argv, char* args[]) {
 	Floppy flp;
 
 	// 从文件中读取头部
-	ifstream ifo(path + "boot.img", ios::binary);
-	char headInfo[Floppy::SECTOR::SIZE]{};
-	ifo.read(headInfo, Floppy::SECTOR::SIZE);
-	ifo.close();
+	flp.readFile(path + "boot.img", Floppy::MAGNETIC::HEAD_0, 0, 0);
 
-	flp.write(Floppy::MAGNETIC::HEAD_0, 0, 0, headInfo);
-
-	// 写入(0, 1, 2)
-	char str[] = "Hello os on windows, my name is luosirui";
-	flp.write(Floppy::MAGNETIC::HEAD_0, 1, 1, str);
+	// 加载kernel
+	flp.readFile(path + "kernel.img", Floppy::MAGNETIC::HEAD_0, 1, 1);
 
 	// 写入文件
-	flp.writeIntoFile(path + "floppy.img", true);
+	flp.writeIntoFile(path + "system.img");
 	return 0;
 }

@@ -1,6 +1,10 @@
-org	0x7c00;
-
 LOAD_ADDR  EQU  0X8000	; 宏
+
+	org	0x7c00;
+	jmp entry
+	
+	;; 注释
+	DB	"vsOS"
 
 entry:
 	mov	ax, 0

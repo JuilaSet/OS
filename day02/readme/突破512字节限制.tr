@@ -61,7 +61,7 @@ entry:
 	mov	ss, ax
 	mov	ds, ax
 	mov	es, ax
-	mov	si, msg
+	mov	si, msg		; 输出指针指向字符串资源
 
 
 putloop:
@@ -88,5 +88,18 @@ msg:
 || nasm kernel.asm -o kernel.img
 || nasm boot.asm -o boot.img
 
-* 通过C++代码写成`system.img`
+* 首先将通过C++代码将写成`system.img`
+[ex~] 
+	[code] |<
+	Floppy flp;
+
+	// 从文件中读取头部(0, 0, 1)
+	flp.readFile(path + "boot.img", Floppy::MAGNETIC::HEAD_0, 0, 0);
+
+	// 加载kernel到(0, 1, 2)
+	flp.readFile(path + "kernel.img", Floppy::MAGNETIC::HEAD_0, 1, 1);
+
+	// 写入文件
+	flp.writeIntoFile(path + "system.img");
+	>| [uncode]
 ====================

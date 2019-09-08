@@ -1,0 +1,4 @@
+﻿  Floppy.cpp
+d:\d_box\learning\workspace\os\day01\floppy\floppy\floppy.cpp(87): warning C4290: 忽略 C++ 异常规范，但指示函数不是 __declspec(nothrow)
+d:\d_box\learning\workspace\os\day01\floppy\floppy\floppy.cpp(103): warning C4309: “=”: 截断常量值
+  Floppy.vcxproj -> D:\D_box\learning\workspace\OS\day01\Floppy\Debug\Floppy.exe

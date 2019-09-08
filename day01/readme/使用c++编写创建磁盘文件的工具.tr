@@ -21,13 +21,48 @@
 	* 存储磁头号: 
 	|| mov DH, 0 ;DH
 
-	* 存储扇区号: 
+	* 存储扇区号: 注意扇区号是从1开始计算的
 	|| mov CL, 2 ;CL
+
+	* 存放读取的数据位置: 
+	|| mov BX, msg ; ES:BX
+
+	* 表示要做的是读盘操作:
+	|| mov AH, 0x02 ; AH = 02
+
+	* 连续读取几个扇区: 
+	|| mov AL, 1
+
+	* 驱动器编号, 当前读取的是第几个软盘: 
+	|| mov DL, 0
 
 	* 调用BIOS中断实现磁盘读取功能: 
 	|| INT 0x13
 
-	* : 
+	* 读盘出现错误, 跳转到error处执行相应代码: 
+	|| JC error
+
+}
+
+* 打印字符串 {
+
+	* 打印字符串直到遇到0为止: 
+	[ex~] [code] |<
+		mov si, msg
+	putloop:
+		mov  al, [si]
+		add  si, 1	; si指向下一个字符
+		cmp  al, 0	; 是否遇到0
+		je   fin
+		mov  ah, 0x0e
+		mov  bx, 15
+		int  0x10	; 调用显示例程
+		jmp  putloop
+	fin: 
+		...
+	msg:
+		"Hello OS"
+	>| [uncode]
 
 }
 ====================

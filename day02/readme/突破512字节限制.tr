@@ -22,6 +22,7 @@
 
 LOAD_ADDR  EQU  0X8000		; 宏
 
+
 entry:
 	mov	AX, 0
 	mov	SS, AX

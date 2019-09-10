@@ -172,7 +172,7 @@ const string day01_path = "D:/D_box/learning/workspace/OS/day01/";
 const string day02_path = "D:/D_box/learning/workspace/OS/day02/";
 const string day03_path = "D:/D_box/learning/workspace/OS/day03/";
 
-const string path = day02_path;
+const string path = day03_path;
 
 int main(int argv, char* args[]) {
 	Floppy flp;

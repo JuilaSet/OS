@@ -35,6 +35,7 @@
 
 		* Descriptor(描述符)声明: 
 		[ex~] [code] |<
+		; 参数: 段基址(开始点), 段界限(长度), 属性
 		%macro Descriptor 3	; %n 表示引用第n个参数, 3 表示3个参数
 			; %2 的高 0x00 00 字节放入byte0
 			dw	%2  &  0FFFFh
@@ -51,13 +52,26 @@
 		%endmacro
 		>| [uncode]
 
+		* bios调用 {
+		
+			* 加载描述符表(load global describe table): 
+			[ex~]
+			|| lgdt	[GdtPtr]
+		
+		}
+
 	}
 
 	* 设置代码的优先级 {
 
 		* 功能: `保护功能`, 不同的代码拥有不同的优先级, 优先级高的能够执行特殊指令, 优先级低的, 某些重要指令就无法执行
 
-		* 全局描述符表实现
+		* 全局描述符表实现, 读写属性: 
+		[ex~] [code] |<
+		DA_32       EQU 4000h	; 32 位段
+		DA_C        EQU 98h	; 存在的只执行代码段属性值
+		DA_DRW      EQU 92h	; 存在的可读写数据段属性值
+		>| [uncode]
 
 	}
 

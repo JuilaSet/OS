@@ -17,10 +17,12 @@ LABEL_DESC_CODE32:
 LABEL_DESC_VIDEO:
 	Descriptor		0B8000h,	 0ffffh,		DA_DRW	; 可读写数据
 
+; 表地址信息
 GdtLen		equ	$ - LABEL_GDT		; 上面三个描述符的大小 (当前地址 - 描述符的首地址)
 GdtPtr		dw	GdtLen - 1		; 2个字节存放描述符的长度
 		dd	0			; 存放首地址Descriptor形成的列表的首地址
 
+; 描述符偏移量
 SelectorCode32	equ	LABEL_DESC_CODE32 - LABEL_GDT	; 得到第2个描述符相对于开头的偏移
 SelectorVideo	equ	LABEL_DESC_VIDEO  - LABEL_GDT	; 得到第3个描述符相对于开头的偏移
 
@@ -35,11 +37,10 @@ LABEL_BEGIN:
 	mov	ss, ax
 	mov	sp, 0100h
 	
+	; 将用于描述地址的信息存到描述符中
 	xor	eax, eax
 	mov	ax,  cs
 	shl	eax, 4		; 向左平移4位(1 byte), 相当于 cs * 0x10 + LABEL_GDT, 模拟段寄存器
-	
-	; 将用于描述地址的信息存到描述符中
 	add	eax, LABEL_SEG_CODE32
 	mov	word [LABEL_DESC_CODE32 + 2], ax
 	shr	eax, 16
@@ -49,12 +50,12 @@ LABEL_BEGIN:
 	; 把全局描述符的地址写到GdtPtr下方的`dd 0`中
 	xor	eax, eax
 	mov	ax, ds
-	shl	eax, 4				; 向左平移4位(1 byte), 
+	shl	eax, 4				; 向左平移4位(1 byte)
 						; 相当于 cs * 0x10 + LABEL_GDT, 模拟段寄存器
 	add	eax,  LABEL_GDT
 	mov	dword  [GdtPtr + 2], eax	; 放入GdtPtr下方的`dd 0`中
 	
-	lgdt	[GdtPtr]			; bios调用, 加载描述符表
+	lgdt	[GdtPtr]			; bios调用, 加载描述符表(load global describe table)
 	
 	; 关中断, 忽略其他硬件中断(ex: 鼠标)
 	cli

@@ -1,21 +1,25 @@
 %include "pm.inc"
 
-org   0x9000
+org   0X8000
 
 jmp   LABEL_BEGIN
 
 [SECTION .gdt]
 
 ; 全局描述符表 gdt(global descript table)
-				; (开始点)段基址 段界限(长度)		属性
+				; 段基址	段界限(长度)		属性
 LABEL_GDT:
-	Descriptor		0,		 0,			0
+	Descriptor		0,		0,			0
 
 LABEL_DESC_CODE32:
-	Descriptor		0,		 SegCode32Len - 1,	DA_C + DA_32 ; 32 位段, 只执行代码
+	Descriptor		0,		SegCode32Len - 1,	DA_C + DA_32 ; 32 位段, 只执行代码
 
 LABEL_DESC_VIDEO:
-	Descriptor		0B8000h,	 0ffffh,		DA_DRW	; 可读写数据
+	Descriptor		0B8000h,	0ffffh,		DA_DRW	; 可读写数据
+
+LABEL_DESC_5M:
+	Descriptor		0500000h,	0ffffh,		DA_DRW	; 可读写数据
+
 
 ; 表地址信息
 GdtLen		equ	$ - LABEL_GDT		; 上面三个描述符的大小 (当前地址 - 描述符的首地址)
@@ -25,11 +29,11 @@ GdtPtr		dw	GdtLen - 1		; 2个字节存放描述符的长度
 ; 描述符偏移量
 SelectorCode32	equ	LABEL_DESC_CODE32 - LABEL_GDT	; 得到第2个描述符相对于开头的偏移
 SelectorVideo	equ	LABEL_DESC_VIDEO  - LABEL_GDT	; 得到第3个描述符相对于开头的偏移
+Selector5M	equ	LABEL_DESC_5M - LABEL_GDT
 
 [SECTION  .s16]
 [BITS  16]
 LABEL_BEGIN:
-
 	; 初始化
 	mov	ax, cs
 	mov	ds, ax
@@ -70,16 +74,32 @@ LABEL_BEGIN:
 	
 	jmp	dword  SelectorCode32: 0	; cpu 跳转到存放的地址处(超越16位寻址)
 	
-[SECTION .s32]	
+[SECTION .s32]
 [BITS  32]
 	
 LABEL_SEG_CODE32:
 	mov	ax, SelectorVideo	; 显存地址
 	mov	gs, ax			; gs是一个段寄存器, 设置它指向显存
 	mov	si, msg
-	mov	ebx, 10			; 从第11行的第10列开始显示字符 (80 * 11 + 10)
-	mov	ecx, 2			; 两个字节表示一个字符
+
+	mov	ax, Selector5M		; 用 es 指向5M内存描述符
+	mov	es, ax
+	mov	edi, 0			; edi是5M内存中的偏移
 	
+write_msg_to_5M:			; 将si指向的字符一个个写到5M内存处, 之后从这里读取字符
+	cmp	byte [si], 0
+	je	prepare_to_show_char
+	mov	al, [si]
+	mov	[es:edi], al
+	add	edi, 1
+	add	si, 1
+	jmp	write_msg_to_5M
+
+prepare_to_show_char:
+	mov	ebx, 10
+	mov	ecx, 2
+	mov	si, 0
+
 showChar:
 	mov	edi, (80*11)		; 从第11行显示字符, 每一行80个字符
 	add	edi, ebx		; (80 * 11) + 10
@@ -87,8 +107,8 @@ showChar:
 	mul	ecx			; (80 * 11) + 10 * 2, mul 将eax/ax/al(32/16/8位)做乘
 	mov	edi, eax
 
-	mov	ah, 0ch			; 设置eax低16位的高8位为0c, 即设置颜色
-	mov	al, [si]		; 设置si所指向的字符放入eax低16位的低8位, 即设置字符
+	mov	ah, 0eh			; 设置eax低16位的高8位为0c, 即设置颜色
+	mov	al, [es: si]		; 设置字符
 	cmp	al, 0			; al是否为结束字符, 是: 结束输出
 	je	end
 

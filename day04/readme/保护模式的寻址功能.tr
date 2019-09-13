@@ -13,11 +13,6 @@
 
 }
 
-* 声明一个可读写区域, 从5M开始: 
-[ex~] 
-||LABEL_DESC_5M:	; 段基址	段界限		属性
-||	Descriptor	0500000h,	0ffffh,		DA_DRW
-
 * 寻址步骤 {
 
 	* 填充GDT内容
@@ -31,4 +26,9 @@
 	|| jmp	dword  SelectorCode32: 0	; SelectorCode是描述符相对于开头地址的偏移
 
 }
+
+* 声明一个可读写区域, 从5M开始: 
+[ex~] 
+||LABEL_DESC_5M:	; 段基址	段界限		属性
+||	Descriptor	0500000h,	0ffffh,		DA_DRW
 ====================

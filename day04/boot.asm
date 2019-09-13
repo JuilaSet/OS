@@ -1,4 +1,4 @@
-LOAD_ADDR  EQU  0X9000	; 宏
+LOAD_ADDR  EQU  0X8000	; 宏
 
 	org	0x7c00;
 	jmp entry

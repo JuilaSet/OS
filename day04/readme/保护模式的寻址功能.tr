@@ -17,4 +17,18 @@
 [ex~] 
 ||LABEL_DESC_5M:	; 段基址	段界限		属性
 ||	Descriptor	0500000h,	0ffffh,		DA_DRW
+
+* 寻址步骤 {
+
+	* 填充GDT内容
+
+	* bios调用, 加载描述符表
+	|| lgdt	[GdtPtr]	; GdtPtr存放GDT的长度
+
+	* 关闭中断
+
+	* cpu根据描述符的索引跳转到存放的地址处(超越16位寻址)
+	|| jmp	dword  SelectorCode32: 0	; SelectorCode是描述符相对于开头地址的偏移
+
+}
 ====================

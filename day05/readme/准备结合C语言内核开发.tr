@@ -1,0 +1,38 @@
+/*
+ * 准备结合C语言内核开发
+ */
+#def [text~]
+====================
+* 过程 {
+
+	* 从`foo.asm`中的`_start`开始执行
+
+	* `_start`中调用一个函数叫`bar_func`, 由`bar.c`模块实现
+
+	* `bar_func`中调用`foo_print`, 由`foo.asm`实现
+	[dgrm] |<
+	foo.asm   |    bar.c
+	__________|____________
+	_start ======> 
+	               bar_func
+	foo_print <=== 
+	>| [undgrm]
+
+}
+
+* 开始编译: 生成`elf`格式的文件 {
+
+	* 编译`foo.asm`: 
+	[ex~]
+	|| nasm -f elf32 -o foo.o foo.asm
+
+	* 编译`bar.c`: 
+	[ex~]
+	|| gcc -m32 -c -o bar.o bar.c
+
+	* 模块连接: 
+	[ex~]
+	|| ld -m elf_i386 -o foobar foo.o bar.o
+
+}
+====================

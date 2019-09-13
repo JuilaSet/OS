@@ -35,4 +35,14 @@
 	|| ld -m elf_i386 -o foobar foo.o bar.o
 
 }
+
+* 通过反汇编的方式的到连接后的文件 {
+
+	* 生成不带有符号标记的`.o`文件: `-fno-asynchronous-unwind-tables `, 便于之后的反汇编
+	[ex~]
+	|| gcc -m32 -fno-asynchronous-unwind-tables -s -c -o bar.o bar.c
+
+	* : 
+
+}
 ====================

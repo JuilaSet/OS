@@ -36,33 +36,32 @@
 
 }
 
-[def num 0;]
 * 通过反汇编的方式的到连接后的文件 {
 
-	* [echo num++;]: 生成不带有符号标记的`.o`文件: `-fno-asynchronous-unwind-tables `, 便于之后的反汇编
+	* 1: 生成不带有符号标记的`.o`文件: `-fno-asynchronous-unwind-tables `, 便于之后的反汇编
 	[ex~]
 	|| gcc -m32 -fno-asynchronous-unwind-tables -s -c -o bar.o bar.c
 
-	* [echo num++;]: 编译: 
+	* 2: 编译: 
 	[ex~]
 	|| cd objconv
 	|| g++ -o objconv -O2 src/*cpp
 
-	* [echo num++;]: 绑定命令`objconv`: 在bin目录下建立软连接
+	* 3: 绑定命令`objconv`: 在bin目录下建立软连接
 
-	* [echo num++;]: 生成`bar.asm`反汇编文件: 
+	* 4: 生成`bar.asm`反汇编文件: 
 	|| objconv -fnasm bar.o -o bar.asm
 
-	* [echo num++;]: 将`foo.asm`里面的_start, 修改成main
+	* 5: 将`foo.asm`里面的_start, 修改成main
 
-	* [echo num++;]: 在`foo.asm`末尾添加`%include "bar.asm" `将第 [* 4] 步反汇编的C模块代码引入`foo.asm`
+	* 6: 在`foo.asm`末尾添加`%include "bar.asm" `将第 [* 4] 步反汇编的C模块代码引入`foo.asm`
 
-	* [echo num++;]: 去掉所有的`extern`指令, 和不执行的部分
+	* 7: 去掉所有的`extern`指令, 和不执行的部分
 
-	* [echo num++;]: 生成`foo.asm`二进制文件
+	* 8: 生成`foo.asm`二进制文件
 	|| nasm -f elf32 foo.asm
 
-	* [echo num++;]: 编译`foo`必须带有32位库
+	* 9: 编译`foo`必须带有32位库
 	|| gcc -m32 foo.o -o foo
 
 }

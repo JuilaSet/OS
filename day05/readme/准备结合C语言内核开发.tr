@@ -45,16 +45,17 @@
 	* 2: 编译: 
 	[ex~]
 	|| cd objconv
-	|| g++ -o objconv -O2 src/*cpp
+	|| g++ -o objconv -O2 src/*cpp --std=c++98
 
-	* 3: 绑定命令`objconv`: 在bin目录下建立软连接
+	* 3: 绑定命令`objconv`: 在bin目录下建立软连接; 
+	|| sudo cp ./objconv /bin/objconv
 
 	* 4: 生成`bar.asm`反汇编文件: 
 	|| objconv -fnasm bar.o -o bar.asm
 
 	* 5: 将`foo.asm`里面的_start, 修改成main
 
-	* 6: 在`foo.asm`末尾添加`%include "bar.asm" `将第 [* 4] 步反汇编的C模块代码引入`foo.asm`
+	* 6: 在`foo.asm`末尾添加`%include "bar.asm" `将第 [node 4;] 步反汇编的C模块代码引入`foo.asm`
 
 	* 7: 去掉所有的`extern`指令, 和不执行的部分
 

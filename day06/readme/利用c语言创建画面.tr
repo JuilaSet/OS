@@ -43,4 +43,20 @@ int  0x10
 	}
 
 }
+
+* 构建 {
+
+	* 将c文件编译成二进制文件: 
+	|| gcc -m32 -fno-asynchronous-unwind-tables -s -c -o write_vga.o write_vga.cpp
+
+	* 反编译: 
+	|| objconv -fnasm write_vga.o write_vga.asm
+
+	* 反汇编中的代码去掉开头的两句: 
+	[code] |<
+	global CMain: function
+	extern io_hlt
+	>| [uncode]
+
+}
 ====================

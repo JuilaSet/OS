@@ -1,0 +1,7 @@
+﻿D:\Program Files (x86)\Microsoft Visual Studio\2019\Preview\MSBuild\Microsoft\VC\v160\Microsoft.CppBuild.targets(452,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (floppy2.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  floppy2.cpp
+D:\D_box\wkspc\OS\Floppy\floppy2.cpp(86,77) : warning C4290: 忽略 C++ 异常规范，但指示函数不是 __declspec(nothrow)
+D:\D_box\wkspc\OS\Floppy\floppy2.cpp(101,31) : warning C4838: 从“int”转换到“char”需要收缩转换
+D:\D_box\wkspc\OS\Floppy\floppy2.cpp(101,31) : warning C4309: “初始化”: 截断常量值
+D:\D_box\wkspc\OS\Floppy\floppy2.cpp(112,20) : warning C4309: “=”: 截断常量值
+  floppy2.vcxproj -> D:\D_box\wkspc\OS\Floppy\Debug\Floppy.exe

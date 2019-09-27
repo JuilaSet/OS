@@ -1,3 +1,4 @@
-nasm boot.asm -o boot.img
-..\Floppy\Debug\Floppy.exe
-pause
+nasm -o kernel.img kernel.asm
+nasm -o boot.img boot.asm
+cd D:
+Floppy.exe ./

@@ -1,7 +1,6 @@
-﻿  pch.cpp
-  Floppy.cpp
-d:\d_box\learning\workspace\os\floppy01\floppy\floppy.cpp(87): warning C4290: 忽略 C++ 异常规范，但指示函数不是 __declspec(nothrow)
-d:\d_box\learning\workspace\os\floppy01\floppy\floppy.cpp(102): warning C4838: 从“int”转换到“char”需要收缩转换
-d:\d_box\learning\workspace\os\floppy01\floppy\floppy.cpp(102): warning C4309: “初始化”: 截断常量值
-d:\d_box\learning\workspace\os\floppy01\floppy\floppy.cpp(113): warning C4309: “=”: 截断常量值
-  Floppy.vcxproj -> D:\D_box\learning\workspace\OS\Floppy01\Debug\Floppy.exe
+﻿  Floppy.cpp
+d:\d_box\learning\workspace\os\floppy\floppy\floppy.cpp(87): warning C4290: 忽略 C++ 异常规范，但指示函数不是 __declspec(nothrow)
+d:\d_box\learning\workspace\os\floppy\floppy\floppy.cpp(102): warning C4838: 从“int”转换到“char”需要收缩转换
+d:\d_box\learning\workspace\os\floppy\floppy\floppy.cpp(102): warning C4309: “初始化”: 截断常量值
+d:\d_box\learning\workspace\os\floppy\floppy\floppy.cpp(113): warning C4309: “=”: 截断常量值
+  Floppy.vcxproj -> D:\D_box\learning\workspace\OS\Floppy\Debug\Floppy.exe

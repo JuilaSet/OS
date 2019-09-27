@@ -94,7 +94,7 @@ LABEL_SEG_CODE32:
 
 
 ; 导入汇编对应的函数
-%include	"lib.asm"
+	%include	"lib.asm"
 
 SegCode32Len   equ  $ - LABEL_SEG_CODE32
 

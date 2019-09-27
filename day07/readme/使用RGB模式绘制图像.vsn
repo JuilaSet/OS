@@ -18,11 +18,17 @@
 
 		* 写入调色盘: 
 		[ex~] [code] |<
-		
+		for(int i = start; i < end; ++i){
+			io_out8(0x03c9, rgb[0]);	// R
+			io_out8(0x03c9, rgb[1]);	// G
+			io_out8(0x03c9, rgb[2]);	// B
+			rgb += 3;
+		}
 		>| [uncode]
-
-		* : 
 
 	}
 
 }
+
+@important
+* 镜像生成工具出错

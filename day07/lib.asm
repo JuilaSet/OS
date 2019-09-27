@@ -31,15 +31,18 @@ io_out32:
 	out dx, eax
 	ret
 
+; 屏蔽中断: eflags 第9位设置成0
 io_cli:
 	CLI
 	RET
 
+; 保存eflags快照 
 io_load_eflags:
 	pushfd
 	pop  eax
 	ret
 
+; 加载保存的eflags快照
 io_store_eflags:
 	mov eax, [esp + 4]
 	push eax

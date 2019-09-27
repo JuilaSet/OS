@@ -4,6 +4,10 @@ CMain:  ; Function begin
         sub     esp, 24                                 ; 0003 _ 83. EC, 18
         call    pict_init                               ; 0006 _ E8, FFFFFFFC(rel)
 
+	jmp	end
+	db	"hello ffffff"
+end:
+
         mov     dword [ebp-0CH], 655360                 ; 000B _ C7. 45, F4, 000A0000
         mov     dword [ebp-10H], 0                      ; 0012 _ C7. 45, F0, 00000000
         jmp     ?_002                                   ; 0019 _ EB, 0F

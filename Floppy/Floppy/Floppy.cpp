@@ -17,6 +17,7 @@ public:
 	}
 };
 
+
 // Floppy
 class Floppy {
 public:
@@ -132,13 +133,48 @@ public:
 		char buf[Floppy::SECTOR::SIZE]{};
 
 		ifstream ifo(filename, ios::binary);
-		ifo.read(buf, Floppy::SECTOR::SIZE);
-		ifo.close();
 
-		write(magneticID, cylinderID, sectorID, buf);
+		if (!ifo.is_open()) {
+			std::cerr << "file failed open" << std::endl;
+			exit(1);
+		}
+
+		auto mag = _getInt(magneticID);
+
+		while (1) {
+			ifo.read(buf, Floppy::SECTOR::SIZE);
+			write(_getMagnetic(mag), cylinderID, sectorID, buf);
+
+			if (ifo.eof())break;
+			// 如果没有读取完毕, 就读取到下一个扇区
+			++sectorID;
+			if (sectorID >= SECTOR::COUNT) {
+				sectorID = 0;
+				++mag;
+				if (mag >= 2) {
+					++cylinderID;
+					mag = 0;
+					if (cylinderID >= CYLINDER::COUNT) {
+						std::cerr << "Floppy full" << std::endl;
+						exit(2);
+					}
+				}
+			}
+		}
+		ifo.close();
 	}
 
 private:
+
+	// 返回值
+	int _getInt(Floppy::MAGNETIC mag) {
+		return (int)mag;
+	}
+
+	MAGNETIC _getMagnetic(int mag) {
+		return (MAGNETIC)mag;
+	}
+
 	// 磁盘数据
 	map<MAGNETIC, magnetic_t> floppyData;
 

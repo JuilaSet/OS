@@ -10,6 +10,9 @@ mov  ah, 0x00
 int  0x10
 >| [uncode]
 
+/home/luo/workspace/OSsy/objconv
+
+
 * `al`模式 {
 
 	* 0x03: 16色字符模式
@@ -50,7 +53,7 @@ int  0x10
 	|| gcc -m32 -fno-asynchronous-unwind-tables -s -c -o write_vga.o write_vga.cpp
 
 	* 反编译: 
-	|| objconv -fnasm write_vga.o write_vga.asm
+	|| objconv -fnasm write_vga.asm write_vga.o
 
 	* 反汇编中的代码去掉开头的两句: 
 	[code] |<

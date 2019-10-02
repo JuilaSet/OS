@@ -1,0 +1,3 @@
+﻿  FontAsmGenerator.cpp
+d:\d_box\learning\workspace\os\fonttools\fontasmgenerator\fontasmgenerator\fontasmgenerator.cpp(47): warning C4018: “<”: 有符号/无符号不匹配
+  FontAsmGenerator.vcxproj -> D:\D_box\learning\workspace\OS\FontTools\FontAsmGenerator\Debug\FontAsmGenerator.exe

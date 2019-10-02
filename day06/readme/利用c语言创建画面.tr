@@ -10,9 +10,6 @@ mov  ah, 0x00
 int  0x10
 >| [uncode]
 
-/home/luo/workspace/OSsy/objconv
-
-
 * `al`模式 {
 
 	* 0x03: 16色字符模式

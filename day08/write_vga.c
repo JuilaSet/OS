@@ -91,13 +91,8 @@ void CMain(){
 	// ×ÖÌå¼ä¾à
 	int width = 8, height = 16;
 
-	// ×Ö·û´®
-	static char str[] = "abcde";
-
 	// ´òÓ¡×Ö·û´®
-	showFont8(vram, xsize, 20, 20, COL8_FFFFFF, FONT_LIST);
-	Print(vram, xsize, width, height, str);
-	showFont8(vram, xsize, 20, 20 + height, COL8_FFFFFF, getAddrOffset('c'));
+	Print(vram, xsize, 20, 20, width, height, "abcde");
 
 	for(;;) {
 		io_hlt();

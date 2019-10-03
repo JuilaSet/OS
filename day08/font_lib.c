@@ -37,10 +37,10 @@ void showFont8(char *vram, int xsize, int x, int y, char c, char* font){
 	}
 }
 
-void Print(char *vram, int xsize, int width, int height, unsigned char str[]){
+void Print(char *vram, int xsize, int x, int y, int width, int height, unsigned char str[]){
 	for(int i = 1; str[i]; ++i){
 		char c = str[i];
-		showFont8(vram, xsize, 20 + width * i, 20, COL8_FFFFFF, getAddrOffset(c));
+		showFont8(vram, xsize, x + width * i, y, COL8_FFFFFF, getAddrOffset(c));
 	}
 }
 

@@ -96,6 +96,10 @@ LABEL_SEG_CODE32:
 ; 导入汇编对应的函数
 	%include	"lib.asm"
 
+; 导入字体文件
+fontlist:
+	%include	"font.asm"
+
 SegCode32Len   equ  $ - LABEL_SEG_CODE32
 
 [SECTION .gs]

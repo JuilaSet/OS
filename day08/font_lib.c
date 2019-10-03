@@ -9,12 +9,6 @@ void boxfill8(char* vram, int xsize, char c, int x0, int y0, int x1, int y1) {
 		}
 }
 
-// 字体列表
-char fontlist[16] = {
-	0x00, 0x18, 0x18, 0x18, 0x18, 0x24, 0x24, 0x24,		// 8 * 16像素
-	0x24, 0x7e, 0x42, 0x42, 0x42, 0xe7, 0x00, 0x00
-};
-
 // 显示字体(vram: 图形缓存, xsize: 宽度, c: 字体颜色, font: 文字)
 void showFont8(char *vram, int xsize, int x, int y, char c, char* font){
 	char d;

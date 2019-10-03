@@ -1,4 +1,6 @@
 ﻿// 绘图函数
+extern char FONT_LIST[16];
+extern int* PTR_OFFSET;
 
 // 绘制方块
 void boxfill8(char* vram, int xsize, char c, int x0, int y0, int x1, int y1) {

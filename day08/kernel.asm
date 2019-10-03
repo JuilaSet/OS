@@ -96,9 +96,23 @@ LABEL_SEG_CODE32:
 ; 导入汇编对应的函数
 	%include	"lib.asm"
 
+
 ; 导入字体文件
-fontlist:
-	%include	"font.asm"
+PTR_OFFSET: dd 10H
+FONT_LIST: 
+
+vsFont_A:
+db 0, 24, 24, 24, 24, 36, 36, 36
+db 36, 126, 66, 66, 66, 66, 231, 0
+
+vsFont_B:
+db 0, 0, 124, 66, 65, 65, 66, 68
+db 124, 66, 65, 65, 66, 68, 120, 0
+
+vsFont_Mat:
+db 0, 0, 8, 32, 64, 130, 129, 129
+db 66, 36, 24, 36, 36, 24, 0, 0
+
 
 SegCode32Len   equ  $ - LABEL_SEG_CODE32
 

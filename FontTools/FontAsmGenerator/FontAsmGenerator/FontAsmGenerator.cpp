@@ -7,7 +7,7 @@
 #include <cassert>
 using namespace std;
 
-using front_vec = vector<int>;
+using front_vec = vector<unsigned int>;
 using batch_vec = vector<string>;
 
 class FontAsmGenerator {
@@ -60,14 +60,14 @@ public:
 
 	// 写入文件
 	void writeIntoFile(string fontName, ofstream &ofile) {
-		ofile << "; " << fontName << endl;
+		ofile << "vsFont_" << fontName << ":" << endl;
 
 		int i = 0;
 		for (auto pattern : fvec) {
 			if (i % 8 == 0) {
 				ofile << "db ";
 			}
-			ofile << hex << setiosflags(ios::uppercase) << setw(2) << pattern << "H";
+			ofile << dec << pattern;
 			if (i % 8 == 7) {
 				ofile << endl;
 			}
@@ -93,8 +93,6 @@ public:
 	}
 };
 
-string path = "D:\\D_box\\learning\\workspace\\OS\\day08\\";
-
 int main(int argv, char* args[]) {
 
 	if (argv < 3) {
@@ -107,7 +105,7 @@ int main(int argv, char* args[]) {
 	string outputfile(args[argv - 1]);
 
 	ifstream ifile(path + inputfile); // "front.txt"
-	ofstream ofile(path + outputfile); // "front.asm"
+	ofstream ofile(path + outputfile, ios::ate); // "front.asm"
 
 	if (!ifile) {
 		cerr << "input file open failed !" << endl;
@@ -119,6 +117,13 @@ int main(int argv, char* args[]) {
 		exit(-1);
 	}
 	
+	// 写入偏移量 PTR_OFFSET: 偏移量
+	ofile << "PTR_OFFSET: " 
+		<< "dd" << ends 
+		<< hex << setiosflags(ios::uppercase) << FontAsmGenerator::PTR_OFFSET << "H" << endl;
+
+	// 写入字体列表
+	ofile << "FONT_LIST: " << endl;
 	while(!ifile.eof()){
 		batch_vec bat;
 

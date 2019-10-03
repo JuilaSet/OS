@@ -19,8 +19,11 @@
 
 #include "font_lib.c"
 
+void io_cli(void);
 void io_hlt(void);
 void io_out8(int, int);
+int io_load_eflags(void);
+void io_store_eflags(int);
 
 // 调色板
 unsigned char pict[3 * LINE] = {
@@ -42,13 +45,6 @@ unsigned char pict[3 * LINE] = {
 	0x84,  0x84,  0x84
 };
 
-void pict_init(){
-	// 写入调色板
-	set_pict(0, LINE, pict);
-
-	return;
-}
-
 void set_pict(int start, int end, unsigned char* rgb){
 	int i, eflags;
 
@@ -68,23 +64,36 @@ void set_pict(int start, int end, unsigned char* rgb){
 	}
 
 	// 打开中断功能(恢复eflags)
-	io_load_eflags(eflags);
+	io_store_eflags(eflags);
 
 	return;
 }
+
+void pict_init(){
+	// 写入调色板
+	set_pict(0, LINE, pict);
+
+	return;
+}
+
+extern char vsFont_Mat[16];
 
 void CMain(){
 
 	pict_init();
 
 	int i;
-	char *vram = 0xa0000;
+	char *vram = (char *)0xa0000;
 	
+	// 背景颜色
 	fillAll(vram, COL8_C6C6C6);
 
+	// 绘制字体
 	int xsize = 320;
-	showFont8(vram, xsize, 20, 20, COL8_FFFFFF, fontlist);
-	
+	showFont8(vram, xsize, 20, 20, COL8_FFFFFF, FONT_LIST);
+
+	showFont8(vram, xsize, 36, 20, COL8_FFFFFF, vsFont_Mat);
+
 	for(;;) {
 		io_hlt();
 	}

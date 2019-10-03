@@ -122,6 +122,9 @@ int main(int argv, char* args[]) {
 		<< "dd" << ends 
 		<< hex << setiosflags(ios::uppercase) << FontAsmGenerator::PTR_OFFSET << "H" << endl;
 
+	// font个数
+	int batchCount = 0;
+
 	// 写入字体列表
 	ofile << "FONT_LIST: " << endl;
 	while(!ifile.eof()){
@@ -144,7 +147,12 @@ int main(int argv, char* args[]) {
 
 		// 写入文件
 		gener.writeIntoFile(patternName, ofile);
+		
+		batchCount++;
 	}
+
+	// 字体个数
+	ofile << "FONT_SIZE: dd " << batchCount << endl;
 
 	ofile.close();
 	ifile.close();

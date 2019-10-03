@@ -1,5 +1,6 @@
 ﻿// 绘图函数
 extern char FONT_LIST[16];
+extern int FONT_SIZE;
 extern int* PTR_OFFSET;
 
 // 绘制方块
@@ -9,6 +10,12 @@ void boxfill8(char* vram, int xsize, char c, int x0, int y0, int x1, int y1) {
 		for (x = x0; x <= x1; x++) {
 			vram[y * xsize + x] = c;
 		}
+}
+
+// 得到距离'a'的地址
+char* getAddrOffset(char ch){
+	char* addr = (ch - 'a') * 16 + FONT_LIST;
+	return addr;
 }
 
 // 显示字体(vram: 图形缓存, xsize: 宽度, c: 字体颜色, font: 文字)
@@ -30,6 +37,14 @@ void showFont8(char *vram, int xsize, int x, int y, char c, char* font){
 	}
 }
 
+void Print(char *vram, int xsize, int width, int height, unsigned char str[]){
+	for(int i = 1; str[i]; ++i){
+		char c = str[i];
+		showFont8(vram, xsize, 20 + width * i, 20, COL8_FFFFFF, getAddrOffset(c));
+	}
+}
+
+// 背景填充
 void fillAll(char* vram, char font){
 	for(int i=0; i<0xffff; i++){
 		vram[i] = font;

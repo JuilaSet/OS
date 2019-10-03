@@ -76,8 +76,6 @@ void pict_init(){
 	return;
 }
 
-extern char vsFont_Mat[16];
-
 void CMain(){
 
 	pict_init();
@@ -90,9 +88,16 @@ void CMain(){
 
 	// »æÖÆ×ÖÌå
 	int xsize = 320;
-	showFont8(vram, xsize, 20, 20, COL8_FFFFFF, FONT_LIST);
+	// ×ÖÌå¼ä¾à
+	int width = 8, height = 16;
 
-	showFont8(vram, xsize, 36, 20, COL8_FFFFFF, vsFont_Mat);
+	// ×Ö·û´®
+	static char str[] = "abcde";
+
+	// ´òÓ¡×Ö·û´®
+	showFont8(vram, xsize, 20, 20, COL8_FFFFFF, FONT_LIST);
+	Print(vram, xsize, width, height, str);
+	showFont8(vram, xsize, 20, 20 + height, COL8_FFFFFF, getAddrOffset('c'));
 
 	for(;;) {
 		io_hlt();

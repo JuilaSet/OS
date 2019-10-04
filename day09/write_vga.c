@@ -75,7 +75,9 @@ void pict_init(){
 	return;
 }
 
-
+char cursor[] = {
+	"*******..\0*wwww*...\0*www*....\0*ww*.*...\0*w***.*..\0**..**.*.\0*....**..\0......*.."
+};
 
 void CMain(){
 
@@ -94,11 +96,11 @@ void CMain(){
 	fillAll(vram, COL8_848484);
 
 	// ´òÓ¡×Ö·û´®
-	for(int i = COL8_000000; i <= COL8_848484; ++i){
-		Print(vram, xsize, 20 + i * 8, 20, width, height, i, "0");
+	for(int i = 0; i <= 26; ++i){
+		showFont8(vram, xsize, 20 + i * 8, 20, COL8_FFFFFF, ALPHA_FONT_LIST + i * 16);
 	}
 
-	showFont8(vram, xsize, 20, 50, COL8_FFFFFF, vsFont_Debug);
+	// Print(vram, xsize, 20 + i * 8, 20, width, height, COL8_FFFFFF, "0");
 
 	for(;;) {
 		io_hlt();

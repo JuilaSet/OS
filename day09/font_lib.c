@@ -1,5 +1,6 @@
 ﻿// 绘图函数
 extern char FONT_LIST[16];
+extern char ALPHA_FONT_LIST[16];
 extern char vsFont_Debug[16];
 extern char NUMBER_FONT_LIST[16];
 extern char ALPHA_FONT_LIST[16];

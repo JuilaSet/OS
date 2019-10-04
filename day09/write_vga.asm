@@ -1,5 +1,5 @@
 ; Disassembly of file: write_vga.o
-; Fri Oct  4 03:12:55 2019
+; Fri Oct  4 03:43:01 2019
 ; Mode: 32 bits
 ; Syntax: YASM/NASM
 ; Instruction set: 80386
@@ -408,35 +408,28 @@ CMain:  ; Function begin
         call    fillAll                                 ; 03F6 _ E8, FFFFFFFC(rel)
         add     esp, 16                                 ; 03FB _ 83. C4, 10
         mov     dword [ebp-28H], 0                      ; 03FE _ C7. 45, D8, 00000000
-        jmp     ?_022                                   ; 0405 _ EB, 2C
+        jmp     ?_022                                   ; 0405 _ EB, 30
 
 ?_021:  mov     eax, dword [ebp-28H]                    ; 0407 _ 8B. 45, D8
-        shl     eax, 3                                  ; 040A _ C1. E0, 03
-        add     eax, 20                                 ; 040D _ 83. C0, 14
-        push    ?_024                                   ; 0410 _ 68, 00000000(d)
-        push    dword [ebp-28H]                         ; 0415 _ FF. 75, D8
-        push    dword [ebp-14H]                         ; 0418 _ FF. 75, EC
-        push    dword [ebp-18H]                         ; 041B _ FF. 75, E8
-        push    20                                      ; 041E _ 6A, 14
-        push    eax                                     ; 0420 _ 50
-        push    dword [ebp-20H]                         ; 0421 _ FF. 75, E0
-        push    dword [ebp-24H]                         ; 0424 _ FF. 75, DC
-        call    Print                                   ; 0427 _ E8, FFFFFFFC(rel)
-        add     esp, 32                                 ; 042C _ 83. C4, 20
-        add     dword [ebp-28H], 1                      ; 042F _ 83. 45, D8, 01
-?_022:  cmp     dword [ebp-28H], 15                     ; 0433 _ 83. 7D, D8, 0F
-        jle     ?_021                                   ; 0437 _ 7E, CE
-        sub     esp, 8                                  ; 0439 _ 83. EC, 08
-        push    vsFont_Debug                              ; 043C _ 68, 00000000(d)
-        push    7                                       ; 0441 _ 6A, 07
-        push    50                                      ; 0443 _ 6A, 32
-        push    20                                      ; 0445 _ 6A, 14
-        push    dword [ebp-20H]                         ; 0447 _ FF. 75, E0
-        push    dword [ebp-24H]                         ; 044A _ FF. 75, DC
-        call    showFont8                               ; 044D _ E8, FFFFFFFC(rel)
-        add     esp, 32                                 ; 0452 _ 83. C4, 20
-?_023:  call    io_hlt                                  ; 0455 _ E8, FFFFFFFC(rel)
-        jmp     ?_023                                   ; 045A _ EB, F9
+        shl     eax, 4                                  ; 040A _ C1. E0, 04
+        lea     edx, [ALPHA_FONT_LIST+eax]              ; 040D _ 8D. 90, 00000000(d)
+        mov     eax, dword [ebp-28H]                    ; 0413 _ 8B. 45, D8
+        shl     eax, 3                                  ; 0416 _ C1. E0, 03
+        add     eax, 20                                 ; 0419 _ 83. C0, 14
+        sub     esp, 8                                  ; 041C _ 83. EC, 08
+        push    edx                                     ; 041F _ 52
+        push    7                                       ; 0420 _ 6A, 07
+        push    20                                      ; 0422 _ 6A, 14
+        push    eax                                     ; 0424 _ 50
+        push    dword [ebp-20H]                         ; 0425 _ FF. 75, E0
+        push    dword [ebp-24H]                         ; 0428 _ FF. 75, DC
+        call    showFont8                               ; 042B _ E8, FFFFFFFC(rel)
+        add     esp, 32                                 ; 0430 _ 83. C4, 20
+        add     dword [ebp-28H], 1                      ; 0433 _ 83. 45, D8, 01
+?_022:  cmp     dword [ebp-28H], 26                     ; 0437 _ 83. 7D, D8, 1A
+        jle     ?_021                                   ; 043B _ 7E, CA
+?_023:  call    io_hlt                                  ; 043D _ E8, FFFFFFFC(rel)
+        jmp     ?_023                                   ; 0442 _ EB, F9
 ; CMain End of function
 
 
@@ -450,10 +443,5 @@ pict1:                                                  ; byte
         db 00H, 84H, 00H, 84H, 84H, 84H, 84H, 84H       ; 0028 _ ........
 
 
-
-
-
-?_024:                                                  ; byte
-        db 30H, 00H                                     ; 0000 _ 0.
 
 

@@ -140,7 +140,7 @@ function moveDown(fontGrid){
 	}
 }
 
-function generatrText(){
+function generateText(showinline = false){
 	let string = "";
 	for(var i=0; i<heightN; ++i){
 		for(var j=0; j<widthN; ++j){
@@ -150,9 +150,15 @@ function generatrText(){
 				string += '.';
 			}
 		}
-		string += '\n';
+		if(showinline)
+			string += '\\0';
+		else
+			string += '\n';
 	}
-	output.innerHTML = string;
+		if(showinline)
+			output.innerHTML = string + "\\0";
+		else
+			output.innerHTML = string;
 }
 
 // 根据数据应用到界面
@@ -161,7 +167,7 @@ function applyGrid(fontGrid){
 		for(let j = 0; j < widthN; ++j){
 			grid[i][j].applyBlock();
 		}
-	generatrText();
+	generateText();
 	canvas.redraw();
 }
 
@@ -172,6 +178,7 @@ let domReady = function () {
 	let canvasSwitcher = document.getElementById("canvasSwitcher");
 	let canvasCleaner = document.getElementById("canvasCleaner");
 	
+	let cinline = document.getElementById("inline");
 	let copyer = document.getElementById("copy");
 	let colorSelectBoard = document.getElementById("colorSelectBoard");
 
@@ -232,7 +239,10 @@ let domReady = function () {
 	}
 
 	// 控制器
-
+	cinline.onclick = function(){
+		generateText(true);
+	}
+	
 	// 向左移动
 	cleft.onclick = function(){
 		moveLeft(grid);
@@ -288,7 +298,7 @@ let domReady = function () {
 				grid[i][j].inActive();
 				grid[i][j].applyBlock();
 			}
-		generatrText();
+		generateText();
 		storeGrid(grid);
 	}
 
@@ -313,7 +323,7 @@ let domReady = function () {
 						grid[pos.y][pos.x].inActive();
 						storePrepare = true;
 					}
-					generatrText();
+					generateText();
 					// applyGrid(grid);
 				}
 

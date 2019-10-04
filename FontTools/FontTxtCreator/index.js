@@ -114,12 +114,59 @@ let canvas;
 let w = 37.75 // canvas.width / widthN;
 let h = 37.75 // (canvas.height - 50) / heightN;
 
+// 撤销和恢复
+let orderlist = new Orderlist();
+
+// grid写入命令列表
+function storeGrid(fontGrid){
+	let formedGrid = new Array();
+	for(let i =0; i < heightN; ++i){
+		formedGrid[i] = new Array(widthN);
+	}
+
+	// 序列化并存储
+	for(let i = 0; i < heightN; ++i)
+		for(let j = 0; j < widthN; ++j){
+		formedGrid[i][j] = fontGrid[i][j].format();
+	}
+
+	// 存入命令列表
+	orderlist.store(formedGrid);
+}
+
+// 根据命令列表写入grid
+function restore(fontGrid){
+	let obj = orderlist.UndoListTop();
+	// 序列化并存储
+	for(let i = 0; i < heightN; ++i)
+		for(let j = 0; j < widthN; ++j){
+		fontGrid[i][j].reformat(obj[i][j]);
+	}
+}
+
+// 撤销 
+function undo(fontGrid){
+	if(orderlist.canUndo()){
+		orderlist.undo();
+		restore(fontGrid);
+	}
+	applyGrid(fontGrid);
+}
+
+// 恢复
+function redo(fontGrid){
+	if(orderlist.canRedo()){
+		orderlist.redo();
+		restore(fontGrid);
+	}
+	applyGrid(fontGrid);
+}
+
 function createGrid(){
 	let fontGrid = new Array();
 	for(let i =0; i < heightN; ++i){
 		fontGrid[i] = new Array(widthN);
 	}
-
 	initGrid(fontGrid);
 	return fontGrid;
 }
@@ -146,6 +193,15 @@ function initGrid(fontGrid){
 				assgin : function(grid){
 					this.state = grid.state;
 					this.color = grid.color;
+				},
+				format: function(){
+					let obj = {state: this.state, color: this.color};
+					return JSON.stringify(obj);
+				},
+				reformat: function(format){
+					let obj = JSON.parse(format);
+					this.state = obj.state;
+					this.color = obj.color;
 				}
 			};
 }
@@ -227,6 +283,9 @@ oCanvas.domReady(function () {
 	let copyer = document.getElementById("copy");
 	let colorSelectBoard = document.getElementById("colorSelectBoard");
 
+	let cundo = document.getElementById("undo");
+	let credo = document.getElementById("redo");
+
 	let cleft = document.getElementById("cleft");
 	let cup = document.getElementById("cup");
 	let cright = document.getElementById("cright");
@@ -300,20 +359,18 @@ oCanvas.domReady(function () {
 		applyGrid(grid);
 	}
 
+	cundo.onclick = function(){
+		undo(grid);
+	}
+
+	credo.onclick = function(){
+		redo(grid);
+	}
+
 	// 复制内容
 	copyer.onclick = function(){
 		output.select();
 		document.execCommand("copy");
-	}
-
-	// 清除内容
-	canvasCleaner.onclick = function(){
-		for(let i = 0; i < heightN; ++i)
-			for(let j = 0; j < widthN; ++j){
-				grid[i][j].inActive();
-				grid[i][j].applyBlock();
-			}
-		generatrText();
 	}
 
 	// 切换颜色
@@ -328,22 +385,24 @@ oCanvas.domReady(function () {
 		colorSwitch = this.value;
 	}, false);
 
-	/*let textContainer = canvas.display.text({
-		x: 157,
-		y: 196,
-		origin: { x: "center", y: "center" },
-		align: "center",
-		font: "bold 25px/1.5 sans-serif",
-		text: "(0, 0)",
-		fill: inActiveColor
-	});*/
+	// 清除内容
+	canvasCleaner.onclick = function(){
+		for(let i = 0; i < heightN; ++i)
+			for(let j = 0; j < widthN; ++j){
+				grid[i][j].inActive();
+				grid[i][j].applyBlock();
+			}
+		generatrText();
+		storeGrid(grid);
+	}
 
-	// canvas.addChild(textContainer);
+	// 最开始时存放状态
+	storeGrid(grid);
 
 	// 控制器
+	let storePrepare = false;
 	canvas.setLoop(function () {
 		let pos = floorPosition(canvas.mouse.x, canvas.mouse.y);
-		// textContainer.text = "(" + pos.x + ", " + pos.y + ")";
 
 		// 点击事件
 		if(pos.x < widthN && pos.y < heightN){
@@ -352,12 +411,19 @@ oCanvas.domReady(function () {
 					if(!cleanMode){
 						if(grid[pos.y][pos.x].state == 0 || grid[pos.y][pos.x].color != colorSwitch){
 							grid[pos.y][pos.x].active(colorSwitch);
+							storePrepare = true;
 						}
 					}else if(grid[pos.y][pos.x].state == 1){
 						grid[pos.y][pos.x].inActive();
+						storePrepare = true;
 					}
 					generatrText();
 					// applyGrid(grid);
+				}
+
+				if(storePrepare && canvas.mouse.buttonState == "up"){
+					storeGrid(grid);
+					storePrepare = false;
 				}
 			}
 		}

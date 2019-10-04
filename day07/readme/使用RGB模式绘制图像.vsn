@@ -37,7 +37,6 @@
 		0x00ff00	亮绿	green		g
 		0xffff00	亮黄	yellow		y
 		0x0000ff	亮蓝	blue		b
-
 		0xff00ff	亮紫	purpose		p
 		0x00ffff	浅亮	light		l
 		0xffffff	全白	white		w
@@ -50,6 +49,14 @@
 		0x008484	浅暗蓝	slate		s
 		0x848484	暗灰	drakgrey	=
 		>| [uncode]
+
+		* 撤销与恢复 {
+
+			* 撤销: 发生行为, 存入行为
+
+			* 恢复: 发生行为, 丢弃原有的撤销值
+
+		}
 
 	}
 

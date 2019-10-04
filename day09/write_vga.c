@@ -75,9 +75,7 @@ void pict_init(){
 	return;
 }
 
-char cursor[] = {
-	"*******..\0*wwww*...\0*www*....\0*ww*.*...\0*w***.*..\0**..**.*.\0*....**..\0......*.."
-};
+char cursor[] = "*.......\0**......\0*w*.....\0*ww*....\0*www*...\0*w****..\0****....\0*.......\0\0";
 
 void CMain(){
 
@@ -88,7 +86,6 @@ void CMain(){
     char* vram = bootInfo.vgaRam;
     int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
 
-	int i;
 	// ×ÖÌå¼ä¾à
 	int width = 8, height = 16;
 
@@ -96,9 +93,12 @@ void CMain(){
 	fillAll(vram, COL8_848484);
 
 	// ´òÓ¡×Ö·û´®
-	for(int i = 0; i <= 26; ++i){
-		showFont8(vram, xsize, 20 + i * 8, 20, COL8_FFFFFF, ALPHA_FONT_LIST + i * 16);
-	}
+//	for(int i = 0; i <= 26; ++i){
+//		showFont8(vram, xsize, 20 + i * 8, 20, COL8_FFFFFF, ALPHA_FONT_LIST + i * 16);
+//	}
+
+	PrintRGB(vram, xsize, 20, 20, cursor);
+
 
 	// Print(vram, xsize, 20 + i * 8, 20, width, height, COL8_FFFFFF, "0");
 

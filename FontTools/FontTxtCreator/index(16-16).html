@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Author" content="骆思睿">
+  <title>字体描述文件 - 生成器</title>
+	<script src="./libs/ocanvas-2.10.0.js"></script>
+ </head>
+ <body>
+<div style="height:auto; display:inline-block">
+	<div align="center">
+		<button style="height:auto; width: 25%; padding: 5px;" id="cleft">←</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="cup">↑</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="cright">→</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="undo">Undo</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="cdown">↓</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="redo">Redo</button>
+	</div>
+	<canvas id="canvas" width="302px" height="650px"  style="height:auto; padding: 5px; display;block;" ></canvas>
+</div>
+<div style="height:auto; display:inline-block; padding: 5px">
+	<div>
+		<select style="height:auto; padding: 5px" id="colorSelectBoard">
+			<option value="clean">[clean]</option>
+			<option value="black" selected="selected">black</option>
+			<option value="red">red</option>
+			<option value="green">green</option>
+			<option value="yellow">yellow</option>
+			<option value="blue">blue</option>
+			<option value="purpose">purpose</option>
+			<option value="light">light</option>
+			<option value="white">white</option>
+			<option value="grey">grey</option>
+			<option value="drakred">drakred</option>
+			<option value="drakgreen">drakgreen</option>
+			<option value="drakyellow">drakyellow</option>
+			<option value="drakblue">drakblue</option>
+			<option value="drakpurpos">drakpurpos</option>
+			<option value="slate">slate</option>
+			<option value="drakgrey">drakgrey</option>
+		</select>
+		<button style="height:auto; padding: 5px;" id="canvasCleaner">clear</button>
+		<button style="height:auto; padding: 5px;" id="copy">copy</button>
+	</div>
+	<div>
+		<button style="height:auto; padding: 5px;" id="inline">inline-mode</button>
+	</div>
+	<textarea id="output" rows="39" cols="25" readonly="readonly"></textarea>
+</div>
+	<script>
+		let widthN = 16, heightN = 16;
+	</script>
+	<script src="./orderlist.js"></script>
+	<script src="./color.js"></script>
+	<script src="./index.js"></script>
+ </body>
+</html>

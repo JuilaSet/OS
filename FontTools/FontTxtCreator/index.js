@@ -141,7 +141,7 @@ function moveDown(fontGrid){
 }
 
 function generateText(showinline = false){
-	let string = "";
+	let string = showinline ? "\"" : "";
 	for(var i=0; i<heightN; ++i){
 		for(var j=0; j<widthN; ++j){
 			if(grid[i][j].state == 1){
@@ -156,7 +156,7 @@ function generateText(showinline = false){
 			string += '\n';
 	}
 		if(showinline)
-			output.innerHTML = string + "\\0";
+			output.innerHTML = string + "\\0\";";
 		else
 			output.innerHTML = string;
 }
@@ -239,8 +239,10 @@ let domReady = function () {
 	}
 
 	// 控制器
+	let inline = false;
 	cinline.onclick = function(){
-		generateText(true);
+		inline = !inline;
+		generateText(inline);
 	}
 	
 	// 向左移动

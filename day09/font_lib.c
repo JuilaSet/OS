@@ -55,6 +55,44 @@ void Print(char *vram, int xsize, int x, int y, int width, int height, int font,
 	}
 }
 
+// 查找对应的颜色标号
+char charToPictColor(char c){
+	if(c == '*')return COL8_000000;
+	if(c == 'r')return COL8_FF0000;
+	if(c == 'g')return COL8_00FF00;
+	if(c == 'y')return COL8_FFFF00;
+	if(c == 'b')return COL8_0000FF;
+	if(c == 'p')return COL8_FF00FF;
+	if(c == 'l')return COL8_00FFFF;
+	if(c == 'w')return COL8_FFFFFF;
+	if(c == '-')return COL8_C6C6C6;
+	if(c == 'R')return COL8_840000;
+	if(c == 'G')return COL8_008400;
+	if(c == 'Y')return COL8_848400;
+	if(c == 'B')return COL8_000084;
+	if(c == 'P')return COL8_840084;
+	if(c == 's')return COL8_008484;
+	if(c == '=')return COL8_848484;
+}
+
+void PrintRGB(char *vram, int xsize, int x, int y, char* pic){
+	for(int line = 0, i = 0, index = 0;;++index){
+		if(pic[index] == '\0'){
+			// 结束
+			if(pic[index+1]=='\0'){
+				return;	// 00: 结束
+			}else{
+				line++;	// 0: 一行结束
+				i = 0;
+				continue;
+			}
+		}
+		if(pic[index] != '.')
+			vram[(y + line) * xsize + x + i] = charToPictColor(pic[index]);
+		i++;
+	}
+}
+
 // 背景填充
 void fillAll(char* vram, int font){
 	for(int i=0; i < 0xffff; i++){

@@ -1,0 +1,79 @@
+/*
+ * 绘制内核字体
+ */
+#def [text~]
+====================
+* 思想: 将字符拆成16行像素点, 用01表示, 每一行的01序列用一个数字表示
+[dgrm] |<
+010: 2
+101: 5
+111: 7
+101: 5
+
+数组: arr = {2, 5, 7, 5}
+>| [undgrm]
+
+* 分为两半检查: 
+[ex~] [code] |<
+// 前四位
+if ((d & 0x80) != 0) {vram[(y+i)*xsize + x + 0] = c;}
+if ((d & 0x40) != 0) {vram[(y+i)*xsize + x + 1] = c;}
+if ((d & 0x20) != 0) {vram[(y+i)*xsize + x + 2] = c;}
+if ((d & 0x10) != 0) {vram[(y+i)*xsize + x + 3] = c;}
+
+// 后四位
+if ((d & 0x08) != 0) {vram[(y+i)*xsize + x + 4] = c;}
+if ((d & 0x04) != 0) {vram[(y+i)*xsize + x + 5] = c;}
+if ((d & 0x02) != 0) {vram[(y+i)*xsize + x + 6] = c;}
+if ((d & 0x01) != 0) {vram[(y+i)*xsize + x + 7] = c;}
+>| [uncode]
+
+* 自制字体生成器 {
+
+	* 步骤: 通过"*"组成的字符串图案获取字体格式 -> 生成字体文件
+
+	* 生成的文件 {
+
+		* 格式: 
+		[ex~] [code] |<
+		PTR_OFFSET: db 10 ; 偏移量
+		FONT_LIST: 
+		; A
+		db  0H, 18H, 18H, 18H, 18H, 24H, 24H, 24H
+		db 24H, 7EH, 42H, 42H, 42H, 42H, E7H,  0H
+		; B
+		db  0H, 78H, 42H, 41H, 42H, 44H, 48H, 60H
+		db 50H, 44H, 42H, 41H, 42H, 44H, 70H,  0H
+		>| [uncode]
+
+		=> 说明: {
+
+			* `PTR_OFFSET`: 一个字体描述符的偏移量
+
+			* `FONT_LIST`: 字体描述符列表
+
+		}
+
+	}
+
+	* 修改 {
+
+		* C语言入口: 
+		|| jmp	CMain
+
+		* 导入字体文件: 
+		|| %include	"font.asm"
+
+		* 外部变量: 
+		[ex~] [code] |<
+		extern char* FONT_LIST;
+		extern int* PTR_OFFSET;
+		>| [uncode]
+
+		* 打开中断功能(恢复eflags)
+		|| io_store_eflags(eflags);
+
+	}
+
+}
+====================

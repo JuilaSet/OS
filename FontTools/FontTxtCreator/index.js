@@ -1,3 +1,46 @@
+// 颜色JSON
+let colorCharMap = {
+	"black" : {
+		index : 0,
+		ch: "*",
+		color : "#000000"
+	},
+	
+	"red" : {
+		index : 1,
+		ch: "r",
+		color : "#FF0000"
+	},
+	
+	"green" : {
+		index : 2,
+		ch: "g",
+		color : "#00ff00"
+	},
+	
+	"yellow" : {
+		index : 3,
+		ch: "y",
+		color : "#ffff00"
+	},
+	
+	"blue" : {
+		index : 4,
+		ch: "b",
+		color : "#0000FF"
+	},
+
+	"default" : {
+		index : -1,
+		ch: "*",
+		color : "#000000"
+	}
+};
+
+function getColorIdentifier(name){
+	return (colorCharMap[name] == undefined ? colorCharMap["default"] : colorCharMap[name]);
+}
+
 // 数据层
 let widthN = 8, heightN = 16;
 function createGrid(){
@@ -6,22 +49,30 @@ function createGrid(){
 		fontGrid[i] = new Array(widthN);
 	}
 
+	initGrid(fontGrid);
+	return fontGrid;
+}
+
+function initGrid(fontGrid){
 	for(let i = 0; i < heightN; ++i)
 		for(let j = 0; j < widthN; ++j)
 			fontGrid[i][j] = {
 				state : 0, 
+				color : "default",
 				rect : null,
-				active : function(){
-					this.rect.fill = "#222";
+				active : function(color="default"){
+					this.rect.fill = getColorIdentifier(color).color;
+					this.color = color;
 					this.state = 1;
 				},
 				inActive : function(){
-					this.rect.fill = "#CCC";
+					this.rect.fill = "#FFF";
 					this.state = 0;
+				},
+				applyBlock : function(){
+					this.rect.fill = (this.state == 1 ? "#222" : "#FFF");
 				}
 			};
-
-	return fontGrid;
 }
 
 let grid = createGrid();
@@ -31,10 +82,13 @@ let canvas;
 oCanvas.domReady(function () {
 
 	let output = document.getElementById("output");
+	let canvasSwitcher = document.getElementById("canvasSwitcher");
+	let canvasCleaner = document.getElementById("canvasCleaner");
+	let colorSelectBoard = document.getElementById("colorSelectBoard");
 
 	canvas = oCanvas.create({
 		canvas: "#canvas",
-		background: "#CCC"
+		background: "#FFF"
 	});
 
 	let w = canvas.width / widthN;
@@ -63,7 +117,7 @@ oCanvas.domReady(function () {
 				y: 1 + i * h,
 				width: w,
 				height: h,
-				fill: "#CCC",
+				fill: "#FFF",
 				stroke: "outside 1px rgba(0.0, 0.0, 1, 0.5)"
 			});
 
@@ -80,39 +134,34 @@ oCanvas.domReady(function () {
 	}
 
 	// 控制器
+
+	// 清除内容
+	canvasCleaner.onclick = function(){
+		for(let i = 0; i < heightN; ++i)
+			for(let j = 0; j < widthN; ++j){
+				grid[i][j].inActive();
+				grid[i][j].applyBlock();
+			}
+		generatrText();
+	}
+
+	let colorSwitch = "default";
 	var cleanMode = false;
-	let canvas_switcher = canvas.display.rectangle({
-		x: 2,
-		y: heightN * h + 2,
-		width: (w * widthN - 4),
-		height: 46,
-		fill: "#CFC",
-		stroke: "outside 2px rgba(0.0, 0.0, 1, 0.5)"
-	});
+	colorSelectBoard.addEventListener('change',function(){
+		if(this.value == "clean"){
+			cleanMode = true;
+		} else {
+			cleanMode = false;
+		}
+		colorSwitch = this.value;
+	}, false);
 
-	let canvas_switcher_textContainer = canvas.display.text({
-		x: widthN * w / 2,
-		y: heightN * h + 25,
-		origin: { x: "center", y: "center" },
-		align: "center",
-		font: "bold 15px/1.5 sans-serif",
-		text: "write mode",
-		fill: "#000"
-	});
-
-	canvas_switcher.bind("click", function(){
-		cleanMode = !cleanMode;
-		canvas_switcher.fill = cleanMode ? "#CCF" : "#CFC";
-		canvas_switcher_textContainer.text = cleanMode ? "clean mode" : "write mode";
-		canvas.redraw();
-	});
-
-	function doSubmit(){
-		var string = "";
+	function generatrText(){
+		let string = "";
 		for(var i=0; i<heightN; ++i){
 			for(var j=0; j<widthN; ++j){
 				if(grid[i][j].state == 1){
-					string += '*';
+					string += getColorIdentifier(grid[i][j].color).ch;
 				}else{
 					string += '.';
 				}
@@ -121,9 +170,6 @@ oCanvas.domReady(function () {
 		}
 		output.innerHTML = "结果: \n" + string;
 	}
-
-	canvas.addChild(canvas_switcher);
-	canvas.addChild(canvas_switcher_textContainer);
 
 	/*let textContainer = canvas.display.text({
 		x: 157,
@@ -147,13 +193,13 @@ oCanvas.domReady(function () {
 			if(canvas.mouse.canvasHovered) {
 				if(canvas.mouse.buttonState == "down"){
 					if(!cleanMode){
-						if(grid[pos.y][pos.x].state == 0){
-							grid[pos.y][pos.x].active();
+						if(grid[pos.y][pos.x].state == 0 || grid[pos.y][pos.x].color != colorSwitch){
+							grid[pos.y][pos.x].active(colorSwitch);
 						}
 					}else if(grid[pos.y][pos.x].state == 1){
 						grid[pos.y][pos.x].inActive();
 					}
-					doSubmit();
+					generatrText();
 				}
 			}
 		}

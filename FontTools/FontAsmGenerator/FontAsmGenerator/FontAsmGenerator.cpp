@@ -4,11 +4,28 @@
 #include <iomanip>
 #include <vector>
 #include <fstream>
+#include <cstring>
+#include <sstream>
 #include <cassert>
 using namespace std;
 
 using front_vec = vector<unsigned int>;
 using batch_vec = vector<string>;
+
+class PatternError {
+private:
+	int _line;
+	string _msg;
+public:
+	PatternError(string msg, int line): _msg(msg), _line(line){}
+	string what() {
+		string str;
+		ostringstream ostr;
+		ostr << "Pattern Error: " << _msg << endl;
+		ostr << "on line (" << _line << ")" << endl;
+		return ostr.str();
+	}
+};
 
 class FontAsmGenerator {
 public:
@@ -50,10 +67,13 @@ public:
 	}
 
 	// 生成描述数组
-	void generateFrontPatternVector() {
+	void generateFrontPatternVector(int headline) {
 		fvec.clear();
 		for (int i = 0; i < STR_HEIGHT; ++i) {
-			assert(_lines[i].size() == STR_LENGTH);	// 输入的字符串长度错误
+			// 输入的字符串长度错误
+			if (_lines[i].size() != STR_LENGTH) {
+				throw PatternError("each line needs " + to_string(STR_LENGTH) + " char", headline + i);
+			}
 			fvec.push_back(parser(_lines[i]));
 		}
 	}
@@ -97,6 +117,10 @@ int main(int argv, char* args[]) {
 
 	if (argv < 3) {
 		cerr << "Usage: FontAsmGenerator <path> <inputfile> <outputfile>" << endl;
+		cerr << "-- inputfile like: " << endl;
+		cerr << "<name>: " << endl;
+		cerr << "........\n........\n........\n........\n........\n........\n........\n........\n";
+		cerr << "........\n........\n........\n........\n........\n........\n........\n........\n<16 line>" << endl;
 		exit(-1);
 	}
 
@@ -124,31 +148,39 @@ int main(int argv, char* args[]) {
 
 	// font个数
 	int batchCount = 0;
+	int headline = 1;
+	try {
 
-	// 写入字体列表
-	ofile << "FONT_LIST: " << endl;
-	while(!ifile.eof()){
-		batch_vec bat;
+		// 写入字体列表
+		ofile << "FONT_LIST: " << endl;
+		while (!ifile.eof()) {
+			batch_vec bat;
 
-		// 读取对应字符的名称, 如果是"eof"则结束
-		char patternName[64];
-		ifile.getline(patternName, 64);
+			// 读取对应字符的名称, 如果是"eof"则结束
+			char patternName[64];
+			ifile.getline(patternName, 64);
+			headline++;
 
-		// 读取 FontAsmGenerator::STR_HEIGHT 行
-		for (int i = 0; i < FontAsmGenerator::STR_HEIGHT; ++i) {
-			char buffer[FontAsmGenerator::STR_LENGTH + 1];
-			ifile.getline(buffer, FontAsmGenerator::STR_LENGTH + 1);
-			bat.push_back(string(buffer));
+			// 读取 FontAsmGenerator::STR_HEIGHT 行
+			for (int i = 0; i < FontAsmGenerator::STR_HEIGHT; ++i) {
+				char buffer[FontAsmGenerator::STR_LENGTH + 1];
+				ifile.getline(buffer, FontAsmGenerator::STR_LENGTH + 1);
+				bat.push_back(string(buffer));
+			}
+
+			// 生成
+			FontAsmGenerator gener(bat);
+			gener.generateFrontPatternVector(headline);
+
+			// 写入文件
+			gener.writeIntoFile(patternName, ofile);
+
+			batchCount++;
 		}
-
-		// 生成
-		FontAsmGenerator gener(bat);
-		gener.generateFrontPatternVector();
-
-		// 写入文件
-		gener.writeIntoFile(patternName, ofile);
-		
-		batchCount++;
+	}
+	catch(PatternError& e){
+		cout << e.what() << endl;
+		exit(-1);
 	}
 
 	// 字体个数

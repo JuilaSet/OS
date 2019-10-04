@@ -26,7 +26,7 @@ int io_load_eflags(void);
 void io_store_eflags(int);
 
 // 调色板
-unsigned char pict[3 * LINE] = {
+unsigned char pict1[] = {
 	0x00,  0x00,  0x00,
 	0xff,  0x00,  0x00,
 	0x00,  0xff,  0x00,
@@ -42,10 +42,10 @@ unsigned char pict[3 * LINE] = {
 	0x00,  0x00,  0x84,
 	0x84,  0x00,  0x84,
 	0x00,  0x84,  0x84,
-	0x84,  0x84,  0x84
+	0x84,  0x84,  0x84,
 };
 
-void set_pict(int start, int end, unsigned char* rgb){
+void set_pict(int start, int end, unsigned char* rgb, int which){
 	int i, eflags;
 
 	// 保存eflags
@@ -54,12 +54,12 @@ void set_pict(int start, int end, unsigned char* rgb){
 	// 关闭中断功能, 防止被干扰
 	io_cli();
 
-	io_out8(0x03c8, 0);
+	io_out8(0x03c8, which);
 
 	for(int i = start; i < end; ++i){
-		io_out8(0x03c9, rgb[0]);
-		io_out8(0x03c9, rgb[1]);
-		io_out8(0x03c9, rgb[2]);
+		io_out8(0x03c9, rgb[0] / 4);
+		io_out8(0x03c9, rgb[1] / 4);
+		io_out8(0x03c9, rgb[2] / 4);
 		rgb += 3;
 	}
 
@@ -71,28 +71,34 @@ void set_pict(int start, int end, unsigned char* rgb){
 
 void pict_init(){
 	// 写入调色板
-	set_pict(0, LINE, pict);
-
+	set_pict(0, LINE, pict1, 0);
 	return;
 }
+
+
 
 void CMain(){
 
 	pict_init();
 
-	int i;
-	char *vram = (char *)0xa0000;
-	
-	// 背景颜色
-	fillAll(vram, COL8_C6C6C6);
+	// 显示
+	struct BOOTINFO bootInfo = { (char*)0xa0000, 320, 200 };
+    char* vram = bootInfo.vgaRam;
+    int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
 
-	// 绘制字体
-	int xsize = 320;
+	int i;
 	// 字体间距
 	int width = 8, height = 16;
 
+	// 系统背景
+	fillAll(vram, COL8_848484);
+
 	// 打印字符串
-	Print(vram, xsize, 20, 20, width, height, "abcde");
+	for(int i = COL8_000000; i <= COL8_848484; ++i){
+		Print(vram, xsize, 20 + i * 8, 20, width, height, i, "0");
+	}
+
+	showFont8(vram, xsize, 20, 50, COL8_FFFFFF, vsFont_Debug);
 
 	for(;;) {
 		io_hlt();

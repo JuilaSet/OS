@@ -1,5 +1,9 @@
 ﻿// 绘图函数
 extern char FONT_LIST[16];
+extern char vsFont_Debug[16];
+extern char NUMBER_FONT_LIST[16];
+extern char ALPHA_FONT_LIST[16];
+
 extern int FONT_SIZE;
 extern int* PTR_OFFSET;
 
@@ -13,8 +17,14 @@ void boxfill8(char* vram, int xsize, char c, int x0, int y0, int x1, int y1) {
 }
 
 // 得到距离'a'的地址
-char* getAddrOffset(char ch){
-	char* addr = (ch - 'a') * 16 + FONT_LIST;
+char* getAddrOffsetAlpha(char ch){
+	char* addr = (ch - 'a') * 16 + ALPHA_FONT_LIST;
+	return addr;
+}
+
+// 得到数字地址
+char* getAddrOffsetNumber(char ch){
+	char* addr = (ch - '0') * 16 + NUMBER_FONT_LIST;
 	return addr;
 }
 
@@ -37,16 +47,30 @@ void showFont8(char *vram, int xsize, int x, int y, char c, char* font){
 	}
 }
 
-void Print(char *vram, int xsize, int x, int y, int width, int height, unsigned char str[]){
-	for(int i = 1; str[i]; ++i){
+void Print(char *vram, int xsize, int x, int y, int width, int height, int font, unsigned char str[]){
+	for(int i = 0; str[i]; ++i){
 		char c = str[i];
-		showFont8(vram, xsize, x + width * i, y, COL8_FFFFFF, getAddrOffset(c));
+		showFont8(vram, xsize, x + width * i, y, font, getAddrOffsetNumber(c));
 	}
 }
 
 // 背景填充
-void fillAll(char* vram, char font){
-	for(int i=0; i<0xffff; i++){
+void fillAll(char* vram, int font){
+	for(int i=0; i < 0xffff; i++){
 		vram[i] = font;
 	}
 }
+
+// 显示器描述结构体
+struct BOOTINFO {
+    char* vgaRam;
+    short screenX, screenY;
+};
+
+// 初始化显示器描述结构体
+void initBootInfo(struct BOOTINFO *pBootInfo) {
+    pBootInfo->vgaRam = (char*)0xa0000;
+    pBootInfo->screenX = 320;
+    pBootInfo->screenY = 200;
+}
+

@@ -8,7 +8,15 @@
  </head>
  <body>
 <div style="height:auto; display:inline-block">
-	<canvas id="canvas" width="302px" height="650px"></canvas>
+	<div align="center">
+		<button style="height:auto; width: 25%; padding: 5px;" id="cleft">←</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="cup">↑</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="cright">→</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="undo">undo</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="cdown">↓</button>
+		<button style="height:auto; width: 25%; padding: 5px;" id="redo">redo</button>
+	</div>
+	<canvas id="canvas" width="302px" height="650px"  style="height:auto; padding: 5px; display;block;" ></canvas>
 </div>
 <div style="height:auto; display:inline-block; padding: 5px">
 	<div>
@@ -18,27 +26,23 @@
 			<option value="green">green</option>
 			<option value="yellow">yellow</option>
 			<option value="blue">blue</option>
+			<option value="purpose">purpose</option>
+			<option value="light">light</option>
+			<option value="white">white</option>
+			<option value="grey">grey</option>
+			<option value="drakred">drakred</option>
+			<option value="drakgreen">drakgreen</option>
+			<option value="drakyellow">drakyellow</option>
+			<option value="drakblue">drakblue</option>
+			<option value="drakpurpos">drakpurpos</option>
+			<option value="slate">slate</option>
+			<option value="drakgrey">drakgrey</option>
 			<option value="clean">clean</option>
 		</select>
 		<button style="height:auto; padding: 5px;" id="canvasCleaner">clear</button>
+		<button style="height:auto; padding: 5px;" id="copy">copy</button>
 	</div>
-	<textarea id="output" rows="39" cols="20" readonly="readonly">结果: 
-........
-........
-........
-........
-........
-........
-........
-........
-........
-........
-........
-........
-........
-........
-........
-........</textarea>
+	<textarea id="output" rows="39" cols="25" readonly="readonly"></textarea>
 	</div>
 	<script src="./index.js"></script>
  </body>

@@ -31,4 +31,125 @@
 [ex~] 
 ||LABEL_DESC_5M:	; 段基址	段界限		属性
 ||	Descriptor	0500000h,	0ffffh,		DA_DRW
+
+* 内存段分页机制的理解 {
+
+	* 段寄存器 { 
+
+		* `段寄存器`表示: 96位, [ 不可见, 80位 FF FF FF FF, FF FF FF FF, FF FF | 可见, 16位, FF FF]
+		[code] |<
+		struct SegMent {
+			WORD Selector;	// 16, 段选择子
+			WORD Attribute;	// 16, 属性(可读可写或可执行)
+			DWORD Base;	// 32, 从哪里开始
+			DWORD limit;	// 32, 段长度
+		}
+		>| [uncode]
+
+		* 一个段寄存器在读取时只能读取16位: 
+		[ex~]
+		|| mov ax, cs
+
+		* 写入段寄存器 {
+
+			* 全局描述符表: `GDT` {
+
+				* 查看`GDT`表首地址: 48位
+				|| r gdtr
+
+				* `GDT`表的长度: 16位
+				|| r gdtl
+
+				* 加载表: 
+				[ex~]
+				|| lgdt	[GdtPtr]
+
+			}
+
+			=> 段描述符 {
+
+				* 执行`mov ds, ax`时, `ax`决定了用哪一个段描述符
+
+				=> 段选择子 {
+
+					* 一共16 bit: 
+					|| [ Index(13字节) | Tl(1字节) | RPL(2字节)]
+
+					* `RPL`: 请求特权级别
+
+					* `Tl`: Tl=0查GDT表, TI=1查LDT表;
+
+					* `Index`: CPU将index乘以8, 再加上GDT或LDT的基地址, 就是要加载的段描述符
+					[ex~] [code] |<
+					段选择子: 001B
+					0000 0000 0001 1011
+					index: 0000 0000 0001 1
+					tl: 0
+					RPL: 11
+					>| [uncode]
+
+					* 可以修改寄存器的指令: LES, LSS, LDS, LFS, LGS
+
+					* 注意: `CS`必须与EIP一直, 所以无法使用`mov`修改
+
+				}
+
+				* 段描述符的属性(bit单位) {
+
+					@段寄存器Base属性1
+					* [ 00 00 00 00,			Base
+
+					* [ 0					G
+
+					* `段寄存器Attribute属性` {
+
+						* [ 0				D/B
+
+						* [ 0				0
+
+						* [ 0				AVL
+
+						@段长度1
+						* [ 00 00			SegmentLimit
+
+						* [ 0				P
+
+						* [ 00				DPL
+
+						* [ 0				S
+
+						* [ 00 00			Type
+
+					}
+
+					@段寄存器Base属性2
+					* [ 00 00 00 00				Base
+
+					* 低4字节 {
+
+						@段寄存器Base属性3
+						* [ 00 00 00 00, 00 00 00 00	Base
+
+						@段长度2
+						* [ 00 00 00 00, 00 00 00 00	SegmentLimit
+
+					}
+
+				} => {
+
+					* P: p=1, 段描述符有效; p=0, 段描述符无效; CPU先检查, 若为0则不做后续检查
+
+					* G: 
+
+				}
+
+			}
+
+			* 局部描述符表: `LDT`
+
+		}
+
+	}
+
+}
 ====================

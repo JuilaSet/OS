@@ -27,13 +27,13 @@
 
 	* 端寄存器 {
 
-		* ES: 附加段寄存器(`extra`)
+		* ES: 附加段寄存器(`extra`), 
 
-		* CS: 代码段寄存器(`code`)
+		* CS: 代码段寄存器(`code`), 对应的数据相当于c语言中的代码语句
 
-		* SS: 栈段寄存器(`stack`)
+		* SS: 栈段寄存器(`stack`), 对应的数据相当于c语言中的局部变量
 
-		* DS: 数据端寄存器(`data`)
+		* DS: 数据端寄存器(`data`), 对应的数据相当于c语言中的全局变量
 
 		* FS: 没有名称
 
@@ -46,6 +46,13 @@
 	|| MOV AX, SP
 	|| MOV ???, AL
 
+	@refer [url |<https://blog.csdn.net/whatday/article/details/24851197>|]
+	* 控制寄存器(CR0,CR1,CR2,CR3,CR4) {
+	
+		* CR0: 0位是保护允许位PE(Protedted Enable), 用于启动保护模式, 如果PE位置1, 则保护模式启动, 如果PE=0, 则在实模式下运行
+	
+	}
+
 	* 标号: 会被翻译成数字
 	[ex~]
 	|| JMP entry
@@ -54,7 +61,7 @@
 
 	* 指令 {
 
-		* `ORG`: 程序的装载地址, 程序要从这个地址开始执行
+		* `ORG`: 程序的装载地址, 程序要从这个地址开始执行; 注意: org不是用来装载程序的, 而是之后的地址会根据这个位置计算; 
 
 		* `MOV`: 赋值 {
 
@@ -172,7 +179,7 @@
 		* 进入virtual box的安装目录
 
 		* 启动调试界面: 
-		|| ./VirtualBoxVM.exe --startvm "你的操作系统名称" --debug-command-line
+		|| ./VirtualBox.exe --startvm "myos" --debug-command-line
 
 	}
 
@@ -180,14 +187,18 @@
 
 		* `r`: 所有寄存器的值
 
-		* `bs`: 设置断点
+		* `dd`, `dq`: 查看内存内容
+
+		* `ba`: 设置断点
 		[ex~]
 		|| # 在7c00处设置断点
-		|| bs x 1 7c00
+		|| ba x 1 7c00
 
 		* `u`: 显示程序
 
 		* `t`: 执行一句
+
+		* `g`: 继续执行
 
 	}
 

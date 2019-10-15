@@ -1,10 +1,10 @@
 LOAD_ADDR  EQU  0X8000	; 宏
 
 	org	0x7c00;
-	jmp entry
+	jmp	entry
 	
 	;; 注释
-	DB	"vsOS"
+	DB	"luosirui OS"
 
 entry:
 	mov	ax, 0
@@ -28,7 +28,7 @@ readFloppy:
 
 	JC	fin
 
-	jmp	LOAD_ADDR	; 当前控制权移交到内存的 LOAD_ADDR 处
+	jmp	LOAD_ADDR	; 跳转到内存的 LOAD_ADDR 处
 
 fin:
 	HLT

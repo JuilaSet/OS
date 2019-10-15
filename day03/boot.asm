@@ -1,10 +1,10 @@
-LOAD_ADDR  EQU  0X9000	; 宏
+LOAD_ADDR  EQU  0X8000	; 宏
 
 	org	0x7c00;
 	jmp entry
 	
 	;; 注释
-	DB	"vsOS"
+	DB	"LuosiruiOS"
 
 entry:
 	mov	ax, 0
@@ -12,6 +12,7 @@ entry:
 	mov	ds, ax
 	mov	es, ax
 	mov	si, ax
+
 
 readFloppy:
 	; 加载扇区2, 柱面1, 磁头0
@@ -22,7 +23,7 @@ readFloppy:
 	mov	BX, LOAD_ADDR	; ES:BX 数据存储缓冲区
 
 	mov	AH, 0x02	; AH = 02 表示要做的是读盘操作
-	mov	AL, 1		; AL 表示要练习读取几个扇区
+	mov	AL, 1		; AL 表示要连续读取几个扇区
 	mov	DL, 0		; 驱动器编号
 	INT	0x13		; 调用BIOS中断实现磁盘读取功能
 
@@ -33,3 +34,4 @@ readFloppy:
 fin:
 	HLT
 	jmp  fin
+

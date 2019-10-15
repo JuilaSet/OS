@@ -25,4 +25,5 @@ fin:
 
 ; 作为内核代码的一部分加载到内存中去的
 msg:
-	DB	"This is Hello World from kernel"
+	DB	"This is Hello World from kernel - By luosir"
+

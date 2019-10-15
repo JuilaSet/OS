@@ -1,10 +1,10 @@
-LOAD_ADDR  EQU  0x9000	; 宏
+LOAD_ADDR  EQU  0x8000	; 宏
 
 	org	0x7c00;
 	jmp entry
 	
 	;; 注释
-	DB	"vsOS"
+	DB	"luosirui OS"
 
 entry:
 	mov	ax, 0

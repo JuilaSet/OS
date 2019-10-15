@@ -3,11 +3,29 @@
  */
 #def [text~]
 ====================
+* 寻址方式 {
+
+	* 实模式寻址方式: CS寄存器*16+IP寄存器
+
+	* 保护模式寻址方式: CS寄存器存储的实际上是段选择符，找到GDT表中对应的表项，然后找到段基址+IP寄存器（段内偏移）
+
+}
+
 * 转入图形模式: 打开VGA接口
 [ex~] [code] |<
 mov  al, 0x13h	; 设置显卡的色彩模式
 mov  ah, 0x00
 int  0x10
+>| [uncode]
+
+@refer [url |<https://www.zhihu.com/question/269649445/answer/351632444>|]
+* 显存空间: 
+[ex~] [code] |<
+A0000~AFFFF: VGA图形模式显存空间
+B0000~B7FFF: MDA单色字符模式显存空间
+B8000~BFFFF: CGA彩色字符模式显存空间
+C0000~C7FFF: 显卡ROM空间（后来被改造成多种用途，也可以映射显存）
+C8000~FFFFE: 留给BIOS以及其它硬件使用（比如硬盘ROM之类的）
 >| [uncode]
 
 * `al`模式 {

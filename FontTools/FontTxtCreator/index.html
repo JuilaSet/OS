@@ -7,8 +7,7 @@
 	<script src="./libs/ocanvas-2.10.0.js"></script>
  </head>
  <body>
-	<table>
-	<tr><td>
+	<div style="float: left">
 		<div align="center">
 			<button style="height:auto; width: 25%; padding: 5px;" id="cleft">←</button>
 			<button style="height:auto; width: 25%; padding: 5px;" id="cup">↑</button>
@@ -20,7 +19,8 @@
 		<div align="center">
 			<canvas id="canvas" width="302px" style="height:auto; padding: 5px;" ></canvas>
 		</div>
-	</td><td>
+	</div>
+	<div>
 		<div>
 			<select style="height:auto; padding: 5px" id="colorSelectBoard">
 				<option value="clean">[clean]</option>
@@ -49,12 +49,14 @@
 		</div>
 			<textarea id="output" rows="39" cols="25" readonly="readonly"></textarea>
 		</div>
-	</td></tr>
-	</table>
+	</div>
 	
 </div>
 	<script>
-		let widthN = 8, heightN = 8;
+		let arr = window.location.search.substring(1).split(",");
+		arr = (arr.length == 1 ? [8, 16] : arr);
+		// tlocation.href = ("index.html?" + location.toString());
+		let widthN = arr[0], heightN = arr[1];
 	</script>
 	<script src="./orderlist.js"></script>
 	<script src="./color.js"></script>

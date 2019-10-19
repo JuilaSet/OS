@@ -60,7 +60,8 @@ void intHandlerFromC(char *esp){
 	char* vram = bootInfo.vgaRam;
 	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
 
-	Print(vram, xsize, 20, 20, width, height, COL8_FFFFFF, "aaaaa");
+//	Print(vram, xsize, 20, 20, width, height, COL8_FFFFFF, "aaaaa");
+	PrintRGB(vram, xsize, 20, 20, imgHook);
 
 	for (;;) {
 		io_hlt();

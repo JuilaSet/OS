@@ -3,6 +3,9 @@
 // Front_lib.c 文件
 // 
 
+// 图像文件
+#include "images.c"
+
 // 绘图函数
 extern char FONT_LIST[16];
 extern char IMAGE_FONT_LIST[16];
@@ -25,7 +28,7 @@ int io_load_eflags(void);
 void io_store_eflags(int);
 
 // 调色板
-unsigned char pict1[] = {
+unsigned char pict[] = {
 	0x00,  0x00,  0x00,
 	0xff,  0x00,  0x00,
 	0x00,  0xff,  0x00,
@@ -70,11 +73,9 @@ void set_pict(int start, int end, unsigned char* rgb, int which){
 
 void pict_init(){
 	// 写入调色板
-	set_pict(0, LINE, pict1, 0);
+	set_pict(0, LINE, pict, 0);
 	return;
 }
-
-char cursor[] = "*.......\0**......\0*w*.....\0*ww*....\0*www*...\0*w****..\0****....\0*.......\0\0";
 
 /*
  * 绘制函数

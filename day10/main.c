@@ -27,6 +27,9 @@ struct BOOTINFO {
 
 struct BOOTINFO bootInfo = { (char*)0xa0000, 320, 200 };
 
+// 字体间距
+int width = 8, height = 16;
+
 void CMain(){
 
 	pict_init();
@@ -34,9 +37,6 @@ void CMain(){
 	// 显示
 	char* vram = bootInfo.vgaRam;
 	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
-	// 字体间距
-	int width = 8, height = 16;
 
 	// 系统背景
 	fillAll(vram, COL8_848484);
@@ -59,7 +59,6 @@ void intHandlerFromC(char *esp){
 
 	char* vram = bootInfo.vgaRam;
 	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-	int width = 8, height = 16;
 
 	Print(vram, xsize, 20, 20, width, height, COL8_FFFFFF, "aaaaa");
 

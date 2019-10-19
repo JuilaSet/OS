@@ -1,8 +1,39 @@
 ; Disassembly of file: main.o
-; Sat Oct 19 06:14:22 2019
+; Sat Oct 19 06:19:08 2019
 ; Mode: 32 bits
 ; Syntax: YASM/NASM
 ; Instruction set: 80386
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 set_pict:; Function begin
         push    ebp                                     ; 0000 _ 55
         mov     ebp, esp                                ; 0001 _ 89. E5
@@ -549,62 +580,62 @@ fillAll:; Function begin
 CMain:  ; Function begin
         push    ebp                                     ; 0581 _ 55
         mov     ebp, esp                                ; 0582 _ 89. E5
-        sub     esp, 40                                 ; 0584 _ 83. EC, 28
+        sub     esp, 24                                 ; 0584 _ 83. EC, 18
         call    pict_init                               ; 0587 _ E8, FFFFFFFC(rel)
         mov     eax, dword [bootInfo]                   ; 058C _ A1, 00000000(d)
-        mov     dword [ebp-1CH], eax                    ; 0591 _ 89. 45, E4
+        mov     dword [ebp-14H], eax                    ; 0591 _ 89. 45, EC
         movzx   eax, word [bootInfo+4H]                 ; 0594 _ 0F B7. 05, 00000004(d)
         cwde                                            ; 059B _ 98
-        mov     dword [ebp-18H], eax                    ; 059C _ 89. 45, E8
+        mov     dword [ebp-10H], eax                    ; 059C _ 89. 45, F0
         movzx   eax, word [bootInfo+6H]                 ; 059F _ 0F B7. 05, 00000006(d)
         cwde                                            ; 05A6 _ 98
-        mov     dword [ebp-14H], eax                    ; 05A7 _ 89. 45, EC
-        mov     dword [ebp-10H], 8                      ; 05AA _ C7. 45, F0, 00000008
-        mov     dword [ebp-0CH], 16                     ; 05B1 _ C7. 45, F4, 00000010
-        sub     esp, 8                                  ; 05B8 _ 83. EC, 08
-        push    15                                      ; 05BB _ 6A, 0F
-        push    dword [ebp-1CH]                         ; 05BD _ FF. 75, E4
-        call    fillAll                                 ; 05C0 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 05C5 _ 83. C4, 10
-        sub     esp, 12                                 ; 05C8 _ 83. EC, 0C
-        push    cursor                                  ; 05CB _ 68, 00000000(d)
-        push    20                                      ; 05D0 _ 6A, 14
-        push    20                                      ; 05D2 _ 6A, 14
-        push    dword [ebp-18H]                         ; 05D4 _ FF. 75, E8
-        push    dword [ebp-1CH]                         ; 05D7 _ FF. 75, E4
-        call    PrintRGB                                ; 05DA _ E8, FFFFFFFC(rel)
-        add     esp, 32                                 ; 05DF _ 83. C4, 20
-?_046:  call    io_hlt                                  ; 05E2 _ E8, FFFFFFFC(rel)
-        jmp     ?_046                                   ; 05E7 _ EB, F9
+        mov     dword [ebp-0CH], eax                    ; 05A7 _ 89. 45, F4
+        sub     esp, 8                                  ; 05AA _ 83. EC, 08
+        push    15                                      ; 05AD _ 6A, 0F
+        push    dword [ebp-14H]                         ; 05AF _ FF. 75, EC
+        call    fillAll                                 ; 05B2 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 05B7 _ 83. C4, 10
+        sub     esp, 12                                 ; 05BA _ 83. EC, 0C
+        push    cursor                                  ; 05BD _ 68, 00000000(d)
+        push    20                                      ; 05C2 _ 6A, 14
+        push    20                                      ; 05C4 _ 6A, 14
+        push    dword [ebp-10H]                         ; 05C6 _ FF. 75, F0
+        push    dword [ebp-14H]                         ; 05C9 _ FF. 75, EC
+        call    PrintRGB                                ; 05CC _ E8, FFFFFFFC(rel)
+        add     esp, 32                                 ; 05D1 _ 83. C4, 20
+?_046:  call    io_hlt                                  ; 05D4 _ E8, FFFFFFFC(rel)
+        jmp     ?_046                                   ; 05D9 _ EB, F9
 ; CMain End of function
 
 intHandlerFromC:; Function begin
-        push    ebp                                     ; 05E9 _ 55
-        mov     ebp, esp                                ; 05EA _ 89. E5
-        sub     esp, 40                                 ; 05EC _ 83. EC, 28
-        mov     eax, dword [bootInfo]                   ; 05EF _ A1, 00000000(d)
-        mov     dword [ebp-1CH], eax                    ; 05F4 _ 89. 45, E4
-        movzx   eax, word [bootInfo+4H]                 ; 05F7 _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 05FE _ 98
-        mov     dword [ebp-18H], eax                    ; 05FF _ 89. 45, E8
-        movzx   eax, word [bootInfo+6H]                 ; 0602 _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 0609 _ 98
-        mov     dword [ebp-14H], eax                    ; 060A _ 89. 45, EC
-        mov     dword [ebp-10H], 8                      ; 060D _ C7. 45, F0, 00000008
-        mov     dword [ebp-0CH], 16                     ; 0614 _ C7. 45, F4, 00000010
-        push    ?_048                                   ; 061B _ 68, 00000000(d)
-        push    7                                       ; 0620 _ 6A, 07
-        push    dword [ebp-0CH]                         ; 0622 _ FF. 75, F4
-        push    dword [ebp-10H]                         ; 0625 _ FF. 75, F0
-        push    20                                      ; 0628 _ 6A, 14
-        push    20                                      ; 062A _ 6A, 14
-        push    dword [ebp-18H]                         ; 062C _ FF. 75, E8
-        push    dword [ebp-1CH]                         ; 062F _ FF. 75, E4
-        call    Print                                   ; 0632 _ E8, FFFFFFFC(rel)
-        add     esp, 32                                 ; 0637 _ 83. C4, 20
-?_047:  call    io_hlt                                  ; 063A _ E8, FFFFFFFC(rel)
-        jmp     ?_047                                   ; 063F _ EB, F9
+        push    ebp                                     ; 05DB _ 55
+        mov     ebp, esp                                ; 05DC _ 89. E5
+        sub     esp, 24                                 ; 05DE _ 83. EC, 18
+        mov     eax, dword [bootInfo]                   ; 05E1 _ A1, 00000000(d)
+        mov     dword [ebp-14H], eax                    ; 05E6 _ 89. 45, EC
+        movzx   eax, word [bootInfo+4H]                 ; 05E9 _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 05F0 _ 98
+        mov     dword [ebp-10H], eax                    ; 05F1 _ 89. 45, F0
+        movzx   eax, word [bootInfo+6H]                 ; 05F4 _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 05FB _ 98
+        mov     dword [ebp-0CH], eax                    ; 05FC _ 89. 45, F4
+        mov     edx, dword [height]                     ; 05FF _ 8B. 15, 00000000(d)
+        mov     eax, dword [width]                      ; 0605 _ A1, 00000000(d)
+        push    ?_048                                   ; 060A _ 68, 00000000(d)
+        push    7                                       ; 060F _ 6A, 07
+        push    edx                                     ; 0611 _ 52
+        push    eax                                     ; 0612 _ 50
+        push    20                                      ; 0613 _ 6A, 14
+        push    20                                      ; 0615 _ 6A, 14
+        push    dword [ebp-10H]                         ; 0617 _ FF. 75, F0
+        push    dword [ebp-14H]                         ; 061A _ FF. 75, EC
+        call    Print                                   ; 061D _ E8, FFFFFFFC(rel)
+        add     esp, 32                                 ; 0622 _ 83. C4, 20
+?_047:  call    io_hlt                                  ; 0625 _ E8, FFFFFFFC(rel)
+        jmp     ?_047                                   ; 062A _ EB, F9
 ; intHandlerFromC End of function
+
+
 
 
 pict1:                                                  ; byte
@@ -629,7 +660,12 @@ cursor:                                                 ; byte
         db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 00H       ; 0080 _ ........
         db 00H, 00H, 00H, 00H                           ; 0088 _ ....
 
-bootInfo: dq 00C80140000A0000H                          ; 008C _ 00C80140000A0000
+bootInfo: dq 00C80140000A0000H                          ; 008C _ 00C80140000A0000 
+
+width:  dd 00000008H                                    ; 0094 _ 8 
+
+height: dd 00000010H                                    ; 0098 _ 16 
+
 
 ?_048:                                                  ; byte
         db 61H, 61H, 61H, 61H, 61H, 00H                 ; 0000 _ aaaaa.

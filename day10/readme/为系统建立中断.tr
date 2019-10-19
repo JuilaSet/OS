@@ -1,0 +1,162 @@
+/*
+ * 为系统建立中断
+ */
+#def [text~]
+====================
+* 中断向量表: BIOS的中断向量表位于内存低处`0x00 - 0xfff`字节处
+
+* 硬件需要初始化后才能使用
+
+* 中断指令: 恢复中断(sti), 取消中断(cli)
+
+* 主:`0x20和0x21`, 从:`0xa0和0xa1`
+
+* 8259A初始化过程: 向端口中写入1B数据
+|| ICW(Initialization Command Word), 4个
+|| OCW(Opration Control Word), 3个
+|| 都是8位(1B)
+
+* ICW {
+
+	* 通过端口发送命令来完成, 这个命令为ICW(initialization control word)
+
+	* 结构和意义 {
+
+		* ICW1: 主0x20, 从0xa0
+		[code] |<
+		[0]: 0=不需要ICW4,1=需要ICW4
+		[1]: 0=级联8259,1=单个8259
+		[2]: 0=8字节中断向量,1=4字节中断向量
+		[3]: 0=edge triggered模式,1=level triggered模式
+		[4]: 对ICW1必须为1,端口必须为0x20或0xa0
+		[5-7]: 对PC系统都为0
+		>| [uncode]
+
+		* ICW2: 主0x21, 从0xa1
+		[code] |<
+		[0-2]: 80x86系统全为0
+		[3-7]: 80x86系统中断向量
+		>| [uncode]
+
+		* ICW3: 主0x21, 级联标志位; 从0xa1
+		[code] |<
+		[n]: 若第n位为1, 表示IRn级联从片; 0, 表示无从片; 
+
+		从: 
+		ICW3[0-2] 从片连接主片的IR号
+		ICw3[3-7] 必须是0
+		>| [uncode]
+
+		* ICW4: 主0x21, 从0xa1
+		[code] |<
+		[0]: 0=MCS 80/85,1=8086模式
+		[1]: 0=正常EOI,1=自动EOI
+		[2-3]: 主从缓冲模式
+		[4]: 0=sequential模式,1=SFNM模式
+		[5-7]: 未使用,全为0
+		>| [uncode]
+
+		=> 自动EOI: 代码不用主动给CPU发送信号就可以再次处理中断
+
+	}
+
+	* 对端口发送数据时, 顺序是定死的
+
+	=> 1. 往端口20h(主片)或A0h(从片)发送ICW1: 
+	[ex~] 
+	|| ; 往端口主片发送ICW1: 
+	|| mov al, 011h
+	|| out 020h, al
+	[ex~]
+	|| ; 向从8259A发送ICW1:
+	|| out A0h, al
+
+	=>2. 往端口21h(主片)或A1h(从片)发送ICW2: 
+	[ex~]
+	|| ; 向主8259A发送ICW2:
+	|| mov al, 20h	; 当主8259A对应的IRQn管线向CPU发送信号时, CPU根据0x20+n这个值去查找要执行的代码, n=1,2,3...
+	|| out 021h, al
+	|| ; 向从8259A发送ICW2:
+	|| mov al, 028h
+	|| out A1, al
+
+	=>3. 往端口21h(主片)或A1h(从片)发送ICW3: 
+	[ex~]
+	|| ; 向主8259A发送ICW3
+	|| mov al, 04h
+	|| out 21h, al	; 表示从8259A通过主IRQ2管线连接到主8259A控制器
+	[ex~]
+	|| ; 向从8259A 发送 ICW3
+	|| mov al, 02h	; 表示当前从片是从IRQ2管线接入主8259A芯片的
+	|| out A1h, al
+
+	=>4. 往端口20h(主片)或A0h(从片)发送ICW4: 
+	[ex~]
+	|| ;  向主8259A发送ICW4:
+	|| mov al, 003h
+	|| out 021h, al
+	[ex~]
+	|| ; 向从8259A发送ICW4:
+	|| out 0A1h, al
+
+}
+
+* OCW {
+
+	* OCW1: 屏蔽或打开外部中断
+	[code] |<
+	[n] : =1, 关闭IRQn; =0, 打开IRQn
+	>| [uncode]
+
+	* OCW2: 
+
+	* 接受键盘产生的中断: 
+	[ex~]
+	|| mov al, 11111101b	; 表示只接受IRQ1管线发生的信号, 即对应的键盘中断
+	|| out 21h, al
+
+	* 鼠标是通过从8259A的IRQ4管线向CPU发送信号
+
+}
+
+* 中断描述符 {
+
+	* 中断描述符的结构: 
+	[ex~] 
+		[code] |<
+		struct GATE_DESCRIPTOR {
+			short offset_low;
+			short selector;
+			char dw_count;
+			char attribute;
+			short offset_high;
+		};
+		>| [uncode]
+
+	=> 说明 {
+
+		* 代码执行段中的偏移: `offset_low` 和 `offset_high`
+
+		* 选择子: `selector`, 选择GDT中对应的段
+
+		* dw_count设置为0, attribute设置为08Eh
+
+	}
+
+}
+
+* 处理程序: 
+[ex~] 
+	[code] |<
+	void intHandlerFromC(char* esp) {
+		char* vram = bootInfo.vgaRam;
+		int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
+		boxfill8(vram, xsize, COL8_000000, 0,0,32*8 -1, 15);
+		showString(vram, xsize, 0, 0, COL8_FFFFFF, "PS/2 keyboard"); 
+		for (;;) {
+			io_hlt();
+		}
+		show_char();
+	}
+	>| [uncode]
+====================

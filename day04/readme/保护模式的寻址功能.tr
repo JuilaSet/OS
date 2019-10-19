@@ -36,7 +36,7 @@
 
 	* 段寄存器 { 
 
-		* `段寄存器`表示: 96位, [ 不可见, 80位 FF FF FF FF, FF FF FF FF, FF FF | 可见, 16位, FF FF]
+		* `段寄存器`表示: 96位, [ 不可见, 80位 FF FF FF FF, FF FF FF FF, FF FF | 可见, 16位, FF FF ]
 		[code] |<
 		struct SegMent {
 			WORD Selector;	// 16, 段选择子
@@ -138,8 +138,6 @@
 				} => {
 
 					* P: p=1, 段描述符有效; p=0, 段描述符无效; CPU先检查, 若为0则不做后续检查
-
-					* G: 
 
 				}
 

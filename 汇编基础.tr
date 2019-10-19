@@ -61,8 +61,6 @@
 
 	* 指令 {
 
-		* `ORG`: 程序的装载地址, 程序要从这个地址开始执行; 注意: org不是用来装载程序的, 而是之后的地址会根据这个位置计算; 
-
 		* `MOV`: 赋值 {
 
 			* `MOV BYTE/WORD/DWORD [addr/寄存器], num2`: num2存入内存的addr位置
@@ -84,6 +82,8 @@
 
 		}
 
+		* `iretd`: 中断返回
+
 		* db: 8位
 		|| 00
 
@@ -98,77 +98,45 @@
 	* 宏 {
 
 		* `$`: 表示当前的偏移量
-
-	}
-
-}
-
-* 显示字符 {
-
-	* 状态: 
-	[ex~] 
-		[code] |<
-		AH=0x0e;
-		AL=字符
-		BH=0
-		BL=颜色code
-		>| [uncode]
-
-	* 汇编代码: 
-	[ex~] 
-		[code] |<
-		putloop:
-			MOV	AL,[SI]		; 显示一个文字
-			ADD	SI,1		; 指向下一个字符
-			; if(遇到空字符), 跳出
-			CMP	AL,0
-			JE	fin
-			MOV	AH,0X0E		; 指定字符颜色
-			INT	0X10		; 调用显卡BIOS
-			JMP	putloop
-		fin:
-		>| [uncode]
-
-	* 调用函数 {
-
-		* 准备参数:
 		[ex~]
-		|| MOV AH, 0x0e
-		|| MOV BX, 15
+		|| 死循环: jmp $
 
-		* 调用例程: 使用硬件的功能
+		* `$$`: 表示当前节(section)的开始处的地址
+
+	}
+
+	* NASM中的伪指令 {
+
+		* `[ORG xxxx]`: 程序的装载地址, 程序要从这个地址开始执行; 
+			=> 注意: org不是用来装载程序的, 而是之后的地址会根据这个位置计算; 
+
+		* `SECTION` {
+
+			* `.data`, `.text`, `.bss`: 编译后地址顺序为`.text`, `.data`, 用户自定义section
+			[ex~] [code] |<
+			[SECTION .data]	// .data 块
+
+			>| [uncode]
+
+			* `[bits 16]`: 告诉编译器，编译成16位指令，前面代码缺省默认
+
+			* 用户自定义`section`: 同名的section编译后会放在一段连续的内存上, 按照出现的先后顺序存储
+
+		}
+
+		* 定义变量: `变量标识符` `数据类型` `值`
+		[ex~] 
+		|| var dd 3
+
+		* 需要另一个模块的函数: 
 		[ex~]
-		|| INT
+		|| extern bar_func
+
+		* 暴露一个变量: 
+		[ex~]
+		|| global _start
 
 	}
-
-}
-
-* NASM中的伪指令 {
-
-	* `SECTION` {
-
-		* `.data`, `.text`, `.bss`: 编译后地址顺序为`.text`, `.data`, 用户自定义section
-		[ex~] [code] |<
-		[SECTION .data]	// .data 块
-
-		>| [uncode]
-
-		* 用户自定义`section`: 同名的section编译后会放在一段连续的内存上, 按照出现的先后顺序存储
-
-	}
-
-	* 定义变量: `变量标识符` `数据类型` `值`
-	[ex~] 
-	|| var dd 3
-
-	* 需要另一个模块的函数: 
-	[ex~]
-	|| extern bar_func
-
-	* 暴露一个变量: 
-	[ex~]
-	|| global _start
 
 }
 

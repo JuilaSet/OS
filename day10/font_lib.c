@@ -1,12 +1,84 @@
-﻿// 绘图函数
+﻿
+// 
+// Front_lib.c 文件
+// 
+
+// 绘图函数
 extern char FONT_LIST[16];
+extern char IMAGE_FONT_LIST[16];
 extern char ALPHA_FONT_LIST[16];
-extern char vsFont_Debug[16];
 extern char NUMBER_FONT_LIST[16];
-extern char ALPHA_FONT_LIST[16];
+
+extern char vsFont_Debug[16];
 
 extern int FONT_SIZE;
 extern int* PTR_OFFSET;
+
+/*
+ * 初始化调色板
+ */
+
+void io_cli(void);
+void io_hlt(void);
+void io_out8(int, int);
+int io_load_eflags(void);
+void io_store_eflags(int);
+
+// 调色板
+unsigned char pict1[] = {
+	0x00,  0x00,  0x00,
+	0xff,  0x00,  0x00,
+	0x00,  0xff,  0x00,
+	0xff,  0xff,  0x00,
+	0x00,  0x00,  0xff,
+	0xff,  0x00,  0xff,
+	0x00,  0xff,  0xff,
+	0xff,  0xff,  0xff,
+	0xc6,  0xc6,  0xc6,
+	0x84,  0x00,  0x00,
+	0x00,  0x84,  0x00,
+	0x84,  0x84,  0x00,
+	0x00,  0x00,  0x84,
+	0x84,  0x00,  0x84,
+	0x00,  0x84,  0x84,
+	0x84,  0x84,  0x84,
+};
+
+void set_pict(int start, int end, unsigned char* rgb, int which){
+	int i, eflags;
+
+	// 保存eflags
+	eflags = io_load_eflags();
+
+	// 关闭中断功能, 防止被干扰
+	io_cli();
+
+	io_out8(0x03c8, which);
+
+	for(int i = start; i < end; ++i){
+		io_out8(0x03c9, rgb[0] / 4);
+		io_out8(0x03c9, rgb[1] / 4);
+		io_out8(0x03c9, rgb[2] / 4);
+		rgb += 3;
+	}
+
+	// 打开中断功能(恢复eflags)
+	io_store_eflags(eflags);
+
+	return;
+}
+
+void pict_init(){
+	// 写入调色板
+	set_pict(0, LINE, pict1, 0);
+	return;
+}
+
+char cursor[] = "*.......\0**......\0*w*.....\0*ww*....\0*www*...\0*w****..\0****....\0*.......\0\0";
+
+/*
+ * 绘制函数
+ */
 
 // 绘制方块
 void boxfill8(char* vram, int xsize, char c, int x0, int y0, int x1, int y1) {
@@ -53,8 +125,8 @@ void Print(char *vram, int xsize, int x, int y, int width, int height, int font,
 		char c = str[i];
 		if(c <= '9' && c >= '0')
 			showFont8(vram, xsize, x + width * i, y, font, getAddrOffsetNumber(c));
-		else if (c <= 'z' && c >=)
-			
+		else if (c <= 'z' && c >= 'a' || c <= 'Z' && c >= 'A')
+			showFont8(vram, xsize, x + width * i, y, font, getAddrOffsetAlpha(c));
 	}
 }
 
@@ -102,17 +174,3 @@ void fillAll(char* vram, int font){
 		vram[i] = font;
 	}
 }
-
-// 显示器描述结构体
-struct BOOTINFO {
-    char* vgaRam;
-    short screenX, screenY;
-};
-
-// 初始化显示器描述结构体
-void initBootInfo(struct BOOTINFO *pBootInfo) {
-    pBootInfo->vgaRam = (char*)0xa0000;
-    pBootInfo->screenX = 320;
-    pBootInfo->screenY = 200;
-}
-

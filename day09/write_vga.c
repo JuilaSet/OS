@@ -100,7 +100,7 @@ void CMain(){
 	PrintRGB(vram, xsize, 20, 20, cursor);
 
 
-	// Print(vram, xsize, 20 + i * 8, 20, width, height, COL8_FFFFFF, "0");
+	Print(vram, xsize, 20 + i * 8, 20, width, height, COL8_FFFFFF, "01234");
 
 	for(;;) {
 		io_hlt();

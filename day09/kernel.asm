@@ -33,11 +33,12 @@ LABEL_BEGIN:
 	mov	ss, ax
 	mov	sp, 0100h
 
-	; 显示
+	; 调色板显示模式显示
 	mov	al, 0x13
 	mov	ah, 0
 	int	0x10
 
+	; 32位保护模式代码
 	xor	eax, eax
 	mov	ax,  cs
 	shl	eax, 4

@@ -38,4 +38,45 @@
 	* 读取过程: 18个扇区(1个柱面) => 下个盘面的下一个柱面
 
 }
+
+* 显示字符 {
+
+	* 状态: 
+	[ex~] 
+		[code] |<
+		AH=0x0e;
+		AL=字符
+		BH=0
+		BL=颜色code
+		>| [uncode]
+
+	* 汇编代码: 
+	[ex~] 
+		[code] |<
+		putloop:
+			MOV	AL,[SI]		; 显示一个文字
+			ADD	SI,1		; 指向下一个字符
+			; if(遇到空字符), 跳出
+			CMP	AL,0
+			JE	fin
+			MOV	AH,0X0E		; 指定字符颜色
+			INT	0X10		; 调用显卡BIOS
+			JMP	putloop
+		fin:
+		>| [uncode]
+
+	* 调用函数 {
+
+		* 准备参数:
+		[ex~]
+		|| MOV AH, 0x0e
+		|| MOV BX, 15
+
+		* 调用例程: 使用硬件的功能
+		[ex~]
+		|| INT
+
+	}
+
+}
 ====================

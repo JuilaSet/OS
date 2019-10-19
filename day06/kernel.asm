@@ -6,14 +6,14 @@ jmp	LABEL_BEGIN
 
 [SECTION .gdt]
 ;				段基址		段界限			属性
-LABEL_GDT:   	    Descriptor	0,		0,			0  
+LABEL_GDT:   	    Descriptor	0,		0,			0		; 空描述符, CPU不使用
 LABEL_DESC_CODE32:  Descriptor	0,		SegCode32Len - 1,	DA_C + DA_32
 
 ; 把整个4G内存当做一段可读可写的内存
 LABEL_DESC_VRAM:    Descriptor	0,		0ffffffffh,		DA_DRW	; 长度为4G
 
-; C语言的用户栈空间
-LABEL_DESC_STACK:   Descriptor	0,		200h,			DA_DRWA+DA_32
+; C语言的用户栈空间: TopOfStack = 512, 200h
+LABEL_DESC_STACK:   Descriptor	0,		TopOfStack,		DA_DRWA+DA_32
 
 GdtLen     equ    $ - LABEL_GDT
 GdtPtr     dw     GdtLen - 1

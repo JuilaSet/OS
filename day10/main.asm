@@ -1,8 +1,20 @@
 ; Disassembly of file: main.o
-; Sat Oct 19 06:35:08 2019
+; Thu Oct 24 23:07:20 2019
 ; Mode: 32 bits
 ; Syntax: YASM/NASM
 ; Instruction set: 80386
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -578,58 +590,229 @@ fillAll:; Function begin
         ret                                             ; 0580 _ C3
 ; fillAll End of function
 
-CMain:  ; Function begin
+charToHex:; Function begin
         push    ebp                                     ; 0581 _ 55
         mov     ebp, esp                                ; 0582 _ 89. E5
-        sub     esp, 24                                 ; 0584 _ 83. EC, 18
-        call    pict_init                               ; 0587 _ E8, FFFFFFFC(rel)
-        mov     eax, dword [bootInfo]                   ; 058C _ A1, 00000000(d)
-        mov     dword [ebp-14H], eax                    ; 0591 _ 89. 45, EC
-        movzx   eax, word [bootInfo+4H]                 ; 0594 _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 059B _ 98
-        mov     dword [ebp-10H], eax                    ; 059C _ 89. 45, F0
-        movzx   eax, word [bootInfo+6H]                 ; 059F _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 05A6 _ 98
-        mov     dword [ebp-0CH], eax                    ; 05A7 _ 89. 45, F4
-        sub     esp, 8                                  ; 05AA _ 83. EC, 08
-        push    15                                      ; 05AD _ 6A, 0F
-        push    dword [ebp-14H]                         ; 05AF _ FF. 75, EC
-        call    fillAll                                 ; 05B2 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 05B7 _ 83. C4, 10
-        sub     esp, 12                                 ; 05BA _ 83. EC, 0C
-        push    cursor                                  ; 05BD _ 68, 00000000(d)
-        push    20                                      ; 05C2 _ 6A, 14
-        push    20                                      ; 05C4 _ 6A, 14
-        push    dword [ebp-10H]                         ; 05C6 _ FF. 75, F0
-        push    dword [ebp-14H]                         ; 05C9 _ FF. 75, EC
-        call    PrintRGB                                ; 05CC _ E8, FFFFFFFC(rel)
-        add     esp, 32                                 ; 05D1 _ 83. C4, 20
-?_046:  call    io_hlt                                  ; 05D4 _ E8, FFFFFFFC(rel)
-        jmp     ?_046                                   ; 05D9 _ EB, F9
-; CMain End of function
+        sub     esp, 4                                  ; 0584 _ 83. EC, 04
+        mov     eax, dword [ebp+8H]                     ; 0587 _ 8B. 45, 08
+        mov     byte [ebp-4H], al                       ; 058A _ 88. 45, FC
+        cmp     byte [ebp-4H], 9                        ; 058D _ 80. 7D, FC, 09
+        jle     ?_046                                   ; 0591 _ 7E, 09
+        movzx   eax, byte [ebp-4H]                      ; 0593 _ 0F B6. 45, FC
+        add     eax, 87                                 ; 0597 _ 83. C0, 57
+        jmp     ?_047                                   ; 059A _ EB, 07
+
+?_046:  movzx   eax, byte [ebp-4H]                      ; 059C _ 0F B6. 45, FC
+        add     eax, 48                                 ; 05A0 _ 83. C0, 30
+?_047:  leave                                           ; 05A3 _ C9
+        ret                                             ; 05A4 _ C3
+; charToHex End of function
+
+charToHexStr:; Function begin
+        push    ebp                                     ; 05A5 _ 55
+        mov     ebp, esp                                ; 05A6 _ 89. E5
+        sub     esp, 4                                  ; 05A8 _ 83. EC, 04
+        mov     eax, dword [ebp+8H]                     ; 05AB _ 8B. 45, 08
+        mov     byte [ebp-4H], al                       ; 05AE _ 88. 45, FC
+        movzx   eax, byte [ebp-4H]                      ; 05B1 _ 0F B6. 45, FC
+        movsx   eax, al                                 ; 05B5 _ 0F BE. C0
+        and     eax, 0FH                                ; 05B8 _ 83. E0, 0F
+        push    eax                                     ; 05BB _ 50
+        call    charToHex                               ; 05BC _ E8, FFFFFFFC(rel)
+        add     esp, 4                                  ; 05C1 _ 83. C4, 04
+        mov     byte [?_050], al                        ; 05C4 _ A2, 0000002D(d)
+        shr     byte [ebp-4H], 4                        ; 05C9 _ C0. 6D, FC, 04
+        movzx   eax, byte [ebp-4H]                      ; 05CD _ 0F B6. 45, FC
+        movsx   eax, al                                 ; 05D1 _ 0F BE. C0
+        and     eax, 0FH                                ; 05D4 _ 83. E0, 0F
+        push    eax                                     ; 05D7 _ 50
+        call    charToHex                               ; 05D8 _ E8, FFFFFFFC(rel)
+        add     esp, 4                                  ; 05DD _ 83. C4, 04
+        mov     byte [keystr.1608], al                  ; 05E0 _ A2, 0000002C(d)
+        mov     eax, keystr.1608                        ; 05E5 _ B8, 0000002C(d)
+        leave                                           ; 05EA _ C9
+        ret                                             ; 05EB _ C3
+; charToHexStr End of function
+
+keybuf_init:; Function begin
+        push    ebp                                     ; 05EC _ 55
+        mov     ebp, esp                                ; 05ED _ 89. E5
+        mov     dword [keybuf+20H], 0                   ; 05EF _ C7. 05, 00000020(d), 00000000
+        mov     dword [keybuf+24H], 0                   ; 05F9 _ C7. 05, 00000024(d), 00000000
+        mov     dword [keybuf+28H], 0                   ; 0603 _ C7. 05, 00000028(d), 00000000
+        nop                                             ; 060D _ 90
+        pop     ebp                                     ; 060E _ 5D
+        ret                                             ; 060F _ C3
+; keybuf_init End of function
+
+keybuf_w8:; Function begin
+        push    ebp                                     ; 0610 _ 55
+        mov     ebp, esp                                ; 0611 _ 89. E5
+        sub     esp, 4                                  ; 0613 _ 83. EC, 04
+        mov     eax, dword [ebp+8H]                     ; 0616 _ 8B. 45, 08
+        mov     byte [ebp-4H], al                       ; 0619 _ 88. 45, FC
+        mov     eax, dword [keybuf+24H]                 ; 061C _ A1, 00000024(d)
+        movzx   edx, byte [ebp-4H]                      ; 0621 _ 0F B6. 55, FC
+        mov     byte [keybuf+eax], dl                   ; 0625 _ 88. 90, 00000000(d)
+        mov     eax, dword [keybuf+28H]                 ; 062B _ A1, 00000028(d)
+        add     eax, 1                                  ; 0630 _ 83. C0, 01
+        mov     dword [keybuf+28H], eax                 ; 0633 _ A3, 00000028(d)
+        mov     eax, dword [keybuf+24H]                 ; 0638 _ A1, 00000024(d)
+        lea     edx, [eax+1H]                           ; 063D _ 8D. 50, 01
+        mov     eax, edx                                ; 0640 _ 89. D0
+        sar     eax, 31                                 ; 0642 _ C1. F8, 1F
+        shr     eax, 27                                 ; 0645 _ C1. E8, 1B
+        add     edx, eax                                ; 0648 _ 01. C2
+        and     edx, 1FH                                ; 064A _ 83. E2, 1F
+        sub     edx, eax                                ; 064D _ 29. C2
+        mov     eax, edx                                ; 064F _ 89. D0
+        mov     dword [keybuf+24H], eax                 ; 0651 _ A3, 00000024(d)
+        nop                                             ; 0656 _ 90
+        leave                                           ; 0657 _ C9
+        ret                                             ; 0658 _ C3
+; keybuf_w8 End of function
+
+keybuf_r8:; Function begin
+        push    ebp                                     ; 0659 _ 55
+        mov     ebp, esp                                ; 065A _ 89. E5
+        sub     esp, 16                                 ; 065C _ 83. EC, 10
+        mov     eax, dword [keybuf+20H]                 ; 065F _ A1, 00000020(d)
+        movzx   eax, byte [keybuf+eax]                  ; 0664 _ 0F B6. 80, 00000000(d)
+        mov     byte [ebp-1H], al                       ; 066B _ 88. 45, FF
+        mov     eax, dword [keybuf+28H]                 ; 066E _ A1, 00000028(d)
+        sub     eax, 1                                  ; 0673 _ 83. E8, 01
+        mov     dword [keybuf+28H], eax                 ; 0676 _ A3, 00000028(d)
+        mov     eax, dword [keybuf+20H]                 ; 067B _ A1, 00000020(d)
+        lea     edx, [eax+1H]                           ; 0680 _ 8D. 50, 01
+        mov     eax, edx                                ; 0683 _ 89. D0
+        sar     eax, 31                                 ; 0685 _ C1. F8, 1F
+        shr     eax, 27                                 ; 0688 _ C1. E8, 1B
+        add     edx, eax                                ; 068B _ 01. C2
+        and     edx, 1FH                                ; 068D _ 83. E2, 1F
+        sub     edx, eax                                ; 0690 _ 29. C2
+        mov     eax, edx                                ; 0692 _ 89. D0
+        mov     dword [keybuf+20H], eax                 ; 0694 _ A3, 00000020(d)
+        movzx   eax, byte [ebp-1H]                      ; 0699 _ 0F B6. 45, FF
+        leave                                           ; 069D _ C9
+        ret                                             ; 069E _ C3
+; keybuf_r8 End of function
+
+keybuf_isEmpty:; Function begin
+        push    ebp                                     ; 069F _ 55
+        mov     ebp, esp                                ; 06A0 _ 89. E5
+        mov     eax, dword [keybuf+28H]                 ; 06A2 _ A1, 00000028(d)
+        test    eax, eax                                ; 06A7 _ 85. C0
+        sete    al                                      ; 06A9 _ 0F 94. C0
+        movzx   eax, al                                 ; 06AC _ 0F B6. C0
+        pop     ebp                                     ; 06AF _ 5D
+        ret                                             ; 06B0 _ C3
+; keybuf_isEmpty End of function
 
 intHandlerFromC:; Function begin
-        push    ebp                                     ; 05DB _ 55
-        mov     ebp, esp                                ; 05DC _ 89. E5
-        sub     esp, 24                                 ; 05DE _ 83. EC, 18
-        mov     eax, dword [bootInfo]                   ; 05E1 _ A1, 00000000(d)
-        mov     dword [ebp-14H], eax                    ; 05E6 _ 89. 45, EC
-        movzx   eax, word [bootInfo+4H]                 ; 05E9 _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 05F0 _ 98
-        mov     dword [ebp-10H], eax                    ; 05F1 _ 89. 45, F0
-        movzx   eax, word [bootInfo+6H]                 ; 05F4 _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 05FB _ 98
-        mov     dword [ebp-0CH], eax                    ; 05FC _ 89. 45, F4
-        push    imgHook                                 ; 05FF _ 68, 00000000(d)
-        push    20                                      ; 0604 _ 6A, 14
-        push    20                                      ; 0606 _ 6A, 14
-        push    dword [ebp-10H]                         ; 0608 _ FF. 75, F0
-        push    dword [ebp-14H]                         ; 060B _ FF. 75, EC
-        call    PrintRGB                                ; 060E _ E8, FFFFFFFC(rel)
-        add     esp, 20                                 ; 0613 _ 83. C4, 14
-?_047:  call    io_hlt                                  ; 0616 _ E8, FFFFFFFC(rel)
-        jmp     ?_047                                   ; 061B _ EB, F9
+        push    ebp                                     ; 06B1 _ 55
+        mov     ebp, esp                                ; 06B2 _ 89. E5
+        sub     esp, 24                                 ; 06B4 _ 83. EC, 18
+        mov     eax, dword [bootInfo]                   ; 06B7 _ A1, 00000000(d)
+        mov     dword [ebp-14H], eax                    ; 06BC _ 89. 45, EC
+        movzx   eax, word [bootInfo+4H]                 ; 06BF _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 06C6 _ 98
+        mov     dword [ebp-10H], eax                    ; 06C7 _ 89. 45, F0
+        movzx   eax, word [bootInfo+6H]                 ; 06CA _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 06D1 _ 98
+        mov     dword [ebp-0CH], eax                    ; 06D2 _ 89. 45, F4
+        sub     esp, 8                                  ; 06D5 _ 83. EC, 08
+        push    33                                      ; 06D8 _ 6A, 21
+        push    32                                      ; 06DA _ 6A, 20
+        call    io_out8                                 ; 06DC _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 06E1 _ 83. C4, 10
+        mov     byte [ebp-15H], 0                       ; 06E4 _ C6. 45, EB, 00
+        sub     esp, 12                                 ; 06E8 _ 83. EC, 0C
+        push    96                                      ; 06EB _ 6A, 60
+        call    io_in8                                  ; 06ED _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 06F2 _ 83. C4, 10
+        mov     byte [ebp-15H], al                      ; 06F5 _ 88. 45, EB
+        movzx   eax, byte [ebp-15H]                     ; 06F8 _ 0F B6. 45, EB
+        sub     esp, 12                                 ; 06FC _ 83. EC, 0C
+        push    eax                                     ; 06FF _ 50
+        call    keybuf_w8                               ; 0700 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0705 _ 83. C4, 10
+        nop                                             ; 0708 _ 90
+        leave                                           ; 0709 _ C9
+        ret                                             ; 070A _ C3
 ; intHandlerFromC End of function
+
+CMain:  ; Function begin
+        push    ebp                                     ; 070B _ 55
+        mov     ebp, esp                                ; 070C _ 89. E5
+        push    ebx                                     ; 070E _ 53
+        sub     esp, 36                                 ; 070F _ 83. EC, 24
+        call    pict_init                               ; 0712 _ E8, FFFFFFFC(rel)
+        call    keybuf_init                             ; 0717 _ E8, FFFFFFFC(rel)
+        mov     eax, dword [bootInfo]                   ; 071C _ A1, 00000000(d)
+        mov     dword [ebp-18H], eax                    ; 0721 _ 89. 45, E8
+        movzx   eax, word [bootInfo+4H]                 ; 0724 _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 072B _ 98
+        mov     dword [ebp-14H], eax                    ; 072C _ 89. 45, EC
+        movzx   eax, word [bootInfo+6H]                 ; 072F _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 0736 _ 98
+        mov     dword [ebp-10H], eax                    ; 0737 _ 89. 45, F0
+        sub     esp, 8                                  ; 073A _ 83. EC, 08
+        push    15                                      ; 073D _ 6A, 0F
+        push    dword [ebp-18H]                         ; 073F _ FF. 75, E8
+        call    fillAll                                 ; 0742 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0747 _ 83. C4, 10
+        sub     esp, 12                                 ; 074A _ 83. EC, 0C
+        push    cursor                                  ; 074D _ 68, 00000000(d)
+        push    20                                      ; 0752 _ 6A, 14
+        push    20                                      ; 0754 _ 6A, 14
+        push    dword [ebp-14H]                         ; 0756 _ FF. 75, EC
+        push    dword [ebp-18H]                         ; 0759 _ FF. 75, E8
+        call    PrintRGB                                ; 075C _ E8, FFFFFFFC(rel)
+        add     esp, 32                                 ; 0761 _ 83. C4, 20
+?_048:  call    io_hlt                                  ; 0764 _ E8, FFFFFFFC(rel)
+        call    keybuf_isEmpty                          ; 0769 _ E8, FFFFFFFC(rel)
+        test    eax, eax                                ; 076E _ 85. C0
+        jz      ?_049                                   ; 0770 _ 74, 07
+        call    io_stihlt                               ; 0772 _ E8, FFFFFFFC(rel)
+        jmp     ?_048                                   ; 0777 _ EB, EB
+
+?_049:  call    keybuf_r8                               ; 0779 _ E8, FFFFFFFC(rel)
+        mov     byte [ebp-19H], al                      ; 077E _ 88. 45, E7
+        call    io_sti                                  ; 0781 _ E8, FFFFFFFC(rel)
+        movzx   eax, byte [ebp-19H]                     ; 0786 _ 0F B6. 45, E7
+        sub     esp, 12                                 ; 078A _ 83. EC, 0C
+        push    eax                                     ; 078D _ 50
+        call    charToHexStr                            ; 078E _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0793 _ 83. C4, 10
+        mov     dword [ebp-0CH], eax                    ; 0796 _ 89. 45, F4
+        mov     ebx, dword [height]                     ; 0799 _ 8B. 1D, 00000000(d)
+        mov     ecx, dword [width]                      ; 079F _ 8B. 0D, 00000000(d)
+        mov     edx, dword [pointerY]                   ; 07A5 _ 8B. 15, 00000000(d)
+        mov     eax, dword [pointerX]                   ; 07AB _ A1, 00000000(d)
+        push    dword [ebp-0CH]                         ; 07B0 _ FF. 75, F4
+        push    7                                       ; 07B3 _ 6A, 07
+        push    ebx                                     ; 07B5 _ 53
+        push    ecx                                     ; 07B6 _ 51
+        push    edx                                     ; 07B7 _ 52
+        push    eax                                     ; 07B8 _ 50
+        push    dword [ebp-14H]                         ; 07B9 _ FF. 75, EC
+        push    dword [ebp-18H]                         ; 07BC _ FF. 75, E8
+        call    Print                                   ; 07BF _ E8, FFFFFFFC(rel)
+        add     esp, 32                                 ; 07C4 _ 83. C4, 20
+        mov     eax, dword [pointerX]                   ; 07C7 _ A1, 00000000(d)
+        add     eax, 16                                 ; 07CC _ 83. C0, 10
+        mov     dword [pointerX], eax                   ; 07CF _ A3, 00000000(d)
+        mov     eax, dword [ebp-14H]                    ; 07D4 _ 8B. 45, EC
+        lea     edx, [eax-14H]                          ; 07D7 _ 8D. 50, EC
+        mov     eax, dword [pointerX]                   ; 07DA _ A1, 00000000(d)
+        cmp     edx, eax                                ; 07DF _ 39. C2
+        jg      ?_048                                   ; 07E1 _ 7F, 81
+        mov     dword [pointerX], 20                    ; 07E3 _ C7. 05, 00000000(d), 00000014
+        mov     eax, dword [pointerY]                   ; 07ED _ A1, 00000000(d)
+        add     eax, 16                                 ; 07F2 _ 83. C0, 10
+        mov     dword [pointerY], eax                   ; 07F5 _ A3, 00000000(d)
+        jmp     ?_048                                   ; 07FA _ E9, FFFFFF65
+; CMain End of function
 
 
 
@@ -650,41 +833,71 @@ cursor:                                                 ; byte
 
 imgHook:                                                ; byte
         db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0060 _ ........
-        db 2EH, 2EH, 2EH, 2EH, 00H, 2EH, 2EH, 2EH       ; 0068 _ ........
-        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0070 _ ........
-        db 2EH, 00H, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0078 _ ........
-        db 2EH, 2EH, 2EH, 2EH, 2AH, 2AH, 00H, 2EH       ; 0080 _ ....**..
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0068 _ ........
+        db 00H, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0070 _ ........
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0078 _ ........
+        db 2EH, 00H, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0080 _ ........
         db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0088 _ ........
-        db 2AH, 77H, 2AH, 00H, 2EH, 2EH, 2EH, 2EH       ; 0090 _ *w*.....
-        db 2EH, 2EH, 2EH, 2EH, 2AH, 77H, 2AH, 2EH       ; 0098 _ ....*w*.
-        db 00H, 2AH, 2AH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 00A0 _ .**.....
-        db 2AH, 77H, 2AH, 2EH, 2EH, 00H, 2AH, 77H       ; 00A8 _ *w*...*w
-        db 2AH, 2EH, 2EH, 2EH, 2AH, 77H, 2AH, 2EH       ; 00B0 _ *...*w*.
-        db 2EH, 2EH, 00H, 2EH, 2AH, 77H, 2AH, 2EH       ; 00B8 _ ....*w*.
-        db 2AH, 77H, 2AH, 2EH, 2EH, 2EH, 2EH, 00H       ; 00C0 _ *w*.....
-        db 2EH, 2EH, 2AH, 77H, 2AH, 77H, 2AH, 2EH       ; 00C8 _ ..*w*w*.
-        db 2EH, 2EH, 2EH, 2EH, 00H, 2EH, 2EH, 2EH       ; 00D0 _ ........
-        db 2AH, 77H, 2AH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 00D8 _ *w*.....
-        db 2EH, 00H, 2EH, 2EH, 2EH, 2EH, 2AH, 2EH       ; 00E0 _ ......*.
-        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 00H, 2EH       ; 00E8 _ ........
-        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 00F0 _ ........
-        db 2EH, 2EH, 2EH, 00H, 00H, 00H, 00H, 00H       ; 00F8 _ ........
+        db 2EH, 2EH, 00H, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0090 _ ........
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2AH       ; 0098 _ .......*
+        db 2EH, 2EH, 2EH, 00H, 2EH, 2EH, 2EH, 2EH       ; 00A0 _ ........
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2AH       ; 00A8 _ .......*
+        db 77H, 2AH, 2EH, 2EH, 00H, 2EH, 2EH, 2EH       ; 00B0 _ w*......
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2AH       ; 00B8 _ .......*
+        db 77H, 77H, 77H, 2AH, 2EH, 00H, 2EH, 2EH       ; 00C0 _ www*....
+        db 2EH, 2AH, 2EH, 2EH, 2EH, 2EH, 2EH, 2AH       ; 00C8 _ .*.....*
+        db 77H, 77H, 77H, 2AH, 2EH, 2EH, 00H, 2EH       ; 00D0 _ www*....
+        db 2EH, 2AH, 77H, 2AH, 2EH, 2EH, 2EH, 2AH       ; 00D8 _ .*w*...*
+        db 77H, 77H, 77H, 2AH, 2EH, 2EH, 2EH, 00H       ; 00E0 _ www*....
+        db 2EH, 2AH, 77H, 77H, 77H, 2AH, 2EH, 2AH       ; 00E8 _ .*www*.*
+        db 77H, 77H, 77H, 2AH, 2EH, 2EH, 2EH, 2EH       ; 00F0 _ www*....
+        db 00H, 2EH, 2EH, 2AH, 77H, 77H, 77H, 2AH       ; 00F8 _ ...*www*
+        db 77H, 77H, 77H, 2AH, 2EH, 2EH, 2EH, 2EH       ; 0100 _ www*....
+        db 2EH, 00H, 2EH, 2EH, 2EH, 2AH, 77H, 77H       ; 0108 _ .....*ww
+        db 77H, 77H, 77H, 2AH, 2EH, 2EH, 2EH, 2EH       ; 0110 _ www*....
+        db 2EH, 2EH, 00H, 2EH, 2EH, 2EH, 2EH, 2AH       ; 0118 _ .......*
+        db 77H, 77H, 77H, 2AH, 2EH, 2EH, 2EH, 2EH       ; 0120 _ www*....
+        db 2EH, 2EH, 2EH, 00H, 2EH, 2EH, 2EH, 2EH       ; 0128 _ ........
+        db 2EH, 2AH, 77H, 2AH, 2EH, 2EH, 2EH, 2EH       ; 0130 _ .*w*....
+        db 2EH, 2EH, 2EH, 2EH, 00H, 2EH, 2EH, 2EH       ; 0138 _ ........
+        db 2EH, 2EH, 2EH, 2AH, 2EH, 2EH, 2EH, 2EH       ; 0140 _ ...*....
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 00H, 2EH, 2EH       ; 0148 _ ........
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0150 _ ........
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 00H, 2EH       ; 0158 _ ........
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0160 _ ........
+        db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 00H       ; 0168 _ ........
+        db 00H, 00H, 00H, 00H                           ; 0170 _ ....
+
+bootInfo: dq 00C80140000A0000H                          ; 0174 _ 00C80140000A0000 
+
+width:  dd 00000008H                                    ; 017C _ 8 
+
+height: dd 00000010H, 00000000H                         ; 0180 _ 16 0 
+        dd 00000000H, 00000000H                         ; 0188 _ 0 0 
+        dd 00000000H, 00000000H                         ; 0190 _ 0 0 
+        dd 00000000H, 00000000H                         ; 0198 _ 0 0 
 
 pict:                                                   ; byte
-        db 00H, 00H, 00H, 0FFH, 00H, 00H, 00H, 0FFH     ; 0100 _ ........
-        db 00H, 0FFH, 0FFH, 00H, 00H, 00H, 0FFH, 0FFH   ; 0108 _ ........
-        db 00H, 0FFH, 00H, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH ; 0110 _ ........
-        db 0C6H, 0C6H, 0C6H, 84H, 00H, 00H, 00H, 84H    ; 0118 _ ........
-        db 00H, 84H, 84H, 00H, 00H, 00H, 84H, 84H       ; 0120 _ ........
-        db 00H, 84H, 00H, 84H, 84H, 84H, 84H, 84H       ; 0128 _ ........
+        db 00H, 00H, 00H, 0FFH, 00H, 00H, 00H, 0FFH     ; 01A0 _ ........
+        db 00H, 0FFH, 0FFH, 00H, 00H, 00H, 0FFH, 0FFH   ; 01A8 _ ........
+        db 00H, 0FFH, 00H, 0FFH, 0FFH, 0FFH, 0FFH, 0FFH ; 01B0 _ ........
+        db 0C6H, 0C6H, 0C6H, 84H, 00H, 00H, 00H, 84H    ; 01B8 _ ........
+        db 00H, 84H, 84H, 00H, 00H, 00H, 84H, 84H       ; 01C0 _ ........
+        db 00H, 84H, 00H, 84H, 84H, 84H, 84H, 84H       ; 01C8 _ ........
 
-bootInfo: dq 00C80140000A0000H                          ; 0130 _ 00C80140000A0000 
+pointerX: dd 00000014H                                  ; 01D0 _ 20 
 
-width:  dd 00000008H                                    ; 0138 _ 8 
-
-height: dd 00000010H                                    ; 013C _ 16 
+pointerY: dd 00000014H                                  ; 01D4 _ 20 
 
 
 
+
+keybuf:                                                 ; byte
+        resd    11                                      ; 0000
+
+keystr.1608:                                            ; byte
+        resb    1                                       ; 002C
+
+?_050:  resb    2                                       ; 002D
 
 

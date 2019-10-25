@@ -18,14 +18,25 @@ extern int FONT_SIZE;
 extern int* PTR_OFFSET;
 
 /*
+ * 显示结构
+ */
+
+// 显示器描述结构体
+struct BOOTINFO {
+    char* vgaRam;
+    short screenX, screenY;
+};
+
+struct BOOTINFO bootInfo = { (char*)0xa0000, 320, 200 };
+
+// 字体间距
+int width = 8, height = 16;
+
+/*
  * 初始化调色板
  */
 
-void io_cli(void);
-void io_hlt(void);
-void io_out8(int, int);
-int io_load_eflags(void);
-void io_store_eflags(int);
+#define LINE 16
 
 // 调色板
 unsigned char pict[] = {

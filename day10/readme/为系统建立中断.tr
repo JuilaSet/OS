@@ -101,21 +101,26 @@
 
 }
 
-* OCW {
+* OCW(Operation Command Word) {
 
 	* OCW1: 屏蔽或打开外部中断
 	[code] |<
 	[n] : =1, 关闭IRQn; =0, 打开IRQn
 	>| [uncode]
 
-	* OCW2: 
+	* 接收中断信号: 
+	|| IRQs 0-15 -> INTs 32-47 (0x20 - 0x2f)
 
 	* 接受键盘产生的中断: 
 	[ex~]
-	|| mov al, 11111101b	; 表示只接受IRQ1管线发生的信号, 即对应的键盘中断
-	|| out 21h, al
+	|| mov al, 11111101b	; 表示只接受IRQ1管线发生的信号
+	|| out 21h, al		; 0x21表示接收键盘中断, 对应的IRQs为1
 
+	@unkown
 	* 鼠标是通过从8259A的IRQ4管线向CPU发送信号
+	[ex~]
+	|| mov al, 11111101b
+	|| out 2Ch, al
 
 }
 
@@ -159,4 +164,21 @@
 		show_char();
 	}
 	>| [uncode]
+
+* 中断响应获取键盘操作码 {
+
+	* 按下: `make`
+
+	* 抬起:	`break`
+
+	* 重新打开中断: 
+	[ex~]
+	|| io_out8(PIC_OCW2, 0x21);		// PIC_OCW2 = 0x20
+
+	* 获取中断数据: 
+	[ex~]
+	|| unsigned char data = 0;
+	|| data = io_in8(PORT_KEYDAT);		// PORT_KEYDAT = 0x60
+
+}
 ====================

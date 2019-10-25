@@ -15,24 +15,27 @@
 #define  COL8_008484  14
 #define  COL8_848484  15
 
-#define LINE 16
+void io_cli(void);
+void io_out8(int, int);
+char io_in8(char);
+
+int io_load_eflags(void);
+void io_store_eflags(int);
+
+void io_hlt(void);
+void io_sti(void);
+void io_stihlt(void);
+
 
 #include "font_lib.c"
+#include "interrupt_lib.c"
 
-// 显示器描述结构体
-struct BOOTINFO {
-    char* vgaRam;
-    short screenX, screenY;
-};
 
-struct BOOTINFO bootInfo = { (char*)0xa0000, 320, 200 };
-
-// 字体间距
-int width = 8, height = 16;
-
+int pointerX = 20, pointerY = 20;
 void CMain(){
 
 	pict_init();
+	keybuf_init();
 
 	// 显示
 	char* vram = bootInfo.vgaRam;
@@ -41,29 +44,25 @@ void CMain(){
 	// 系统背景
 	fillAll(vram, COL8_848484);
 
-	// 打印字符串
-//	Print(vram, xsize, 20, 20, width, height, COL8_FFFFFF, "0123456789");
-//	Print(vram, xsize, 20, 20 + height, width, height, COL8_FFFFFF, "abcdef");
-//	Print(vram, xsize, 20, 20 + height * 2, width, height, COL8_FFFFFF, "a1b2c3d4");
-
 	PrintRGB(vram, xsize, 20, 20, cursor);
 
 	for(;;) {
-		io_hlt();
-	}
-}
+		io_hlt();	
 
+		if(keybuf_isEmpty()){
+			io_stihlt();
+		} else {
+			unsigned char data = keybuf_r8();
+			io_sti();
+			
+			char* pStr = charToHexStr(data);
+			Print(vram, xsize, pointerX, pointerY, width, height, COL8_FFFFFF, pStr);
 
-// 中断处理程序
-void intHandlerFromC(char *esp){
-
-	char* vram = bootInfo.vgaRam;
-	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
-//	Print(vram, xsize, 20, 20, width, height, COL8_FFFFFF, "aaaaa");
-	PrintRGB(vram, xsize, 20, 20, imgHook);
-
-	for (;;) {
-		io_hlt();
+			pointerX += 16;
+			if(pointerX >= xsize - 20){
+				pointerX = 20;
+				pointerY += 16;
+			}
+		}
 	}
 }

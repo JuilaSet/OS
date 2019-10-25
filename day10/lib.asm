@@ -1,19 +1,18 @@
 io_in8:
 	mov  edx, [esp + 4]
-	mov  eax, 0
+	xor  eax, eax
 	in   al, dx
 	ret
 
 io_in16:
 	mov  edx, [esp + 4]
-	mov  eax, 0
+	xor  eax, eax
 	in   ax, dx
 	ret
 
 io_in32:
 	mov edx, [esp + 4]
 	in  eax, dx
-	ret
 
 io_out8:
 	mov edx, [esp + 4]
@@ -51,7 +50,18 @@ io_store_eflags:
 	popfd
 	ret
 
-; 程序结束
+; 系统进入休眠状态
 io_hlt:		; io_hlt() 函数
-	HLT	; 系统进入休眠状态
+	HLT
+	RET
+
+; 系统进入唤起状态
+io_sti:		; io_sti() 函数
+	STI
+	RET
+
+; 系统休眠再被唤醒
+io_stihlt:	; io_stihlt() 函数
+	STI
+	HLT
 	RET

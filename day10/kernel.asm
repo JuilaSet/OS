@@ -77,7 +77,6 @@ LABEL_BEGIN:
 	shl	eax, 4
 	add	eax,  LABEL_GDT
 	mov	dword  [GdtPtr + 2], eax	; (ds * 16 + LABEL_IDT)
-
 	lgdt	[GdtPtr]
 
 	cli	;πÿ÷–∂œ
@@ -90,6 +89,7 @@ LABEL_BEGIN:
 	mov	dword [IdtPtr + 2], eax		; (ds * 16 + LABEL_IDT)
 	lidt	[IdtPtr]
 
+	; 
 	in	al,  92h
 	or	al,  00000010b
 	out	92h, al

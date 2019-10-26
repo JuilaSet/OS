@@ -20,7 +20,7 @@
 #define PIC_OCW2		0x20
 #define SUBPIC_OCW2		0xA0
 
-#define KEY_BUF_SIZE 32
+#define KEY_BUF_SIZE 128
 #define MOUSE_BUF_SIZE 128
 
 char charToHex(char c){
@@ -108,8 +108,7 @@ void keybuf_w8(unsigned char data){
 
 // 读取
 unsigned char keybuf_r8(){
-	unsigned char data;
-	data = keybuf.key_buf[keybuf.next_r];
+	unsigned char data = keybuf.key_buf[keybuf.next_r];
 	keybuf.len--;
 	keybuf.next_r = (keybuf.next_r + 1) % KEY_BUF_SIZE;
 	return data;
@@ -229,7 +228,7 @@ void intHandlerFromC_Spurious(char *esp){
 	io_out8(PIC_OCW2, 0x21);
 	io_in8(PORT_KEYDAT);
 
-	Printf("sp", vram, xsize);
+	Printf("sp", vram, xsize, ysize);
 }
 
 // 键盘中断
@@ -242,5 +241,18 @@ void intHandlerFromC_keyBoard(char *esp){
 	unsigned char data = io_in8(PORT_KEYDAT);	// 获取中断数据
 
 	// 保存到队列中
-//	keybuf_w8(data);
+	keybuf_w8(data);
+}
+
+// 鼠标中断
+void intHandlerFromC_mouse(char *esp){
+	char* vram = bootInfo.vgaRam;
+	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
+
+    io_out8(SUBPIC_OCW2, 0x20);
+    io_out8(PIC_OCW2, 0x20);
+	unsigned char data = io_in8(PORT_KEYDAT);	// 获取中断数据
+
+	// 保存到队列中
+	keybuf_w8(data);
 }

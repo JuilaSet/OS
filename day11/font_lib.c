@@ -195,7 +195,7 @@ int width = 8, height = 16;
 
 // 打印字符串
 int pointerX = 20, pointerY = 18;
-void Printf(char* sptr, char* vram, int xsize){
+void Printf(char* sptr, char* vram, int xsize, int ysize){
 	int len = strlen(sptr);
 	Print(vram, xsize, pointerX, pointerY, width, height, COL8_FFFFFF, sptr);
 
@@ -203,5 +203,8 @@ void Printf(char* sptr, char* vram, int xsize){
 	if(pointerX >= xsize - 20){
 		pointerX = 20;
 		pointerY += 16;
+		if(pointerY >= ysize){
+			pointerY = 18;
+		}
 	}
 }

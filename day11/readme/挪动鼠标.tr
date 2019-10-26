@@ -64,6 +64,7 @@
 			mdec->x = mdec->buf[1];
 			mdec->y = mdec->buf[2];
 
+			// 进行变换
 			if ((mdec->buf[0] & 0x10) != 0) {
 				mdec->x |= 0xffffff00;
 			}
@@ -80,5 +81,29 @@
 	}
 	>| [uncode]
 
+
+	* 鼠标发送的消息通过键盘传输, 所以只需要接收一次即可: 
+	[code] |<
+	...
+	for(;;) {
+		io_cli();
+		if(keybuf_isEmpty()) {
+			io_stihlt();
+		} else {
+			io_sti();
+
+			unsigned char data = keybuf_r8();
+
+			char* pStr = charToHexStr(data);
+			Printf(pStr, vram, xsize, ysize);
+
+			if (mouse_decode(&mdec, data) != 0) {
+				eraseMouse(vram, xsize, &cur_pos);
+				computeMousePosition(&mdec, xsize, ysize);
+				drawMouse(vram, xsize, &cur_pos);
+			}
+		}
+	}
+	>| [uncode]
 }
 ====================

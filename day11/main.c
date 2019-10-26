@@ -39,8 +39,8 @@ void eraseMouse(char* vram, int xsize, struct CURSOR_INFO* pos) {
 	boxfill8(vram, xsize, COL8_848484, 
 		pos->x, 
 		pos->y, 
-		pos->x + 15, 
-		pos->y + 15);
+		pos->x + 9, 
+		pos->y + 9);
 }
 
 void drawMouse(char* vram, int xsize, struct CURSOR_INFO* pos) {
@@ -97,37 +97,16 @@ void CMain(){
 		} else {
 			io_sti();
 
-			char* pStr = charToHexStr(keybuf_r8());
-			Printf(pStr, vram, xsize);
+			unsigned char data = keybuf_r8();
+
+			char* pStr = charToHexStr(data);
+			Printf(pStr, vram, xsize, ysize);
+
+			if (mouse_decode(&mdec, data) != 0) {
+				eraseMouse(vram, xsize, &cur_pos);
+				computeMousePosition(&mdec, xsize, ysize);
+				drawMouse(vram, xsize, &cur_pos);
+			}
 		}
-
-		if(fifo8_isEmpty(&MOUSE_FIFO8)){
-			io_stihlt();
-		}else{
-			io_sti();
-
-			char* pStr = charToHexStr(MOUSE_FIFO8.len);
-			Printf(pStr, vram, xsize);
-
-//			unsigned char data = fifo8_r(&MOUSE_FIFO8);
-		}
-	}
-}
-
-// 鼠标中断
-void intHandlerFromC_mouse(char *esp){
-	char* vram = bootInfo.vgaRam;
-	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
-    io_out8(SUBPIC_OCW2, 0x20);
-    io_out8(PIC_OCW2, 0x20);
-	unsigned char data = io_in8(PORT_KEYDAT);	// 获取中断数据
-
-	// 保存到队列中
-//	fifo8_w(&MOUSE_FIFO8, data);
-	if (mouse_decode(&mdec, data) != 0) {
-		eraseMouse(vram, xsize, &cur_pos);
-		computeMousePosition(&mdec, xsize, ysize);
-		drawMouse(vram, xsize, &cur_pos);
 	}
 }

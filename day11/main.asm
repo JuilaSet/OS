@@ -1,9 +1,8 @@
 ; Disassembly of file: main.o
-; Sat Oct 26 00:11:22 2019
+; Sat Oct 26 01:03:01 2019
 ; Mode: 32 bits
 ; Syntax: YASM/NASM
 ; Instruction set: 80386
-
 
 
 
@@ -886,7 +885,7 @@ enable_mouse:; Function begin
         ret                                             ; 0864 _ C3
 ; enable_mouse End of function
 
-intHandlerFromC_keyBoard:; Function begin
+intHandlerFromC_Spurious:; Function begin
         push    ebp                                     ; 0865 _ 55
         mov     ebp, esp                                ; 0866 _ 89. E5
         sub     esp, 24                                 ; 0868 _ 83. EC, 18
@@ -898,139 +897,163 @@ intHandlerFromC_keyBoard:; Function begin
         movzx   eax, word [bootInfo+6H]                 ; 087E _ 0F B7. 05, 00000006(d)
         cwde                                            ; 0885 _ 98
         mov     dword [ebp-0CH], eax                    ; 0886 _ 89. 45, F4
-        mov     byte [ebp-15H], 0                       ; 0889 _ C6. 45, EB, 00
-        sub     esp, 8                                  ; 088D _ 83. EC, 08
-        push    33                                      ; 0890 _ 6A, 21
-        push    32                                      ; 0892 _ 6A, 20
-        call    io_out8                                 ; 0894 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0899 _ 83. C4, 10
-        sub     esp, 12                                 ; 089C _ 83. EC, 0C
-        push    96                                      ; 089F _ 6A, 60
-        call    io_in8                                  ; 08A1 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 08A6 _ 83. C4, 10
-        mov     byte [ebp-15H], al                      ; 08A9 _ 88. 45, EB
-        movzx   eax, byte [ebp-15H]                     ; 08AC _ 0F B6. 45, EB
-        sub     esp, 12                                 ; 08B0 _ 83. EC, 0C
-        push    eax                                     ; 08B3 _ 50
-        call    keybuf_w8                               ; 08B4 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 08B9 _ 83. C4, 10
-        sub     esp, 4                                  ; 08BC _ 83. EC, 04
-        push    dword [ebp-10H]                         ; 08BF _ FF. 75, F0
-        push    dword [ebp-14H]                         ; 08C2 _ FF. 75, EC
-        push    ?_055                                   ; 08C5 _ 68, 00000000(d)
-        call    Printf                                  ; 08CA _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 08CF _ 83. C4, 10
-        nop                                             ; 08D2 _ 90
-        leave                                           ; 08D3 _ C9
-        ret                                             ; 08D4 _ C3
+        sub     esp, 8                                  ; 0889 _ 83. EC, 08
+        push    33                                      ; 088C _ 6A, 21
+        push    32                                      ; 088E _ 6A, 20
+        call    io_out8                                 ; 0890 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0895 _ 83. C4, 10
+        sub     esp, 12                                 ; 0898 _ 83. EC, 0C
+        push    96                                      ; 089B _ 6A, 60
+        call    io_in8                                  ; 089D _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 08A2 _ 83. C4, 10
+        sub     esp, 4                                  ; 08A5 _ 83. EC, 04
+        push    dword [ebp-10H]                         ; 08A8 _ FF. 75, F0
+        push    dword [ebp-14H]                         ; 08AB _ FF. 75, EC
+        push    ?_055                                   ; 08AE _ 68, 00000000(d)
+        call    Printf                                  ; 08B3 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 08B8 _ 83. C4, 10
+        nop                                             ; 08BB _ 90
+        leave                                           ; 08BC _ C9
+        ret                                             ; 08BD _ C3
+; intHandlerFromC_Spurious End of function
+
+intHandlerFromC_keyBoard:; Function begin
+        push    ebp                                     ; 08BE _ 55
+        mov     ebp, esp                                ; 08BF _ 89. E5
+        sub     esp, 24                                 ; 08C1 _ 83. EC, 18
+        mov     eax, dword [bootInfo]                   ; 08C4 _ A1, 00000000(d)
+        mov     dword [ebp-14H], eax                    ; 08C9 _ 89. 45, EC
+        movzx   eax, word [bootInfo+4H]                 ; 08CC _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 08D3 _ 98
+        mov     dword [ebp-10H], eax                    ; 08D4 _ 89. 45, F0
+        movzx   eax, word [bootInfo+6H]                 ; 08D7 _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 08DE _ 98
+        mov     dword [ebp-0CH], eax                    ; 08DF _ 89. 45, F4
+        mov     byte [ebp-15H], 0                       ; 08E2 _ C6. 45, EB, 00
+        sub     esp, 8                                  ; 08E6 _ 83. EC, 08
+        push    33                                      ; 08E9 _ 6A, 21
+        push    32                                      ; 08EB _ 6A, 20
+        call    io_out8                                 ; 08ED _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 08F2 _ 83. C4, 10
+        sub     esp, 12                                 ; 08F5 _ 83. EC, 0C
+        push    96                                      ; 08F8 _ 6A, 60
+        call    io_in8                                  ; 08FA _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 08FF _ 83. C4, 10
+        mov     byte [ebp-15H], al                      ; 0902 _ 88. 45, EB
+        movzx   eax, byte [ebp-15H]                     ; 0905 _ 0F B6. 45, EB
+        sub     esp, 12                                 ; 0909 _ 83. EC, 0C
+        push    eax                                     ; 090C _ 50
+        call    keybuf_w8                               ; 090D _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0912 _ 83. C4, 10
+        sub     esp, 4                                  ; 0915 _ 83. EC, 04
+        push    dword [ebp-10H]                         ; 0918 _ FF. 75, F0
+        push    dword [ebp-14H]                         ; 091B _ FF. 75, EC
+        push    ?_056                                   ; 091E _ 68, 00000009(d)
+        call    Printf                                  ; 0923 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0928 _ 83. C4, 10
+        nop                                             ; 092B _ 90
+        leave                                           ; 092C _ C9
+        ret                                             ; 092D _ C3
 ; intHandlerFromC_keyBoard End of function
 
 intHandlerFromC_mouse:; Function begin
-        push    ebp                                     ; 08D5 _ 55
-        mov     ebp, esp                                ; 08D6 _ 89. E5
-        sub     esp, 16                                 ; 08D8 _ 83. EC, 10
-        mov     eax, dword [bootInfo]                   ; 08DB _ A1, 00000000(d)
-        mov     dword [ebp-0CH], eax                    ; 08E0 _ 89. 45, F4
-        movzx   eax, word [bootInfo+4H]                 ; 08E3 _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 08EA _ 98
-        mov     dword [ebp-8H], eax                     ; 08EB _ 89. 45, F8
-        movzx   eax, word [bootInfo+6H]                 ; 08EE _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 08F5 _ 98
-        mov     dword [ebp-4H], eax                     ; 08F6 _ 89. 45, FC
-        push    dword [ebp-8H]                          ; 08F9 _ FF. 75, F8
-        push    dword [ebp-0CH]                         ; 08FC _ FF. 75, F4
-        push    ?_056                                   ; 08FF _ 68, 00000004(d)
-        call    Printf                                  ; 0904 _ E8, FFFFFFFC(rel)
-        add     esp, 12                                 ; 0909 _ 83. C4, 0C
-        nop                                             ; 090C _ 90
-        leave                                           ; 090D _ C9
-        ret                                             ; 090E _ C3
+        push    ebp                                     ; 092E _ 55
+        mov     ebp, esp                                ; 092F _ 89. E5
+        sub     esp, 24                                 ; 0931 _ 83. EC, 18
+        mov     eax, dword [bootInfo]                   ; 0934 _ A1, 00000000(d)
+        mov     dword [ebp-14H], eax                    ; 0939 _ 89. 45, EC
+        movzx   eax, word [bootInfo+4H]                 ; 093C _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 0943 _ 98
+        mov     dword [ebp-10H], eax                    ; 0944 _ 89. 45, F0
+        movzx   eax, word [bootInfo+6H]                 ; 0947 _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 094E _ 98
+        mov     dword [ebp-0CH], eax                    ; 094F _ 89. 45, F4
+        mov     byte [ebp-15H], 0                       ; 0952 _ C6. 45, EB, 00
+        sub     esp, 8                                  ; 0956 _ 83. EC, 08
+        push    33                                      ; 0959 _ 6A, 21
+        push    32                                      ; 095B _ 6A, 20
+        call    io_out8                                 ; 095D _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0962 _ 83. C4, 10
+        sub     esp, 12                                 ; 0965 _ 83. EC, 0C
+        push    96                                      ; 0968 _ 6A, 60
+        call    io_in8                                  ; 096A _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 096F _ 83. C4, 10
+        mov     byte [ebp-15H], al                      ; 0972 _ 88. 45, EB
+        movzx   eax, byte [ebp-15H]                     ; 0975 _ 0F B6. 45, EB
+        sub     esp, 12                                 ; 0979 _ 83. EC, 0C
+        push    eax                                     ; 097C _ 50
+        call    keybuf_w8                               ; 097D _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0982 _ 83. C4, 10
+        sub     esp, 4                                  ; 0985 _ 83. EC, 04
+        push    dword [ebp-10H]                         ; 0988 _ FF. 75, F0
+        push    dword [ebp-14H]                         ; 098B _ FF. 75, EC
+        push    ?_057                                   ; 098E _ 68, 0000000D(d)
+        call    Printf                                  ; 0993 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0998 _ 83. C4, 10
+        nop                                             ; 099B _ 90
+        leave                                           ; 099C _ C9
+        ret                                             ; 099D _ C3
 ; intHandlerFromC_mouse End of function
 
-intHandlerFromC_Spurious:; Function begin
-        push    ebp                                     ; 090F _ 55
-        mov     ebp, esp                                ; 0910 _ 89. E5
-        sub     esp, 24                                 ; 0912 _ 83. EC, 18
-        mov     eax, dword [bootInfo]                   ; 0915 _ A1, 00000000(d)
-        mov     dword [ebp-14H], eax                    ; 091A _ 89. 45, EC
-        movzx   eax, word [bootInfo+4H]                 ; 091D _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 0924 _ 98
-        mov     dword [ebp-10H], eax                    ; 0925 _ 89. 45, F0
-        movzx   eax, word [bootInfo+6H]                 ; 0928 _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 092F _ 98
-        mov     dword [ebp-0CH], eax                    ; 0930 _ 89. 45, F4
-        sub     esp, 8                                  ; 0933 _ 83. EC, 08
-        push    33                                      ; 0936 _ 6A, 21
-        push    32                                      ; 0938 _ 6A, 20
-        call    io_out8                                 ; 093A _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 093F _ 83. C4, 10
-        sub     esp, 12                                 ; 0942 _ 83. EC, 0C
-        push    96                                      ; 0945 _ 6A, 60
-        call    io_in8                                  ; 0947 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 094C _ 83. C4, 10
-        sub     esp, 4                                  ; 094F _ 83. EC, 04
-        push    dword [ebp-10H]                         ; 0952 _ FF. 75, F0
-        push    dword [ebp-14H]                         ; 0955 _ FF. 75, EC
-        push    ?_057                                   ; 0958 _ 68, 0000000A(d)
-        call    Printf                                  ; 095D _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0962 _ 83. C4, 10
-        nop                                             ; 0965 _ 90
-        leave                                           ; 0966 _ C9
-        ret                                             ; 0967 _ C3
-; intHandlerFromC_Spurious End of function
-
 CMain:  ; Function begin
-        push    ebp                                     ; 0968 _ 55
-        mov     ebp, esp                                ; 0969 _ 89. E5
-        sub     esp, 40                                 ; 096B _ 83. EC, 28
-        call    pict_init                               ; 096E _ E8, FFFFFFFC(rel)
-        call    keybuf_init                             ; 0973 _ E8, FFFFFFFC(rel)
-        call    init_keyboard                           ; 0978 _ E8, FFFFFFFC(rel)
-        call    enable_mouse                            ; 097D _ E8, FFFFFFFC(rel)
-        mov     eax, dword [bootInfo]                   ; 0982 _ A1, 00000000(d)
-        mov     dword [ebp-18H], eax                    ; 0987 _ 89. 45, E8
-        movzx   eax, word [bootInfo+4H]                 ; 098A _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 0991 _ 98
-        mov     dword [ebp-14H], eax                    ; 0992 _ 89. 45, EC
-        movzx   eax, word [bootInfo+6H]                 ; 0995 _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 099C _ 98
-        mov     dword [ebp-10H], eax                    ; 099D _ 89. 45, F0
-        sub     esp, 8                                  ; 09A0 _ 83. EC, 08
-        push    15                                      ; 09A3 _ 6A, 0F
-        push    dword [ebp-18H]                         ; 09A5 _ FF. 75, E8
-        call    fillAll                                 ; 09A8 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 09AD _ 83. C4, 10
-        sub     esp, 12                                 ; 09B0 _ 83. EC, 0C
-        push    cursor                                  ; 09B3 _ 68, 00000000(d)
-        push    20                                      ; 09B8 _ 6A, 14
-        push    20                                      ; 09BA _ 6A, 14
-        push    dword [ebp-14H]                         ; 09BC _ FF. 75, EC
-        push    dword [ebp-18H]                         ; 09BF _ FF. 75, E8
-        call    PrintRGB                                ; 09C2 _ E8, FFFFFFFC(rel)
-        add     esp, 32                                 ; 09C7 _ 83. C4, 20
-?_052:  call    io_hlt                                  ; 09CA _ E8, FFFFFFFC(rel)
-        call    keybuf_isEmpty                          ; 09CF _ E8, FFFFFFFC(rel)
-        test    eax, eax                                ; 09D4 _ 85. C0
-        jz      ?_053                                   ; 09D6 _ 74, 07
-        call    io_stihlt                               ; 09D8 _ E8, FFFFFFFC(rel)
-        jmp     ?_052                                   ; 09DD _ EB, EB
+        push    ebp                                     ; 099E _ 55
+        mov     ebp, esp                                ; 099F _ 89. E5
+        sub     esp, 40                                 ; 09A1 _ 83. EC, 28
+        call    pict_init                               ; 09A4 _ E8, FFFFFFFC(rel)
+        call    keybuf_init                             ; 09A9 _ E8, FFFFFFFC(rel)
+        call    init_keyboard                           ; 09AE _ E8, FFFFFFFC(rel)
+        call    io_sti                                  ; 09B3 _ E8, FFFFFFFC(rel)
+        call    enable_mouse                            ; 09B8 _ E8, FFFFFFFC(rel)
+        mov     eax, dword [bootInfo]                   ; 09BD _ A1, 00000000(d)
+        mov     dword [ebp-18H], eax                    ; 09C2 _ 89. 45, E8
+        movzx   eax, word [bootInfo+4H]                 ; 09C5 _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 09CC _ 98
+        mov     dword [ebp-14H], eax                    ; 09CD _ 89. 45, EC
+        movzx   eax, word [bootInfo+6H]                 ; 09D0 _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 09D7 _ 98
+        mov     dword [ebp-10H], eax                    ; 09D8 _ 89. 45, F0
+        sub     esp, 8                                  ; 09DB _ 83. EC, 08
+        push    15                                      ; 09DE _ 6A, 0F
+        push    dword [ebp-18H]                         ; 09E0 _ FF. 75, E8
+        call    fillAll                                 ; 09E3 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 09E8 _ 83. C4, 10
+        sub     esp, 12                                 ; 09EB _ 83. EC, 0C
+        push    cursor                                  ; 09EE _ 68, 00000000(d)
+        push    20                                      ; 09F3 _ 6A, 14
+        push    20                                      ; 09F5 _ 6A, 14
+        push    dword [ebp-14H]                         ; 09F7 _ FF. 75, EC
+        push    dword [ebp-18H]                         ; 09FA _ FF. 75, E8
+        call    PrintRGB                                ; 09FD _ E8, FFFFFFFC(rel)
+        add     esp, 32                                 ; 0A02 _ 83. C4, 20
+        sub     esp, 4                                  ; 0A05 _ 83. EC, 04
+        push    dword [ebp-14H]                         ; 0A08 _ FF. 75, EC
+        push    dword [ebp-18H]                         ; 0A0B _ FF. 75, E8
+        push    ?_058                                   ; 0A0E _ 68, 00000013(d)
+        call    Printf                                  ; 0A13 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0A18 _ 83. C4, 10
+?_052:  call    io_cli                                  ; 0A1B _ E8, FFFFFFFC(rel)
+        call    keybuf_isEmpty                          ; 0A20 _ E8, FFFFFFFC(rel)
+        test    eax, eax                                ; 0A25 _ 85. C0
+        jz      ?_053                                   ; 0A27 _ 74, 07
+        call    io_stihlt                               ; 0A29 _ E8, FFFFFFFC(rel)
+        jmp     ?_052                                   ; 0A2E _ EB, EB
 
-?_053:  call    keybuf_r8                               ; 09DF _ E8, FFFFFFFC(rel)
-        mov     byte [ebp-19H], al                      ; 09E4 _ 88. 45, E7
-        call    io_sti                                  ; 09E7 _ E8, FFFFFFFC(rel)
-        movzx   eax, byte [ebp-19H]                     ; 09EC _ 0F B6. 45, E7
-        sub     esp, 12                                 ; 09F0 _ 83. EC, 0C
-        push    eax                                     ; 09F3 _ 50
-        call    charToHexStr                            ; 09F4 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 09F9 _ 83. C4, 10
-        mov     dword [ebp-0CH], eax                    ; 09FC _ 89. 45, F4
-        sub     esp, 4                                  ; 09FF _ 83. EC, 04
-        push    dword [ebp-14H]                         ; 0A02 _ FF. 75, EC
-        push    dword [ebp-18H]                         ; 0A05 _ FF. 75, E8
-        push    dword [ebp-0CH]                         ; 0A08 _ FF. 75, F4
-        call    Printf                                  ; 0A0B _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0A10 _ 83. C4, 10
-        jmp     ?_052                                   ; 0A13 _ EB, B5
+?_053:  call    io_sti                                  ; 0A30 _ E8, FFFFFFFC(rel)
+        call    keybuf_r8                               ; 0A35 _ E8, FFFFFFFC(rel)
+        mov     byte [ebp-19H], al                      ; 0A3A _ 88. 45, E7
+        movzx   eax, byte [ebp-19H]                     ; 0A3D _ 0F B6. 45, E7
+        sub     esp, 12                                 ; 0A41 _ 83. EC, 0C
+        push    eax                                     ; 0A44 _ 50
+        call    charToHexStr                            ; 0A45 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0A4A _ 83. C4, 10
+        mov     dword [ebp-0CH], eax                    ; 0A4D _ 89. 45, F4
+        sub     esp, 4                                  ; 0A50 _ 83. EC, 04
+        push    dword [ebp-14H]                         ; 0A53 _ FF. 75, EC
+        push    dword [ebp-18H]                         ; 0A56 _ FF. 75, E8
+        push    dword [ebp-0CH]                         ; 0A59 _ FF. 75, F4
+        call    Printf                                  ; 0A5C _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0A61 _ 83. C4, 10
+        jmp     ?_052                                   ; 0A64 _ EB, B5
 ; CMain End of function
 
 
@@ -1121,13 +1144,17 @@ keystr.1624:                                            ; byte
 
 
 ?_055:                                                  ; byte
-        db 6BH, 65H, 79H, 00H                           ; 0000 _ key.
+        db 73H, 70H, 75H, 72H, 69H, 6FH, 75H, 73H       ; 0000 _ spurious
+        db 00H                                          ; 0008 _ .
 
 ?_056:                                                  ; byte
-        db 6DH, 6FH, 75H, 73H, 65H, 00H                 ; 0004 _ mouse.
+        db 6BH, 65H, 79H, 00H                           ; 0009 _ key.
 
 ?_057:                                                  ; byte
-        db 73H, 70H, 75H, 72H, 69H, 6FH, 75H, 73H       ; 000A _ spurious
-        db 00H                                          ; 0012 _ .
+        db 6DH, 6FH, 75H, 73H, 65H, 00H                 ; 000D _ mouse.
+
+?_058:                                                  ; byte
+        db 53H, 79H, 73H, 74H, 65H, 6DH, 20H, 73H       ; 0013 _ System s
+        db 74H, 61H, 72H, 74H, 00H                      ; 001B _ tart.
 
 

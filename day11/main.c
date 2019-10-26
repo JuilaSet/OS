@@ -37,24 +37,29 @@ void CMain(){
 	keybuf_init();
 
 	init_keyboard();
+	
+	// 允许开启中断
+    io_sti();
 	enable_mouse();
 
 	// 显示
 	char* vram = bootInfo.vgaRam;
 	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
+	
 	// 系统背景
 	fillAll(vram, COL8_848484);
 	PrintRGB(vram, xsize, 20, 20, cursor);
 
+	Printf("System start", vram, xsize);
+
 	for(;;) {
-		io_hlt();
+		io_cli();
 		if(keybuf_isEmpty()) {
 			io_stihlt();
 		} else {
-			unsigned char data = keybuf_r8();
 			io_sti();
 
+			unsigned char data = keybuf_r8();
 			char* pStr = charToHexStr(data);
 			Printf(pStr, vram, xsize);
 		}

@@ -1,0 +1,115 @@
+/*
+ * 接收鼠标中断信号
+ */
+#def [text~]
+====================
+* 启用从片接收信号: 从8259A芯片是通过主8259A的IRQ2信号线连接在一起的
+[code] |<
+mov  al, 11111001b ; 允许键盘中断, 并启用从片接收信号
+out  021h, al
+call io_delay
+>| [uncode]
+
+* 允许鼠标中断: 
+[code] |<
+mov  al, 11101111b ; 允许鼠标中断
+out  0A1h, al
+call io_delay
+>| [uncode]
+
+* `8042键盘控制芯片`编程 {
+
+	* 鼠标电路的初始化: 为了不让cpu不顾设备接收数据能力而不停发送指令, CPU必须等待设备准备好
+	[code] |<
+	#define PORT_KEYSTA		0x0064
+	#define KEYSTA_SEND_NOTREADY	0x02
+
+	/* 等待键盘控制电路准备完毕 */
+	void  wait_KBC_sendready() {
+		for(;;) {
+			// 反复从0x64端口读取数据, 并检测读到数据的第二个比特位
+			// 直到该比特位为0时, 才着手发送控制信息
+			if ((io_in8(PORT_KEYSTA) & KEYSTA_SEND_NOTREADY) == 0) {
+				break;
+			}
+		}
+	}
+	>| [uncode]
+
+	* 配置鼠标: 之后鼠标硬件所产生的数据信息, 都可以通过键盘电路端口`0x60`读到
+	[code] |<
+	#define PORT_KEYCMD		0x0064	// 键盘电路指令
+	#define PORT_KEYDAT		0x0060	// 键盘数据
+
+	#define KEYCMD_WRITE_MODE	0x60
+	#define KBC_MODE		0x47	// 启动鼠标模式
+
+	void init_keyboard(void) {
+		wait_KBC_sendready();	// 等待返回可写信号
+		io_out8(PORT_KEYCMD, KEYCMD_WRITE_MODE);	// 命令键盘电路进入数据接收状态, 等待鼠标发送信号
+		wait_KBC_sendready();	// 等待返回可写信号
+		io_out8(PORT_KEYDAT, KBC_MODE);			// 要求键盘电路启动鼠标模式
+	}
+	>| [uncode]
+
+	* 激活鼠标: 
+	[code] |<
+	#define KEYCMD_SENDTO_MOUSE 0xd4
+	#define MOUSECMD_ENABLE 0xf4
+
+	void enable_mouse(void) {
+		wait_KBC_sendready();
+		io_out8(PORT_KEYCMD, KEYCMD_SENDTO_MOUSE);	// 通知8042下个字节的发向0x60的数据将发给鼠标
+		wait_KBC_sendready();
+		io_out8(PORT_KEYDAT, MOUSECMD_ENABLE);		// 允许鼠标发数据, MOUSECMD_ENABLE这个数据会被键盘电路发送给鼠标
+		return;						// \ 对鼠标进行激活, 鼠标一旦接收到该数据后, 立马向CPU发送中断信号
+	}
+	>| [uncode]
+
+	@refer [url |<https://blog.csdn.net/iteye_20271/article/details/82121585>|]
+	* 整体过程: 
+	[code] |<
+	// 对8042键盘控制芯片进行编程
+	// 允许 鼠标 接口
+	io_out8(PORT_KEYCMD, 0xa8);
+
+	// 通知8042下个字节的发向0x60的数据将发给 鼠标
+	io_out8(PORT_KEYCMD, KEYCMD_SENDTO_MOUSE);
+
+	// 允许 鼠标 发数据
+	io_out8(PORT_KEYDAT, MOUSECMD_ENABLE);
+
+	// 通知8042,下个字节的发向0x60的数据应放向8042的命令寄存器
+	io_out8(PORT_KEYCMD, KEYCMD_WRITE_MODE);
+
+	// 许可键盘及 鼠标 接口及中断
+	io_out8(PORT_KEYDAT, KBC_MODE);
+	>| [uncode]
+
+	=> 相关命令: 
+	[code] |<
+	0xA8命令: 许可i8042的鼠标通道, 即允许鼠标操作
+	0xD4命令: 把发往0x60端口的参数数据发给鼠标
+	0x60命令: 把发往0x60端口的参数数据写入i8042的控制寄存器
+	>| [uncode]
+
+}
+
+* 设置鼠标的中断函数: 设置中断描述符表
+[code] |<
+LABEL_IDT:
+%rep  33	; 33 = 21h, 从0开始, 即0-20h
+	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
+%endrep
+
+.021H:		; 接收键盘中断, 对应IRQ1
+	Gate	SelectorCode32, KeyBoardHandler, 0, DA_386IGate
+
+%rep  10	; 10 = Ch
+	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
+%endrep
+
+.02CH:		; 接收鼠标中断, 对应IRQC, 即从片的IRQ4
+	Gate	SelectorCode32, MouseHandler, 0, DA_386IGate
+>| [uncode]
+====================

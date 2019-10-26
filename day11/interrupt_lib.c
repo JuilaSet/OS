@@ -110,6 +110,17 @@ void enable_mouse(void) {
  * 主程序
  */ 
 
+// 未知中断
+void intHandlerFromC_Spurious(char *esp){
+	char* vram = bootInfo.vgaRam;
+	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
+
+	io_out8(PIC_OCW2, 0x21);
+	io_in8(PORT_KEYDAT);
+
+	Printf("spurious", vram, xsize);
+}
+
 // 键盘中断
 void intHandlerFromC_keyBoard(char *esp){
 
@@ -130,16 +141,10 @@ void intHandlerFromC_mouse(char *esp){
 	char* vram = bootInfo.vgaRam;
 	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
 
-	Printf("mouse", vram, xsize);
-}
-
-// 未知中断
-void intHandlerFromC_Spurious(char *esp){
-	char* vram = bootInfo.vgaRam;
-	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
+	unsigned char data = 0;
 	io_out8(PIC_OCW2, 0x21);
-	io_in8(PORT_KEYDAT);
-
-	Printf("spurious", vram, xsize);
+	data = io_in8(PORT_KEYDAT);		// 获取中断数据
+	// 保存到队列中
+	keybuf_w8(data);
+	Printf("mouse", vram, xsize);
 }

@@ -3,5 +3,82 @@
  */
 #def [text~]
 ====================
+* 鼠标信号 {
 
+	* 按键对应: 
+	[code] |<
+	1001: 9-> 左键
+	1010: A-> 右键
+	1100: C-> 中间
+	>| [uncode]
+
+}
+
+* 实现 {
+
+	* 设置结构体来处理鼠标发送的相关信息: 
+	[code] |<
+	struct MOUSE_DEC {
+		unsigned char buf[3];	// 来存储鼠标发送的三个数据
+		unsigned char phase;	// 当前接收到第几个数据
+		int x, y, btn;	// x: 水平移动, y: 上下移动
+	};
+	>| [uncode]
+
+	* 判断: 
+	[code] |<
+	int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat) {
+		// 初始
+		if (mdec->phase == 0) {
+			if (dat == 0xfa) {
+				mdec->phase = 1;	// 进入1阶段
+			}
+
+			return 0;
+		}
+
+		// 1 字节
+		if (mdec->phase == 1) {
+			if ((dat & 0xc8) == 0x08) {
+				mdec->buf[0] = dat;
+				mdec->phase = 2;	// 进入2阶段
+			}
+
+			return 0;
+		}
+
+		// 2 字节
+		if (mdec->phase == 2) {
+			mdec->buf[1] = dat;
+			mdec->phase = 3;		// 进入3阶段
+			return 0;
+		}
+
+		// 3 字节
+		if (mdec->phase == 3) {
+			mdec->buf[2] = dat;
+			mdec->phase = 1;		// 进入1阶段
+
+			// 记录按键
+			mdec->btn = mdec->buf[0] & 0x07;	// 通过&取出前三位
+			mdec->x = mdec->buf[1];
+			mdec->y = mdec->buf[2];
+
+			if ((mdec->buf[0] & 0x10) != 0) {
+				mdec->x |= 0xffffff00;
+			}
+
+			if ((mdec->buf[0] & 0x20) != 0) {
+				mdec->y |= 0xffffff00;
+			}
+
+			mdec->y = -mdec->y;
+			return 0;
+		}
+
+		return -1;
+	}
+	>| [uncode]
+
+}
 ====================

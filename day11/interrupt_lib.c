@@ -75,6 +75,10 @@ int fifo8_isEmpty(struct FIFO8 *fifo8){
 	return (fifo8->len == 0);
 }
 
+int fifo8_isFull(struct FIFO8 *fifo8){
+	return (fifo8->len == fifo8->cap);
+}
+
 /*
  * 键盘缓存
  */
@@ -152,6 +156,67 @@ void enable_mouse(void) {
 	// \ 对鼠标进行激活, 鼠标一旦接收到该数据后, 立马向CPU发送中断信号
 }
 
+// 鼠标信号
+struct CURSOR_INFO {
+	int x, y;	// x: 水平移动, y: 上下移动
+};
+
+struct MOUSE_DEC {
+	unsigned char buf[3];	// 来存储鼠标发送的三个数据
+	unsigned char phase;	// 当前接收到第几个数据
+	struct CURSOR_INFO pos;
+	int btn;
+};
+
+// 解析鼠标信号
+int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat) {
+	// 初始
+	if (mdec->phase == 0) {
+		if (dat == 0xfa) {
+			mdec->phase = 1;	// 进入1阶段
+		}
+		return 0;
+	}
+
+	// 1 字节
+	if (mdec->phase == 1) {
+		if ((dat & 0xc8) == 0x08) {
+			mdec->buf[0] = dat;
+			mdec->phase = 2;	// 进入2阶段
+		}
+		return 0;
+	}
+
+	// 2 字节
+	if (mdec->phase == 2) {
+		mdec->buf[1] = dat;
+		mdec->phase = 3;		// 进入3阶段
+		return 0;
+	}
+
+	// 3 字节
+	if (mdec->phase == 3) {
+		mdec->buf[2] = dat;
+		mdec->phase = 1;		// 进入1阶段
+
+		// 记录按键
+		mdec->btn = mdec->buf[0] & 0x07;	// 通过&取出前三位
+		mdec->pos.x = mdec->buf[1];
+		mdec->pos.y = mdec->buf[2];
+
+		if ((mdec->buf[0] & 0x10) != 0) {
+			mdec->pos.x |= 0xffffff00;
+		}
+		if ((mdec->buf[0] & 0x20) != 0) {
+			mdec->pos.y |= 0xffffff00;
+		}
+		mdec->pos.y = -mdec->pos.y;
+		return 1;
+	}
+
+	return -1;
+}
+
 /*
  * 主程序
  */ 
@@ -177,18 +242,5 @@ void intHandlerFromC_keyBoard(char *esp){
 	unsigned char data = io_in8(PORT_KEYDAT);	// 获取中断数据
 
 	// 保存到队列中
-	keybuf_w8(data);
-}
-
-// 鼠标中断
-void intHandlerFromC_mouse(char *esp){
-	char* vram = bootInfo.vgaRam;
-	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
-    io_out8(PIC_OCW2, 0x20);
-    io_out8(SUBPIC_OCW2, 0x20);
-	unsigned char data = io_in8(PORT_KEYDAT);	// 获取中断数据
-
-	// 保存到队列中
-	fifo8_w(&MOUSE_FIFO8, data);
+//	keybuf_w8(data);
 }

@@ -31,6 +31,44 @@ void io_stihlt(void);
 #include "font_lib.c"
 #include "interrupt_lib.c"
 
+
+struct MOUSE_DEC mdec = {};
+struct CURSOR_INFO cur_pos = {20, 20};
+
+void eraseMouse(char* vram, int xsize, struct CURSOR_INFO* pos) {
+	boxfill8(vram, xsize, COL8_848484, 
+		pos->x, 
+		pos->y, 
+		pos->x + 15, 
+		pos->y + 15);
+}
+
+void drawMouse(char* vram, int xsize, struct CURSOR_INFO* pos) {
+	PrintRGB(vram, xsize, pos->x, pos->y, cursor);
+}
+
+void computeMousePosition(struct MOUSE_DEC* mdec, int xsize, int ysize) {
+	cur_pos.x = (cur_pos.x + mdec->pos.x);
+	cur_pos.y = (cur_pos.y + mdec->pos.y);
+
+	
+    if (cur_pos.x < 0) {
+       cur_pos.x = 0;
+    }
+
+    if (cur_pos.y < 0) {
+       cur_pos.y = 0;
+    }
+
+    if (cur_pos.x > xsize) {
+       cur_pos.x = xsize;
+    }
+    if (cur_pos.y > ysize) {
+       cur_pos.y = ysize;
+    }
+
+}
+
 void CMain(){
 
 	pict_init();
@@ -50,9 +88,7 @@ void CMain(){
 	
 	// 系统背景
 	fillAll(vram, COL8_848484);
-	PrintRGB(vram, xsize, 20, 20, cursor);
-
-	Printf("Sys start", vram, xsize);
+	PrintRGB(vram, xsize, cur_pos.x, cur_pos.y, cursor);
 
 	for(;;) {
 		io_cli();
@@ -63,7 +99,6 @@ void CMain(){
 
 			char* pStr = charToHexStr(keybuf_r8());
 			Printf(pStr, vram, xsize);
-			Printf(" ", vram, xsize);
 		}
 
 		if(fifo8_isEmpty(&MOUSE_FIFO8)){
@@ -71,9 +106,28 @@ void CMain(){
 		}else{
 			io_sti();
 
-			char* pStr = charToHexStr(fifo8_r(&MOUSE_FIFO8));
+			char* pStr = charToHexStr(MOUSE_FIFO8.len);
 			Printf(pStr, vram, xsize);
-			Printf(" ", vram, xsize);
+
+//			unsigned char data = fifo8_r(&MOUSE_FIFO8);
 		}
+	}
+}
+
+// 鼠标中断
+void intHandlerFromC_mouse(char *esp){
+	char* vram = bootInfo.vgaRam;
+	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
+
+    io_out8(SUBPIC_OCW2, 0x20);
+    io_out8(PIC_OCW2, 0x20);
+	unsigned char data = io_in8(PORT_KEYDAT);	// 获取中断数据
+
+	// 保存到队列中
+//	fifo8_w(&MOUSE_FIFO8, data);
+	if (mouse_decode(&mdec, data) != 0) {
+		eraseMouse(vram, xsize, &cur_pos);
+		computeMousePosition(&mdec, xsize, ysize);
+		drawMouse(vram, xsize, &cur_pos);
 	}
 }

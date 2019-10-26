@@ -34,7 +34,9 @@ void io_stihlt(void);
 void CMain(){
 
 	pict_init();
+
 	keybuf_init();
+	fifo8_init(&MOUSE_FIFO8, mouse_buf, MOUSE_BUF_SIZE);
 
 	init_keyboard();
 	
@@ -50,7 +52,7 @@ void CMain(){
 	fillAll(vram, COL8_848484);
 	PrintRGB(vram, xsize, 20, 20, cursor);
 
-	Printf("System start", vram, xsize);
+	Printf("Sys start", vram, xsize);
 
 	for(;;) {
 		io_cli();
@@ -59,9 +61,19 @@ void CMain(){
 		} else {
 			io_sti();
 
-			unsigned char data = keybuf_r8();
-			char* pStr = charToHexStr(data);
+			char* pStr = charToHexStr(keybuf_r8());
 			Printf(pStr, vram, xsize);
+			Printf(" ", vram, xsize);
+		}
+
+		if(fifo8_isEmpty(&MOUSE_FIFO8)){
+			io_stihlt();
+		}else{
+			io_sti();
+
+			char* pStr = charToHexStr(fifo8_r(&MOUSE_FIFO8));
+			Printf(pStr, vram, xsize);
+			Printf(" ", vram, xsize);
 		}
 	}
 }

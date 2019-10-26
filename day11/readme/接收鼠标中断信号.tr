@@ -112,4 +112,32 @@ LABEL_IDT:
 .02CH:		; 接收鼠标中断, 对应IRQC, 即从片的IRQ4
 	Gate	SelectorCode32, MouseHandler, 0, DA_386IGate
 >| [uncode]
+
+@unkown
+=> 实验结果: 
+[code] |<
+; 中断向量表
+LABEL_IDT:
+%rep  9 
+	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
+%endrep
+
+; 9	接收键盘中断
+.09H:
+	Gate	SelectorCode32, KeyBoardHandler, 0, DA_386IGate
+
+%rep  34
+	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
+%endrep
+
+; 44	接收鼠标中断
+.2CH:
+	Gate	SelectorCode32, MouseHandler, 0, DA_386IGate
+
+%rep  241
+	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
+%endrep
+>| [uncode]
+
+* 你知道吗: 第一个`0xFA`是鼠标被激活时传送过来的
 ====================

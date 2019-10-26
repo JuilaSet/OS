@@ -46,4 +46,8 @@ io_delay:
 	nop
 	nop
 	nop
+	nop
+	nop
+	nop
+	nop
 	ret

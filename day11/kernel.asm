@@ -29,12 +29,22 @@ LABEL_IDT:
 	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
 %endrep
 
+; 9
 .09H:
 	Gate	SelectorCode32, KeyBoardHandler, 0, DA_386IGate
 
-%rep  245
-	Gate	SelectorCode32, MouseHandler, 0, DA_386IGate
+%rep  34
+	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
 %endrep
+
+; 44
+.2CH:
+	Gate	SelectorCode32, MouseHandler, 0, DA_386IGate
+
+%rep  241
+	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
+%endrep
+
 
 IdtLen  equ $ - LABEL_IDT
 IdtPtr  dw  IdtLen - 1

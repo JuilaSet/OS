@@ -122,8 +122,8 @@ LABEL_SEG_CODE32:
 	mov	ax, SelectorVram
 	mov	ds,  ax
 
-	mov  ax, SelectorVideo
-	mov  gs, ax
+	mov	ax, SelectorVideo
+	mov	gs, ax
 
 	sti
 
@@ -175,8 +175,7 @@ _MouseHandler:
 	pop  es
 	iretd
 
-; 头文件
-; 导入汇编对应的函数
+; 头文件, 导入汇编对应的函数
 	%include	"lib.asm"
 
 ; 导入字体文件

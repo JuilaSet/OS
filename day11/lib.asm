@@ -32,11 +32,6 @@ io_out32:
 	out dx, eax
 	ret
 
-; 屏蔽中断: eflags 第9位设置成0
-io_cli:
-	CLI
-	RET
-
 ; 保存eflags快照 
 io_load_eflags:
 	pushfd
@@ -49,6 +44,11 @@ io_store_eflags:
 	push eax
 	popfd
 	ret
+
+; 屏蔽中断: eflags 第9位设置成0
+io_cli:
+	CLI
+	RET
 
 ; 系统进入休眠状态
 io_hlt:		; io_hlt() 函数

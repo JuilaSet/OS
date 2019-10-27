@@ -27,6 +27,7 @@ void io_sti(void);
 void io_stihlt(void);
 
 #include "string.h"
+#include "fifo.h"
 
 #include "font_lib.c"
 #include "interrupt_lib.c"
@@ -72,8 +73,9 @@ void computeMousePosition(struct MOUSE_DEC* mdec, int xsize, int ysize) {
 void CMain(){
 
 	pict_init();
-
-	keybuf_init();
+	
+	// 初始化队列
+	fifo8_init(&KEY_FIFO8, key_buf, KEY_BUF_SIZE);
 	fifo8_init(&MOUSE_FIFO8, mouse_buf, MOUSE_BUF_SIZE);
 
 	init_keyboard();
@@ -92,21 +94,30 @@ void CMain(){
 
 	for(;;) {
 		io_cli();
-		if(keybuf_isEmpty()) {
+		int key_empty = fifo8_isEmpty(&KEY_FIFO8);
+		int mouse_empty = fifo8_isEmpty(&MOUSE_FIFO8);
+
+		// 键盘
+		if(key_empty && mouse_empty){
 			io_stihlt();
-		} else {
+		}else if(!key_empty){
+			// 处理键盘
 			io_sti();
 
-			unsigned char data = keybuf_r8();
-
-			char* pStr = charToHexStr(data);
+			unsigned char data_key = fifo8_r(&KEY_FIFO8);
+			char* pStr = charToHexStr(data_key);
 			Printf(pStr, vram, xsize, ysize);
+		}else if(!mouse_empty){
+			// 处理鼠标
+			io_sti();
+			unsigned char data_mouse = fifo8_r(&MOUSE_FIFO8);
 
-			if (mouse_decode(&mdec, data) != 0) {
+			if (mouse_decode(&mdec, data_mouse) != 0) {
 				eraseMouse(vram, xsize, &cur_pos);
 				computeMousePosition(&mdec, xsize, ysize);
 				drawMouse(vram, xsize, &cur_pos);
 			}
 		}
+
 	}
 }

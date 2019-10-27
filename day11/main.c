@@ -79,7 +79,7 @@ void CMain(){
 	fifo8_init(&MOUSE_FIFO8, mouse_buf, MOUSE_BUF_SIZE);
 
 	init_keyboard();
-	
+
 	// 允许开启中断
     io_sti();
 	enable_mouse();
@@ -87,7 +87,7 @@ void CMain(){
 	// 显示
 	char* vram = bootInfo.vgaRam;
 	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-	
+
 	// 系统背景
 	fillAll(vram, COL8_848484);
 	PrintRGB(vram, xsize, cur_pos.x, cur_pos.y, cursor);
@@ -97,8 +97,8 @@ void CMain(){
 		int key_empty = fifo8_isEmpty(&KEY_FIFO8);
 		int mouse_empty = fifo8_isEmpty(&MOUSE_FIFO8);
 
-		// 键盘
 		if(key_empty && mouse_empty){
+			// 查看一下中断是否发生
 			io_stihlt();
 		}else if(!key_empty){
 			// 处理键盘
@@ -110,7 +110,13 @@ void CMain(){
 		}else if(!mouse_empty){
 			// 处理鼠标
 			io_sti();
+
 			unsigned char data_mouse = fifo8_r(&MOUSE_FIFO8);
+			// 查看鼠标第一次发送的数据
+			if(0xfa == data_mouse){
+				char* pStr = charToHexStr(data_mouse);
+				Printf(pStr, vram, xsize, ysize);
+			}
 
 			if (mouse_decode(&mdec, data_mouse) != 0) {
 				eraseMouse(vram, xsize, &cur_pos);

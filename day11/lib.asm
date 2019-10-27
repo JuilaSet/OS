@@ -45,22 +45,23 @@ io_store_eflags:
 	popfd
 	ret
 
-; 屏蔽中断: eflags 第9位设置成0
-io_cli:
-	CLI
-	RET
 
 ; 系统进入休眠状态
 io_hlt:		; io_hlt() 函数
 	HLT
 	RET
 
-; 系统进入唤起状态
+; 允许中断发生
 io_sti:		; io_sti() 函数
 	STI
 	RET
 
-; 系统休眠再被唤醒
+; 禁止中断发生
+io_cli:
+	CLI
+	RET
+
+; 查看一下中断是否发生
 io_stihlt:	; io_stihlt() 函数
 	STI
 	HLT

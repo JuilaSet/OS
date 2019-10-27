@@ -18,12 +18,14 @@ void fifo8_init(struct FIFO8* fifo8, unsigned char* buf, int cap){
 	fifo8->next_w = 0;
 }
 
+// 写入
 void fifo8_w(struct FIFO8 *fifo8, unsigned char data){
 	fifo8->buf[fifo8->next_w] = data;
 	fifo8->len++;
 	fifo8->next_w = (fifo8->next_w + 1) % fifo8->cap;
 }
 
+// 读取
 unsigned char fifo8_r(struct FIFO8 *fifo8){
 	unsigned char data = fifo8->buf[fifo8->next_r];
 	fifo8->len--;

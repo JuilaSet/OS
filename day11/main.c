@@ -112,18 +112,11 @@ void CMain(){
 			io_sti();
 
 			unsigned char data_mouse = fifo8_r(&MOUSE_FIFO8);
-			// 查看鼠标第一次发送的数据
-			if(0xfa == data_mouse){
-				char* pStr = charToHexStr(data_mouse);
-				Printf(pStr, vram, xsize, ysize);
-			}
-
 			if (mouse_decode(&mdec, data_mouse) != 0) {
 				eraseMouse(vram, xsize, &cur_pos);
 				computeMousePosition(&mdec, xsize, ysize);
 				drawMouse(vram, xsize, &cur_pos);
 			}
 		}
-
 	}
 }

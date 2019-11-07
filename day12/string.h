@@ -12,7 +12,7 @@ char* intToHexStr(unsigned int d) {
 	static char str[11] = {'0', 'X'};
 	for(int i = 2; i < 10; i++)
 		str[i] = '0';
-	
+
 	for (int p = 9; p > 1 && d > 0; --p) {
 		int e = d % 16;
 		d /= 16;

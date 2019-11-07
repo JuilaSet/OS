@@ -54,28 +54,31 @@
 
 * 通过汇编代码查询内存信息: 
 [code] |<
+MemChkBuf: times 256 db 0
+dwMCRNumber:   dd 0
+
 ComputeMemory:
-     mov   ebx, 0
-     mov   di, MemChkBuf
+	mov   ebx, 0
+	mov   di, MemChkBuf
 .loop:
-     mov   eax, 0E820h
-     mov   ecx, 20
-     mov   edx, 0534D4150h
-     int   15h
-     jc    LABEL_MEM_CHK_FAIL
-     add   di, 20   
-     inc   dword [dwMCRNumber]
-     cmp   ebx, 0
-     jne   .loop
-     jmp   LABEL_MEM_CHK_OK
+	mov   eax, 0E820h
+	mov   ecx, 20
+	mov   edx, 0534D4150h
+	int   15h
+	jc    LABEL_MEM_CHK_FAIL
+	add   di, 20   
+	inc   dword [dwMCRNumber]
+	cmp   ebx, 0
+	jne   .loop
+	jmp   LABEL_MEM_CHK_OK
 LABEL_MEM_CHK_FAIL:
-    mov    dword [dwMCRNumber], 0
+	mov    dword [dwMCRNumber], 0
 >| [uncode]
 
 * 获取源码: 
 [code] |<
 get_memory_block_count:
-        mov  eax, [dwMCRNumber]
-        ret
+	mov  eax, [dwMCRNumber]
+	ret
 >| [uncode]
 ====================

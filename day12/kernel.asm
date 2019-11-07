@@ -60,6 +60,26 @@ LABEL_BEGIN:
 	mov	ss, ax
 	mov	sp, 0100h
 
+ComputeMemory:
+	mov   ebx, 0
+	mov   di, MemChkBuf
+
+.loop:
+	mov   eax, 0E820h
+	mov   ecx, 20
+	mov   edx, 0534D4150h
+	int   15h
+	jc    near LABEL_MEM_CHK_FAIL
+	add   di, 20   
+	inc   dword [dwMCRNumber]
+	cmp   ebx, 0
+	jne   .loop
+	jmp   LABEL_MEM_CHK_OK
+LABEL_MEM_CHK_FAIL:
+	mov    dword [dwMCRNumber], 0
+
+LABEL_MEM_CHK_OK: 
+
 	; 调色板显示模式显示
 	mov	al, 0x13
 	mov	ah, 0
@@ -143,6 +163,9 @@ LABEL_SEG_CODE32:
 
 	jmp		$
 
+MemChkBuf:		times 256 db 0
+dwMCRNumber:		dd 0
+
 ; 中断处理程序
 _SpuriousHandler:
 	SpuriousHandler equ _SpuriousHandler - $$
@@ -186,6 +209,9 @@ _MouseHandler:
 	iretd
 
 ; 头文件
+; 内存信息
+	%include	"memory.asm"
+
 ; 导入汇编对应的函数
 	%include	"lib.asm"
 

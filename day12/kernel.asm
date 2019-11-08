@@ -163,6 +163,7 @@ LABEL_SEG_CODE32:
 
 	jmp		$
 
+; дз╢Фпео╒
 MemChkBuf:		times 256 db 0
 dwMCRNumber:		dd 0
 

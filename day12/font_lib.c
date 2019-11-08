@@ -29,8 +29,6 @@ struct BOOTINFO {
     short screenX, screenY;
 };
 
-struct BOOTINFO bootInfo = { (char*)0xa0000, 320, 200 };
-
 /*
  * 初始化调色板
  */
@@ -190,21 +188,55 @@ void fillAll(char* vram, int font){
 	}
 }
 
-// 字体间距
-int width = 8, height = 16;
+/*
+ * 虚拟光标
+*/
+
+struct TXTCursor {
+	int pointerX, pointerY;
+	int width, height;				// 每个字的宽度, 高度
+	int initPointerX, initPointerY;	// 初始位置
+	int tabSplitCount;				// tab的格子个数
+};
+
+// 回车
+void Println(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+	tcursor->pointerX = tcursor->initPointerX;
+	tcursor->pointerY += tcursor->height;
+	if(tcursor->pointerY >= bootinfo->screenY){
+		tcursor->pointerY = tcursor->initPointerY;
+	}
+}
 
 // 打印字符串
-int pointerX = 20, pointerY = 18;
-void Printf(char* sptr, char* vram, int xsize, int ysize){
-	int len = strlen(sptr);
-	Print(vram, xsize, pointerX, pointerY, width, height, COL8_FFFFFF, sptr);
+void Printf(char* sptr, int len, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+	int xsize = bootinfo->screenX, ysize = bootinfo->screenY;
+	char* vram = bootinfo->vgaRam;
+	Print(vram, xsize, tcursor->pointerX, tcursor->pointerY, tcursor->width, tcursor->height, COL8_FFFFFF, sptr);
 
-	pointerX += width * len;
-	if(pointerX >= xsize - 20){
-		pointerX = 20;
-		pointerY += 16;
-		if(pointerY >= ysize){
-			pointerY = 18;
-		}
+	tcursor->pointerX += tcursor->width * len;
+	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
+		Println(bootinfo, tcursor);
 	}
+}
+
+// Tab键: n(将一行分为几格)
+void PrintTab(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+	int xsize = bootinfo->screenX, ysize = bootinfo->screenY;
+	// 得到每一个格子的大小
+	short blkSize = (bootinfo->screenX / tcursor->tabSplitCount);
+	// 将光标移动到下一个格子处
+	tcursor->pointerX = blkSize * ((tcursor->pointerX + blkSize) / blkSize);
+	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
+		Println(bootinfo, tcursor);
+	}
+}
+
+// 将地址描述符的信息显示到桌面上: showMemoryInfo(memDesc + count, vram, count, xsize, COL8_FFFFFF);
+void showMemoryInfo(struct AddrRangeDesc* desc, char* vram, int page, int xsize, int color) {
+//	Printf("baseAddrLow: ");
+//	Printf("baseAddrHigh: ");
+//	Printf("lengthLow: ");
+//	Printf("lengthHigh: ");
+//	Printf("type: ");
 }

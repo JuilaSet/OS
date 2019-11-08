@@ -1,0 +1,65 @@
+/*
+ * 解析内存状态信息
+ */
+#def [text~]
+====================
+* 设置变量: 
+[code] |<
+MemChkBuf:		; BIOS 填充的数据缓冲区地址
+	times 256 db 0	; 存放内存描述符
+dwMCRNumber:
+	dd 0		; 可用内存块个数
+>| [uncode]
+
+* c语言获得该地址: 
+[code] |<
+// 内存描述符
+struct AddrRangeDesc {
+	unsigned int baseAddrLow;
+	unsigned int baseAddrHigh;
+	unsigned int lengthLow;
+	unsigned int lengthHigh;
+	unsigned int type;
+};
+
+// 获取BIOS填充的数据缓冲区地址
+char* get_adr_buffer(void);
+
+// 将地址描述符的信息显示到桌面上
+void showMemoryInfo(struct AddrRangeDesc* desc, char* vram, int page, int xsize, int color);
+>| [uncode]
+
+* 获取数据缓冲区地址: 
+[ex~]
+|| struct AddrRangeDesc* memDesc = (struct AddrRangeDesc*)get_adr_buffer();
+
+* 按下回车时, 显示内存信息: 
+[code] |<
+count++;
+...
+// 键盘中断处理函数, 回车 -- 0x!C
+if (data == 0x1C) {
+	showMemoryInfo(memDesc + count, vram, count, xsize, COL8_FFFFFF);
+	count++;
+	if (count > memCnt) {
+		count = 0;
+	}
+}
+>| [uncode]
+
+* tab实现 {
+
+	* 将输出窗格分解为一个个小窗格, 当超过时, `\t`表示从下一个窗格输出: 
+	[code] |<
+	|xxx|xxx|xxx|
+	|xxx|xxx|xxx|
+	|xxx|xxx|xxx|
+	>| [uncode]
+
+	* 案例: 输入unit \t 
+	[code] |<
+	|uni|t--|	<-- \t将会跳到下一个`|`号开始
+	>| [uncode]
+
+}
+====================

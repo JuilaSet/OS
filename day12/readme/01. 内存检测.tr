@@ -15,7 +15,7 @@
 	* 将寄存器ax 赋值为 0E820h
 	|| mov   eax, 0E820h
 
-		=> 每次调用一次int 15h中断, BIOS成功填充地址描述符后后, 我们把dwMCRNumber 这个变量加1: 
+		=> 每次调用一次int 15h中断, BIOS成功填充地址描述符后后, 我们把dwMCRNumber这个变量加1: 
 		[ex~] 
 		|| dwMCRNumber: dd 0
 
@@ -50,35 +50,57 @@
 
 }
 
-* `near`关键字: 调用程序和子程序在同一代码段中
+* 实现 {
 
-* 通过汇编代码查询内存信息: 
-[code] |<
-MemChkBuf: times 256 db 0
-dwMCRNumber:   dd 0
+	* 内存范围描述符的结构: 
+	[code] |<
+	struct AddrRangeDesc {
+	    unsigned int baseAddrLow ;  //内存基地址的低32位
+	    unsigned int baseAddrHigh;  //内存基地址的高32位
+	    unsigned int lengthLow;     //内存块长度的低32位
+	    unsigned int lengthHigh;    //内存块长度的高32位
+	    unsigned int type;          //描述内存块的类型
+	}
+	>| [uncode]
 
-ComputeMemory:
-	mov   ebx, 0
-	mov   di, MemChkBuf
-.loop:
-	mov   eax, 0E820h
-	mov   ecx, 20
-	mov   edx, 0534D4150h
-	int   15h
-	jc    LABEL_MEM_CHK_FAIL
-	add   di, 20   
-	inc   dword [dwMCRNumber]
-	cmp   ebx, 0
-	jne   .loop
-	jmp   LABEL_MEM_CHK_OK
-LABEL_MEM_CHK_FAIL:
-	mov    dword [dwMCRNumber], 0
->| [uncode]
+	=> type: 1(表示当前内存块可以被内核使用), 2(表示当前内存块已经被占用), 3(保留给未来使用, 内核也不能用当前内存块)
 
-* 获取源码: 
-[code] |<
-get_memory_block_count:
-	mov  eax, [dwMCRNumber]
-	ret
->| [uncode]
+	* 设置变量: 
+	[code] |<
+	MemChkBuf: 
+		times 256 db 0	; 存放内存描述符
+	dwMCRNumber:
+		dd 0		; 可用内存块个数
+	>| [uncode]
+
+	* 通过汇编代码查询内存信息: 
+	[code] |<
+	ComputeMemory:
+		mov   ebx, 0
+		mov   di, MemChkBuf
+	.loop:
+		mov   eax, 0E820h
+		mov   ecx, 20
+		mov   edx, 0534D4150h
+		int   15h
+		jc    LABEL_MEM_CHK_FAIL
+		add   di, 20   
+		inc   dword [dwMCRNumber]	; BIOS成功填充地址描述符后, 自加1
+		cmp   ebx, 0
+		jne   .loop
+		jmp   LABEL_MEM_CHK_OK
+	LABEL_MEM_CHK_FAIL:
+		mov    dword [dwMCRNumber], 0
+	>| [uncode]
+
+	* 获取描述符系统函数: 
+	[code] |<
+	get_memory_block_count:
+		mov  eax, [dwMCRNumber]
+		ret
+	>| [uncode]
+
+	* 注意: `near`关键字(调用程序和子程序在同一代码段中)
+
+}
 ====================

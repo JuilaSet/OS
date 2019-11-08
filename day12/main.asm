@@ -1,8 +1,9 @@
 ; Disassembly of file: main.o
-; Thu Nov  7 04:17:39 2019
+; Fri Nov  8 03:31:32 2019
 ; Mode: 32 bits
 ; Syntax: YASM/NASM
 ; Instruction set: 80386
+
 
 
 
@@ -95,7 +96,7 @@ intToHexStr:; Function begin
         jmp     ?_003                                   ; 003A _ EB, 0F
 
 ?_002:  mov     eax, dword [ebp-0CH]                    ; 003C _ 8B. 45, F4
-        add     eax, str.1506                           ; 003F _ 05, 000001C8(d)
+        add     eax, str.1506                           ; 003F _ 05, 000001DC(d)
         mov     byte [eax], 48                          ; 0044 _ C6. 00, 30
         add     dword [ebp-0CH], 1                      ; 0047 _ 83. 45, F4, 01
 ?_003:  cmp     dword [ebp-0CH], 9                      ; 004B _ 83. 7D, F4, 09
@@ -115,7 +116,7 @@ intToHexStr:; Function begin
         add     eax, 55                                 ; 0075 _ 83. C0, 37
         mov     edx, eax                                ; 0078 _ 89. C2
         mov     eax, dword [ebp-8H]                     ; 007A _ 8B. 45, F8
-        add     eax, str.1506                           ; 007D _ 05, 000001C8(d)
+        add     eax, str.1506                           ; 007D _ 05, 000001DC(d)
         mov     byte [eax], dl                          ; 0082 _ 88. 10
         jmp     ?_006                                   ; 0084 _ EB, 12
 
@@ -123,14 +124,14 @@ intToHexStr:; Function begin
         add     eax, 48                                 ; 0089 _ 83. C0, 30
         mov     edx, eax                                ; 008C _ 89. C2
         mov     eax, dword [ebp-8H]                     ; 008E _ 8B. 45, F8
-        add     eax, str.1506                           ; 0091 _ 05, 000001C8(d)
+        add     eax, str.1506                           ; 0091 _ 05, 000001DC(d)
         mov     byte [eax], dl                          ; 0096 _ 88. 10
 ?_006:  sub     dword [ebp-8H], 1                       ; 0098 _ 83. 6D, F8, 01
 ?_007:  cmp     dword [ebp-8H], 1                       ; 009C _ 83. 7D, F8, 01
         jle     ?_008                                   ; 00A0 _ 7E, 06
         cmp     dword [ebp+8H], 0                       ; 00A2 _ 83. 7D, 08, 00
         jnz     ?_004                                   ; 00A6 _ 75, B2
-?_008:  mov     eax, str.1506                           ; 00A8 _ B8, 000001C8(d)
+?_008:  mov     eax, str.1506                           ; 00A8 _ B8, 000001DC(d)
         leave                                           ; 00AD _ C9
         ret                                             ; 00AE _ C3
 ; intToHexStr End of function
@@ -831,589 +832,708 @@ fillAll:; Function begin
         ret                                             ; 0799 _ C3
 ; fillAll End of function
 
-Printf: ; Function begin
+Println:; Function begin
         push    ebp                                     ; 079A _ 55
         mov     ebp, esp                                ; 079B _ 89. E5
-        push    ebx                                     ; 079D _ 53
-        sub     esp, 16                                 ; 079E _ 83. EC, 10
-        push    dword [ebp+8H]                          ; 07A1 _ FF. 75, 08
-        call    strlen                                  ; 07A4 _ E8, FFFFFFFC(rel)
-        add     esp, 4                                  ; 07A9 _ 83. C4, 04
-        mov     dword [ebp-8H], eax                     ; 07AC _ 89. 45, F8
-        mov     ebx, dword [height]                     ; 07AF _ 8B. 1D, 00000000(d)
-        mov     ecx, dword [width]                      ; 07B5 _ 8B. 0D, 00000000(d)
-        mov     edx, dword [pointerY]                   ; 07BB _ 8B. 15, 00000000(d)
-        mov     eax, dword [pointerX]                   ; 07C1 _ A1, 00000000(d)
-        push    dword [ebp+8H]                          ; 07C6 _ FF. 75, 08
-        push    7                                       ; 07C9 _ 6A, 07
-        push    ebx                                     ; 07CB _ 53
-        push    ecx                                     ; 07CC _ 51
-        push    edx                                     ; 07CD _ 52
-        push    eax                                     ; 07CE _ 50
-        push    dword [ebp+10H]                         ; 07CF _ FF. 75, 10
-        push    dword [ebp+0CH]                         ; 07D2 _ FF. 75, 0C
-        call    Print                                   ; 07D5 _ E8, FFFFFFFC(rel)
-        add     esp, 32                                 ; 07DA _ 83. C4, 20
-        mov     eax, dword [width]                      ; 07DD _ A1, 00000000(d)
-        imul    eax, dword [ebp-8H]                     ; 07E2 _ 0F AF. 45, F8
-        mov     edx, eax                                ; 07E6 _ 89. C2
-        mov     eax, dword [pointerX]                   ; 07E8 _ A1, 00000000(d)
-        add     eax, edx                                ; 07ED _ 01. D0
-        mov     dword [pointerX], eax                   ; 07EF _ A3, 00000000(d)
-        mov     eax, dword [ebp+10H]                    ; 07F4 _ 8B. 45, 10
-        lea     edx, [eax-14H]                          ; 07F7 _ 8D. 50, EC
-        mov     eax, dword [pointerX]                   ; 07FA _ A1, 00000000(d)
-        cmp     edx, eax                                ; 07FF _ 39. C2
-        jg      ?_054                                   ; 0801 _ 7F, 2B
-        mov     dword [pointerX], 20                    ; 0803 _ C7. 05, 00000000(d), 00000014
-        mov     eax, dword [pointerY]                   ; 080D _ A1, 00000000(d)
-        add     eax, 16                                 ; 0812 _ 83. C0, 10
-        mov     dword [pointerY], eax                   ; 0815 _ A3, 00000000(d)
-        mov     eax, dword [pointerY]                   ; 081A _ A1, 00000000(d)
-        cmp     eax, dword [ebp+14H]                    ; 081F _ 3B. 45, 14
-        jl      ?_054                                   ; 0822 _ 7C, 0A
-        mov     dword [pointerY], 18                    ; 0824 _ C7. 05, 00000000(d), 00000012
-?_054:  nop                                             ; 082E _ 90
-        mov     ebx, dword [ebp-4H]                     ; 082F _ 8B. 5D, FC
-        leave                                           ; 0832 _ C9
-        ret                                             ; 0833 _ C3
+        mov     eax, dword [ebp+0CH]                    ; 079D _ 8B. 45, 0C
+        mov     edx, dword [eax+10H]                    ; 07A0 _ 8B. 50, 10
+        mov     eax, dword [ebp+0CH]                    ; 07A3 _ 8B. 45, 0C
+        mov     dword [eax], edx                        ; 07A6 _ 89. 10
+        mov     eax, dword [ebp+0CH]                    ; 07A8 _ 8B. 45, 0C
+        mov     edx, dword [eax+4H]                     ; 07AB _ 8B. 50, 04
+        mov     eax, dword [ebp+0CH]                    ; 07AE _ 8B. 45, 0C
+        mov     eax, dword [eax+0CH]                    ; 07B1 _ 8B. 40, 0C
+        add     edx, eax                                ; 07B4 _ 01. C2
+        mov     eax, dword [ebp+0CH]                    ; 07B6 _ 8B. 45, 0C
+        mov     dword [eax+4H], edx                     ; 07B9 _ 89. 50, 04
+        mov     eax, dword [ebp+0CH]                    ; 07BC _ 8B. 45, 0C
+        mov     edx, dword [eax+4H]                     ; 07BF _ 8B. 50, 04
+        mov     eax, dword [ebp+8H]                     ; 07C2 _ 8B. 45, 08
+        movzx   eax, word [eax+6H]                      ; 07C5 _ 0F B7. 40, 06
+        cwde                                            ; 07C9 _ 98
+        cmp     edx, eax                                ; 07CA _ 39. C2
+        jl      ?_054                                   ; 07CC _ 7C, 0C
+        mov     eax, dword [ebp+0CH]                    ; 07CE _ 8B. 45, 0C
+        mov     edx, dword [eax+14H]                    ; 07D1 _ 8B. 50, 14
+        mov     eax, dword [ebp+0CH]                    ; 07D4 _ 8B. 45, 0C
+        mov     dword [eax+4H], edx                     ; 07D7 _ 89. 50, 04
+?_054:  nop                                             ; 07DA _ 90
+        pop     ebp                                     ; 07DB _ 5D
+        ret                                             ; 07DC _ C3
+; Println End of function
+
+Printf: ; Function begin
+        push    ebp                                     ; 07DD _ 55
+        mov     ebp, esp                                ; 07DE _ 89. E5
+        push    ebx                                     ; 07E0 _ 53
+        sub     esp, 16                                 ; 07E1 _ 83. EC, 10
+        mov     eax, dword [ebp+10H]                    ; 07E4 _ 8B. 45, 10
+        movzx   eax, word [eax+4H]                      ; 07E7 _ 0F B7. 40, 04
+        cwde                                            ; 07EB _ 98
+        mov     dword [ebp-10H], eax                    ; 07EC _ 89. 45, F0
+        mov     eax, dword [ebp+10H]                    ; 07EF _ 8B. 45, 10
+        movzx   eax, word [eax+6H]                      ; 07F2 _ 0F B7. 40, 06
+        cwde                                            ; 07F6 _ 98
+        mov     dword [ebp-0CH], eax                    ; 07F7 _ 89. 45, F4
+        mov     eax, dword [ebp+10H]                    ; 07FA _ 8B. 45, 10
+        mov     eax, dword [eax]                        ; 07FD _ 8B. 00
+        mov     dword [ebp-8H], eax                     ; 07FF _ 89. 45, F8
+        mov     eax, dword [ebp+14H]                    ; 0802 _ 8B. 45, 14
+        mov     ebx, dword [eax+0CH]                    ; 0805 _ 8B. 58, 0C
+        mov     eax, dword [ebp+14H]                    ; 0808 _ 8B. 45, 14
+        mov     ecx, dword [eax+8H]                     ; 080B _ 8B. 48, 08
+        mov     eax, dword [ebp+14H]                    ; 080E _ 8B. 45, 14
+        mov     edx, dword [eax+4H]                     ; 0811 _ 8B. 50, 04
+        mov     eax, dword [ebp+14H]                    ; 0814 _ 8B. 45, 14
+        mov     eax, dword [eax]                        ; 0817 _ 8B. 00
+        push    dword [ebp+8H]                          ; 0819 _ FF. 75, 08
+        push    7                                       ; 081C _ 6A, 07
+        push    ebx                                     ; 081E _ 53
+        push    ecx                                     ; 081F _ 51
+        push    edx                                     ; 0820 _ 52
+        push    eax                                     ; 0821 _ 50
+        push    dword [ebp-10H]                         ; 0822 _ FF. 75, F0
+        push    dword [ebp-8H]                          ; 0825 _ FF. 75, F8
+        call    Print                                   ; 0828 _ E8, FFFFFFFC(rel)
+        add     esp, 32                                 ; 082D _ 83. C4, 20
+        mov     eax, dword [ebp+14H]                    ; 0830 _ 8B. 45, 14
+        mov     edx, dword [eax]                        ; 0833 _ 8B. 10
+        mov     eax, dword [ebp+14H]                    ; 0835 _ 8B. 45, 14
+        mov     eax, dword [eax+8H]                     ; 0838 _ 8B. 40, 08
+        imul    eax, dword [ebp+0CH]                    ; 083B _ 0F AF. 45, 0C
+        add     edx, eax                                ; 083F _ 01. C2
+        mov     eax, dword [ebp+14H]                    ; 0841 _ 8B. 45, 14
+        mov     dword [eax], edx                        ; 0844 _ 89. 10
+        mov     eax, dword [ebp+14H]                    ; 0846 _ 8B. 45, 14
+        mov     edx, dword [eax]                        ; 0849 _ 8B. 10
+        mov     eax, dword [ebp+14H]                    ; 084B _ 8B. 45, 14
+        mov     eax, dword [eax+10H]                    ; 084E _ 8B. 40, 10
+        mov     ecx, dword [ebp-10H]                    ; 0851 _ 8B. 4D, F0
+        sub     ecx, eax                                ; 0854 _ 29. C1
+        mov     eax, ecx                                ; 0856 _ 89. C8
+        cmp     edx, eax                                ; 0858 _ 39. C2
+        jl      ?_055                                   ; 085A _ 7C, 0E
+        push    dword [ebp+14H]                         ; 085C _ FF. 75, 14
+        push    dword [ebp+10H]                         ; 085F _ FF. 75, 10
+        call    Println                                 ; 0862 _ E8, FFFFFFFC(rel)
+        add     esp, 8                                  ; 0867 _ 83. C4, 08
+?_055:  nop                                             ; 086A _ 90
+        mov     ebx, dword [ebp-4H]                     ; 086B _ 8B. 5D, FC
+        leave                                           ; 086E _ C9
+        ret                                             ; 086F _ C3
 ; Printf End of function
 
-charToHex:; Function begin
-        push    ebp                                     ; 0834 _ 55
-        mov     ebp, esp                                ; 0835 _ 89. E5
-        sub     esp, 4                                  ; 0837 _ 83. EC, 04
-        mov     eax, dword [ebp+8H]                     ; 083A _ 8B. 45, 08
-        mov     byte [ebp-4H], al                       ; 083D _ 88. 45, FC
-        cmp     byte [ebp-4H], 9                        ; 0840 _ 80. 7D, FC, 09
-        jle     ?_055                                   ; 0844 _ 7E, 09
-        movzx   eax, byte [ebp-4H]                      ; 0846 _ 0F B6. 45, FC
-        add     eax, 87                                 ; 084A _ 83. C0, 57
-        jmp     ?_056                                   ; 084D _ EB, 07
+PrintTab:; Function begin
+        push    ebp                                     ; 0870 _ 55
+        mov     ebp, esp                                ; 0871 _ 89. E5
+        push    ebx                                     ; 0873 _ 53
+        sub     esp, 16                                 ; 0874 _ 83. EC, 10
+        mov     eax, dword [ebp+8H]                     ; 0877 _ 8B. 45, 08
+        movzx   eax, word [eax+4H]                      ; 087A _ 0F B7. 40, 04
+        cwde                                            ; 087E _ 98
+        mov     dword [ebp-0CH], eax                    ; 087F _ 89. 45, F4
+        mov     eax, dword [ebp+8H]                     ; 0882 _ 8B. 45, 08
+        movzx   eax, word [eax+6H]                      ; 0885 _ 0F B7. 40, 06
+        cwde                                            ; 0889 _ 98
+        mov     dword [ebp-8H], eax                     ; 088A _ 89. 45, F8
+        mov     eax, dword [ebp+8H]                     ; 088D _ 8B. 45, 08
+        movzx   eax, word [eax+4H]                      ; 0890 _ 0F B7. 40, 04
+        cwde                                            ; 0894 _ 98
+        mov     edx, dword [ebp+0CH]                    ; 0895 _ 8B. 55, 0C
+        mov     ebx, dword [edx+18H]                    ; 0898 _ 8B. 5A, 18
+        cdq                                             ; 089B _ 99
+        idiv    ebx                                     ; 089C _ F7. FB
+        mov     word [ebp-0EH], ax                      ; 089E _ 66: 89. 45, F2
+        movsx   ecx, word [ebp-0EH]                     ; 08A2 _ 0F BF. 4D, F2
+        mov     eax, dword [ebp+0CH]                    ; 08A6 _ 8B. 45, 0C
+        mov     edx, dword [eax]                        ; 08A9 _ 8B. 10
+        movsx   eax, word [ebp-0EH]                     ; 08AB _ 0F BF. 45, F2
+        add     eax, edx                                ; 08AF _ 01. D0
+        movsx   ebx, word [ebp-0EH]                     ; 08B1 _ 0F BF. 5D, F2
+        cdq                                             ; 08B5 _ 99
+        idiv    ebx                                     ; 08B6 _ F7. FB
+        imul    ecx, eax                                ; 08B8 _ 0F AF. C8
+        mov     edx, ecx                                ; 08BB _ 89. CA
+        mov     eax, dword [ebp+0CH]                    ; 08BD _ 8B. 45, 0C
+        mov     dword [eax], edx                        ; 08C0 _ 89. 10
+        mov     eax, dword [ebp+0CH]                    ; 08C2 _ 8B. 45, 0C
+        mov     edx, dword [eax]                        ; 08C5 _ 8B. 10
+        mov     eax, dword [ebp+0CH]                    ; 08C7 _ 8B. 45, 0C
+        mov     eax, dword [eax+10H]                    ; 08CA _ 8B. 40, 10
+        mov     ecx, dword [ebp-0CH]                    ; 08CD _ 8B. 4D, F4
+        sub     ecx, eax                                ; 08D0 _ 29. C1
+        mov     eax, ecx                                ; 08D2 _ 89. C8
+        cmp     edx, eax                                ; 08D4 _ 39. C2
+        jl      ?_056                                   ; 08D6 _ 7C, 0E
+        push    dword [ebp+0CH]                         ; 08D8 _ FF. 75, 0C
+        push    dword [ebp+8H]                          ; 08DB _ FF. 75, 08
+        call    Println                                 ; 08DE _ E8, FFFFFFFC(rel)
+        add     esp, 8                                  ; 08E3 _ 83. C4, 08
+?_056:  nop                                             ; 08E6 _ 90
+        mov     ebx, dword [ebp-4H]                     ; 08E7 _ 8B. 5D, FC
+        leave                                           ; 08EA _ C9
+        ret                                             ; 08EB _ C3
+; PrintTab End of function
 
-?_055:  movzx   eax, byte [ebp-4H]                      ; 084F _ 0F B6. 45, FC
-        add     eax, 48                                 ; 0853 _ 83. C0, 30
-?_056:  leave                                           ; 0856 _ C9
-        ret                                             ; 0857 _ C3
+showMemoryInfo:; Function begin
+        push    ebp                                     ; 08EC _ 55
+        mov     ebp, esp                                ; 08ED _ 89. E5
+        nop                                             ; 08EF _ 90
+        pop     ebp                                     ; 08F0 _ 5D
+        ret                                             ; 08F1 _ C3
+; showMemoryInfo End of function
+
+charToHex:; Function begin
+        push    ebp                                     ; 08F2 _ 55
+        mov     ebp, esp                                ; 08F3 _ 89. E5
+        sub     esp, 4                                  ; 08F5 _ 83. EC, 04
+        mov     eax, dword [ebp+8H]                     ; 08F8 _ 8B. 45, 08
+        mov     byte [ebp-4H], al                       ; 08FB _ 88. 45, FC
+        cmp     byte [ebp-4H], 9                        ; 08FE _ 80. 7D, FC, 09
+        jle     ?_057                                   ; 0902 _ 7E, 09
+        movzx   eax, byte [ebp-4H]                      ; 0904 _ 0F B6. 45, FC
+        add     eax, 87                                 ; 0908 _ 83. C0, 57
+        jmp     ?_058                                   ; 090B _ EB, 07
+
+?_057:  movzx   eax, byte [ebp-4H]                      ; 090D _ 0F B6. 45, FC
+        add     eax, 48                                 ; 0911 _ 83. C0, 30
+?_058:  leave                                           ; 0914 _ C9
+        ret                                             ; 0915 _ C3
 ; charToHex End of function
 
 charToHexStr:; Function begin
-        push    ebp                                     ; 0858 _ 55
-        mov     ebp, esp                                ; 0859 _ 89. E5
-        sub     esp, 4                                  ; 085B _ 83. EC, 04
-        mov     eax, dword [ebp+8H]                     ; 085E _ 8B. 45, 08
-        mov     byte [ebp-4H], al                       ; 0861 _ 88. 45, FC
-        movzx   eax, byte [ebp-4H]                      ; 0864 _ 0F B6. 45, FC
-        movsx   eax, al                                 ; 0868 _ 0F BE. C0
-        and     eax, 0FH                                ; 086B _ 83. E0, 0F
-        push    eax                                     ; 086E _ 50
-        call    charToHex                               ; 086F _ E8, FFFFFFFC(rel)
-        add     esp, 4                                  ; 0874 _ 83. C4, 04
-        mov     byte [?_076], al                        ; 0877 _ A2, 000001B9(d)
-        shr     byte [ebp-4H], 4                        ; 087C _ C0. 6D, FC, 04
-        movzx   eax, byte [ebp-4H]                      ; 0880 _ 0F B6. 45, FC
-        movsx   eax, al                                 ; 0884 _ 0F BE. C0
-        and     eax, 0FH                                ; 0887 _ 83. E0, 0F
-        push    eax                                     ; 088A _ 50
-        call    charToHex                               ; 088B _ E8, FFFFFFFC(rel)
-        add     esp, 4                                  ; 0890 _ 83. C4, 04
-        mov     byte [keystr.1664], al                  ; 0893 _ A2, 000001B8(d)
-        mov     eax, keystr.1664                        ; 0898 _ B8, 000001B8(d)
-        leave                                           ; 089D _ C9
-        ret                                             ; 089E _ C3
+        push    ebp                                     ; 0916 _ 55
+        mov     ebp, esp                                ; 0917 _ 89. E5
+        sub     esp, 4                                  ; 0919 _ 83. EC, 04
+        mov     eax, dword [ebp+8H]                     ; 091C _ 8B. 45, 08
+        mov     byte [ebp-4H], al                       ; 091F _ 88. 45, FC
+        movzx   eax, byte [ebp-4H]                      ; 0922 _ 0F B6. 45, FC
+        movsx   eax, al                                 ; 0926 _ 0F BE. C0
+        and     eax, 0FH                                ; 0929 _ 83. E0, 0F
+        push    eax                                     ; 092C _ 50
+        call    charToHex                               ; 092D _ E8, FFFFFFFC(rel)
+        add     esp, 4                                  ; 0932 _ 83. C4, 04
+        mov     byte [?_078], al                        ; 0935 _ A2, 000001B9(d)
+        shr     byte [ebp-4H], 4                        ; 093A _ C0. 6D, FC, 04
+        movzx   eax, byte [ebp-4H]                      ; 093E _ 0F B6. 45, FC
+        movsx   eax, al                                 ; 0942 _ 0F BE. C0
+        and     eax, 0FH                                ; 0945 _ 83. E0, 0F
+        push    eax                                     ; 0948 _ 50
+        call    charToHex                               ; 0949 _ E8, FFFFFFFC(rel)
+        add     esp, 4                                  ; 094E _ 83. C4, 04
+        mov     byte [keystr.1697], al                  ; 0951 _ A2, 000001B8(d)
+        mov     eax, keystr.1697                        ; 0956 _ B8, 000001B8(d)
+        leave                                           ; 095B _ C9
+        ret                                             ; 095C _ C3
 ; charToHexStr End of function
 
 wait_KBC_sendready:; Function begin
-        push    ebp                                     ; 089F _ 55
-        mov     ebp, esp                                ; 08A0 _ 89. E5
-        sub     esp, 8                                  ; 08A2 _ 83. EC, 08
-?_057:  sub     esp, 12                                 ; 08A5 _ 83. EC, 0C
-        push    100                                     ; 08A8 _ 6A, 64
-        call    io_in8                                  ; 08AA _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 08AF _ 83. C4, 10
-        movsx   eax, al                                 ; 08B2 _ 0F BE. C0
-        and     eax, 02H                                ; 08B5 _ 83. E0, 02
-        test    eax, eax                                ; 08B8 _ 85. C0
-        jz      ?_058                                   ; 08BA _ 74, 02
-        jmp     ?_057                                   ; 08BC _ EB, E7
+        push    ebp                                     ; 095D _ 55
+        mov     ebp, esp                                ; 095E _ 89. E5
+        sub     esp, 8                                  ; 0960 _ 83. EC, 08
+?_059:  sub     esp, 12                                 ; 0963 _ 83. EC, 0C
+        push    100                                     ; 0966 _ 6A, 64
+        call    io_in8                                  ; 0968 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 096D _ 83. C4, 10
+        movsx   eax, al                                 ; 0970 _ 0F BE. C0
+        and     eax, 02H                                ; 0973 _ 83. E0, 02
+        test    eax, eax                                ; 0976 _ 85. C0
+        jz      ?_060                                   ; 0978 _ 74, 02
+        jmp     ?_059                                   ; 097A _ EB, E7
 
-?_058:  nop                                             ; 08BE _ 90
-        nop                                             ; 08BF _ 90
-        leave                                           ; 08C0 _ C9
-        ret                                             ; 08C1 _ C3
+?_060:  nop                                             ; 097C _ 90
+        nop                                             ; 097D _ 90
+        leave                                           ; 097E _ C9
+        ret                                             ; 097F _ C3
 ; wait_KBC_sendready End of function
 
 init_keyboard:; Function begin
-        push    ebp                                     ; 08C2 _ 55
-        mov     ebp, esp                                ; 08C3 _ 89. E5
-        sub     esp, 8                                  ; 08C5 _ 83. EC, 08
-        call    wait_KBC_sendready                      ; 08C8 _ E8, FFFFFFFC(rel)
-        sub     esp, 8                                  ; 08CD _ 83. EC, 08
-        push    96                                      ; 08D0 _ 6A, 60
-        push    100                                     ; 08D2 _ 6A, 64
-        call    io_out8                                 ; 08D4 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 08D9 _ 83. C4, 10
-        call    wait_KBC_sendready                      ; 08DC _ E8, FFFFFFFC(rel)
-        sub     esp, 8                                  ; 08E1 _ 83. EC, 08
-        push    71                                      ; 08E4 _ 6A, 47
-        push    96                                      ; 08E6 _ 6A, 60
-        call    io_out8                                 ; 08E8 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 08ED _ 83. C4, 10
-        nop                                             ; 08F0 _ 90
-        leave                                           ; 08F1 _ C9
-        ret                                             ; 08F2 _ C3
+        push    ebp                                     ; 0980 _ 55
+        mov     ebp, esp                                ; 0981 _ 89. E5
+        sub     esp, 8                                  ; 0983 _ 83. EC, 08
+        call    wait_KBC_sendready                      ; 0986 _ E8, FFFFFFFC(rel)
+        sub     esp, 8                                  ; 098B _ 83. EC, 08
+        push    96                                      ; 098E _ 6A, 60
+        push    100                                     ; 0990 _ 6A, 64
+        call    io_out8                                 ; 0992 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0997 _ 83. C4, 10
+        call    wait_KBC_sendready                      ; 099A _ E8, FFFFFFFC(rel)
+        sub     esp, 8                                  ; 099F _ 83. EC, 08
+        push    71                                      ; 09A2 _ 6A, 47
+        push    96                                      ; 09A4 _ 6A, 60
+        call    io_out8                                 ; 09A6 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 09AB _ 83. C4, 10
+        nop                                             ; 09AE _ 90
+        leave                                           ; 09AF _ C9
+        ret                                             ; 09B0 _ C3
 ; init_keyboard End of function
 
 enable_mouse:; Function begin
-        push    ebp                                     ; 08F3 _ 55
-        mov     ebp, esp                                ; 08F4 _ 89. E5
-        sub     esp, 8                                  ; 08F6 _ 83. EC, 08
-        call    wait_KBC_sendready                      ; 08F9 _ E8, FFFFFFFC(rel)
-        sub     esp, 8                                  ; 08FE _ 83. EC, 08
-        push    212                                     ; 0901 _ 68, 000000D4
-        push    100                                     ; 0906 _ 6A, 64
-        call    io_out8                                 ; 0908 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 090D _ 83. C4, 10
-        call    wait_KBC_sendready                      ; 0910 _ E8, FFFFFFFC(rel)
-        sub     esp, 8                                  ; 0915 _ 83. EC, 08
-        push    244                                     ; 0918 _ 68, 000000F4
-        push    96                                      ; 091D _ 6A, 60
-        call    io_out8                                 ; 091F _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0924 _ 83. C4, 10
-        nop                                             ; 0927 _ 90
-        leave                                           ; 0928 _ C9
-        ret                                             ; 0929 _ C3
+        push    ebp                                     ; 09B1 _ 55
+        mov     ebp, esp                                ; 09B2 _ 89. E5
+        sub     esp, 8                                  ; 09B4 _ 83. EC, 08
+        call    wait_KBC_sendready                      ; 09B7 _ E8, FFFFFFFC(rel)
+        sub     esp, 8                                  ; 09BC _ 83. EC, 08
+        push    212                                     ; 09BF _ 68, 000000D4
+        push    100                                     ; 09C4 _ 6A, 64
+        call    io_out8                                 ; 09C6 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 09CB _ 83. C4, 10
+        call    wait_KBC_sendready                      ; 09CE _ E8, FFFFFFFC(rel)
+        sub     esp, 8                                  ; 09D3 _ 83. EC, 08
+        push    244                                     ; 09D6 _ 68, 000000F4
+        push    96                                      ; 09DB _ 6A, 60
+        call    io_out8                                 ; 09DD _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 09E2 _ 83. C4, 10
+        nop                                             ; 09E5 _ 90
+        leave                                           ; 09E6 _ C9
+        ret                                             ; 09E7 _ C3
 ; enable_mouse End of function
 
 mouse_decode:; Function begin
-        push    ebp                                     ; 092A _ 55
-        mov     ebp, esp                                ; 092B _ 89. E5
-        sub     esp, 4                                  ; 092D _ 83. EC, 04
-        mov     eax, dword [ebp+0CH]                    ; 0930 _ 8B. 45, 0C
-        mov     byte [ebp-4H], al                       ; 0933 _ 88. 45, FC
-        mov     eax, dword [ebp+8H]                     ; 0936 _ 8B. 45, 08
-        movzx   eax, byte [eax+3H]                      ; 0939 _ 0F B6. 40, 03
-        test    al, al                                  ; 093D _ 84. C0
-        jnz     ?_060                                   ; 093F _ 75, 17
-        cmp     byte [ebp-4H], -6                       ; 0941 _ 80. 7D, FC, FA
-        jnz     ?_059                                   ; 0945 _ 75, 07
-        mov     eax, dword [ebp+8H]                     ; 0947 _ 8B. 45, 08
-        mov     byte [eax+3H], 1                        ; 094A _ C6. 40, 03, 01
-?_059:  mov     eax, 0                                  ; 094E _ B8, 00000000
-        jmp     ?_067                                   ; 0953 _ E9, 0000010F
-
-?_060:  mov     eax, dword [ebp+8H]                     ; 0958 _ 8B. 45, 08
-        movzx   eax, byte [eax+3H]                      ; 095B _ 0F B6. 40, 03
-        cmp     al, 1                                   ; 095F _ 3C, 01
-        jnz     ?_062                                   ; 0961 _ 75, 28
-        movzx   eax, byte [ebp-4H]                      ; 0963 _ 0F B6. 45, FC
-        and     eax, 0C8H                               ; 0967 _ 25, 000000C8
-        cmp     eax, 8                                  ; 096C _ 83. F8, 08
-        jnz     ?_061                                   ; 096F _ 75, 10
-        mov     eax, dword [ebp+8H]                     ; 0971 _ 8B. 45, 08
-        movzx   edx, byte [ebp-4H]                      ; 0974 _ 0F B6. 55, FC
-        mov     byte [eax], dl                          ; 0978 _ 88. 10
-        mov     eax, dword [ebp+8H]                     ; 097A _ 8B. 45, 08
-        mov     byte [eax+3H], 2                        ; 097D _ C6. 40, 03, 02
-?_061:  mov     eax, 0                                  ; 0981 _ B8, 00000000
-        jmp     ?_067                                   ; 0986 _ E9, 000000DC
-
-?_062:  mov     eax, dword [ebp+8H]                     ; 098B _ 8B. 45, 08
-        movzx   eax, byte [eax+3H]                      ; 098E _ 0F B6. 40, 03
-        cmp     al, 2                                   ; 0992 _ 3C, 02
-        jnz     ?_063                                   ; 0994 _ 75, 1B
-        mov     eax, dword [ebp+8H]                     ; 0996 _ 8B. 45, 08
-        movzx   edx, byte [ebp-4H]                      ; 0999 _ 0F B6. 55, FC
-        mov     byte [eax+1H], dl                       ; 099D _ 88. 50, 01
-        mov     eax, dword [ebp+8H]                     ; 09A0 _ 8B. 45, 08
-        mov     byte [eax+3H], 3                        ; 09A3 _ C6. 40, 03, 03
-        mov     eax, 0                                  ; 09A7 _ B8, 00000000
-        jmp     ?_067                                   ; 09AC _ E9, 000000B6
-
-?_063:  mov     eax, dword [ebp+8H]                     ; 09B1 _ 8B. 45, 08
-        movzx   eax, byte [eax+3H]                      ; 09B4 _ 0F B6. 40, 03
-        cmp     al, 3                                   ; 09B8 _ 3C, 03
-        jne     ?_066                                   ; 09BA _ 0F 85, 000000A2
-        mov     eax, dword [ebp+8H]                     ; 09C0 _ 8B. 45, 08
-        movzx   edx, byte [ebp-4H]                      ; 09C3 _ 0F B6. 55, FC
-        mov     byte [eax+2H], dl                       ; 09C7 _ 88. 50, 02
-        mov     eax, dword [ebp+8H]                     ; 09CA _ 8B. 45, 08
-        mov     byte [eax+3H], 1                        ; 09CD _ C6. 40, 03, 01
-        mov     eax, dword [ebp+8H]                     ; 09D1 _ 8B. 45, 08
-        movzx   eax, byte [eax]                         ; 09D4 _ 0F B6. 00
-        movzx   eax, al                                 ; 09D7 _ 0F B6. C0
-        and     eax, 07H                                ; 09DA _ 83. E0, 07
-        mov     edx, eax                                ; 09DD _ 89. C2
-        mov     eax, dword [ebp+8H]                     ; 09DF _ 8B. 45, 08
-        mov     dword [eax+0CH], edx                    ; 09E2 _ 89. 50, 0C
-        mov     eax, dword [ebp+8H]                     ; 09E5 _ 8B. 45, 08
-        movzx   eax, byte [eax+1H]                      ; 09E8 _ 0F B6. 40, 01
-        movzx   edx, al                                 ; 09EC _ 0F B6. D0
-        mov     eax, dword [ebp+8H]                     ; 09EF _ 8B. 45, 08
-        mov     dword [eax+4H], edx                     ; 09F2 _ 89. 50, 04
-        mov     eax, dword [ebp+8H]                     ; 09F5 _ 8B. 45, 08
-        movzx   eax, byte [eax+2H]                      ; 09F8 _ 0F B6. 40, 02
-        movzx   edx, al                                 ; 09FC _ 0F B6. D0
-        mov     eax, dword [ebp+8H]                     ; 09FF _ 8B. 45, 08
-        mov     dword [eax+8H], edx                     ; 0A02 _ 89. 50, 08
+        push    ebp                                     ; 09E8 _ 55
+        mov     ebp, esp                                ; 09E9 _ 89. E5
+        sub     esp, 4                                  ; 09EB _ 83. EC, 04
+        mov     eax, dword [ebp+0CH]                    ; 09EE _ 8B. 45, 0C
+        mov     byte [ebp-4H], al                       ; 09F1 _ 88. 45, FC
+        mov     eax, dword [ebp+8H]                     ; 09F4 _ 8B. 45, 08
+        movzx   eax, byte [eax+3H]                      ; 09F7 _ 0F B6. 40, 03
+        test    al, al                                  ; 09FB _ 84. C0
+        jnz     ?_062                                   ; 09FD _ 75, 17
+        cmp     byte [ebp-4H], -6                       ; 09FF _ 80. 7D, FC, FA
+        jnz     ?_061                                   ; 0A03 _ 75, 07
         mov     eax, dword [ebp+8H]                     ; 0A05 _ 8B. 45, 08
-        movzx   eax, byte [eax]                         ; 0A08 _ 0F B6. 00
-        movzx   eax, al                                 ; 0A0B _ 0F B6. C0
-        and     eax, 10H                                ; 0A0E _ 83. E0, 10
-        test    eax, eax                                ; 0A11 _ 85. C0
-        jz      ?_064                                   ; 0A13 _ 74, 13
-        mov     eax, dword [ebp+8H]                     ; 0A15 _ 8B. 45, 08
-        mov     eax, dword [eax+4H]                     ; 0A18 _ 8B. 40, 04
-        or      eax, 0FFFFFF00H                         ; 0A1B _ 0D, FFFFFF00
-        mov     edx, eax                                ; 0A20 _ 89. C2
-        mov     eax, dword [ebp+8H]                     ; 0A22 _ 8B. 45, 08
-        mov     dword [eax+4H], edx                     ; 0A25 _ 89. 50, 04
-?_064:  mov     eax, dword [ebp+8H]                     ; 0A28 _ 8B. 45, 08
-        movzx   eax, byte [eax]                         ; 0A2B _ 0F B6. 00
-        movzx   eax, al                                 ; 0A2E _ 0F B6. C0
-        and     eax, 20H                                ; 0A31 _ 83. E0, 20
-        test    eax, eax                                ; 0A34 _ 85. C0
-        jz      ?_065                                   ; 0A36 _ 74, 13
-        mov     eax, dword [ebp+8H]                     ; 0A38 _ 8B. 45, 08
-        mov     eax, dword [eax+8H]                     ; 0A3B _ 8B. 40, 08
-        or      eax, 0FFFFFF00H                         ; 0A3E _ 0D, FFFFFF00
-        mov     edx, eax                                ; 0A43 _ 89. C2
-        mov     eax, dword [ebp+8H]                     ; 0A45 _ 8B. 45, 08
-        mov     dword [eax+8H], edx                     ; 0A48 _ 89. 50, 08
-?_065:  mov     eax, dword [ebp+8H]                     ; 0A4B _ 8B. 45, 08
-        mov     eax, dword [eax+8H]                     ; 0A4E _ 8B. 40, 08
-        neg     eax                                     ; 0A51 _ F7. D8
-        mov     edx, eax                                ; 0A53 _ 89. C2
-        mov     eax, dword [ebp+8H]                     ; 0A55 _ 8B. 45, 08
-        mov     dword [eax+8H], edx                     ; 0A58 _ 89. 50, 08
-        mov     eax, 1                                  ; 0A5B _ B8, 00000001
-        jmp     ?_067                                   ; 0A60 _ EB, 05
+        mov     byte [eax+3H], 1                        ; 0A08 _ C6. 40, 03, 01
+?_061:  mov     eax, 0                                  ; 0A0C _ B8, 00000000
+        jmp     ?_069                                   ; 0A11 _ E9, 0000010F
 
-?_066:  mov     eax, 4294967295                         ; 0A62 _ B8, FFFFFFFF
-?_067:  leave                                           ; 0A67 _ C9
-        ret                                             ; 0A68 _ C3
+?_062:  mov     eax, dword [ebp+8H]                     ; 0A16 _ 8B. 45, 08
+        movzx   eax, byte [eax+3H]                      ; 0A19 _ 0F B6. 40, 03
+        cmp     al, 1                                   ; 0A1D _ 3C, 01
+        jnz     ?_064                                   ; 0A1F _ 75, 28
+        movzx   eax, byte [ebp-4H]                      ; 0A21 _ 0F B6. 45, FC
+        and     eax, 0C8H                               ; 0A25 _ 25, 000000C8
+        cmp     eax, 8                                  ; 0A2A _ 83. F8, 08
+        jnz     ?_063                                   ; 0A2D _ 75, 10
+        mov     eax, dword [ebp+8H]                     ; 0A2F _ 8B. 45, 08
+        movzx   edx, byte [ebp-4H]                      ; 0A32 _ 0F B6. 55, FC
+        mov     byte [eax], dl                          ; 0A36 _ 88. 10
+        mov     eax, dword [ebp+8H]                     ; 0A38 _ 8B. 45, 08
+        mov     byte [eax+3H], 2                        ; 0A3B _ C6. 40, 03, 02
+?_063:  mov     eax, 0                                  ; 0A3F _ B8, 00000000
+        jmp     ?_069                                   ; 0A44 _ E9, 000000DC
+
+?_064:  mov     eax, dword [ebp+8H]                     ; 0A49 _ 8B. 45, 08
+        movzx   eax, byte [eax+3H]                      ; 0A4C _ 0F B6. 40, 03
+        cmp     al, 2                                   ; 0A50 _ 3C, 02
+        jnz     ?_065                                   ; 0A52 _ 75, 1B
+        mov     eax, dword [ebp+8H]                     ; 0A54 _ 8B. 45, 08
+        movzx   edx, byte [ebp-4H]                      ; 0A57 _ 0F B6. 55, FC
+        mov     byte [eax+1H], dl                       ; 0A5B _ 88. 50, 01
+        mov     eax, dword [ebp+8H]                     ; 0A5E _ 8B. 45, 08
+        mov     byte [eax+3H], 3                        ; 0A61 _ C6. 40, 03, 03
+        mov     eax, 0                                  ; 0A65 _ B8, 00000000
+        jmp     ?_069                                   ; 0A6A _ E9, 000000B6
+
+?_065:  mov     eax, dword [ebp+8H]                     ; 0A6F _ 8B. 45, 08
+        movzx   eax, byte [eax+3H]                      ; 0A72 _ 0F B6. 40, 03
+        cmp     al, 3                                   ; 0A76 _ 3C, 03
+        jne     ?_068                                   ; 0A78 _ 0F 85, 000000A2
+        mov     eax, dword [ebp+8H]                     ; 0A7E _ 8B. 45, 08
+        movzx   edx, byte [ebp-4H]                      ; 0A81 _ 0F B6. 55, FC
+        mov     byte [eax+2H], dl                       ; 0A85 _ 88. 50, 02
+        mov     eax, dword [ebp+8H]                     ; 0A88 _ 8B. 45, 08
+        mov     byte [eax+3H], 1                        ; 0A8B _ C6. 40, 03, 01
+        mov     eax, dword [ebp+8H]                     ; 0A8F _ 8B. 45, 08
+        movzx   eax, byte [eax]                         ; 0A92 _ 0F B6. 00
+        movzx   eax, al                                 ; 0A95 _ 0F B6. C0
+        and     eax, 07H                                ; 0A98 _ 83. E0, 07
+        mov     edx, eax                                ; 0A9B _ 89. C2
+        mov     eax, dword [ebp+8H]                     ; 0A9D _ 8B. 45, 08
+        mov     dword [eax+0CH], edx                    ; 0AA0 _ 89. 50, 0C
+        mov     eax, dword [ebp+8H]                     ; 0AA3 _ 8B. 45, 08
+        movzx   eax, byte [eax+1H]                      ; 0AA6 _ 0F B6. 40, 01
+        movzx   edx, al                                 ; 0AAA _ 0F B6. D0
+        mov     eax, dword [ebp+8H]                     ; 0AAD _ 8B. 45, 08
+        mov     dword [eax+4H], edx                     ; 0AB0 _ 89. 50, 04
+        mov     eax, dword [ebp+8H]                     ; 0AB3 _ 8B. 45, 08
+        movzx   eax, byte [eax+2H]                      ; 0AB6 _ 0F B6. 40, 02
+        movzx   edx, al                                 ; 0ABA _ 0F B6. D0
+        mov     eax, dword [ebp+8H]                     ; 0ABD _ 8B. 45, 08
+        mov     dword [eax+8H], edx                     ; 0AC0 _ 89. 50, 08
+        mov     eax, dword [ebp+8H]                     ; 0AC3 _ 8B. 45, 08
+        movzx   eax, byte [eax]                         ; 0AC6 _ 0F B6. 00
+        movzx   eax, al                                 ; 0AC9 _ 0F B6. C0
+        and     eax, 10H                                ; 0ACC _ 83. E0, 10
+        test    eax, eax                                ; 0ACF _ 85. C0
+        jz      ?_066                                   ; 0AD1 _ 74, 13
+        mov     eax, dword [ebp+8H]                     ; 0AD3 _ 8B. 45, 08
+        mov     eax, dword [eax+4H]                     ; 0AD6 _ 8B. 40, 04
+        or      eax, 0FFFFFF00H                         ; 0AD9 _ 0D, FFFFFF00
+        mov     edx, eax                                ; 0ADE _ 89. C2
+        mov     eax, dword [ebp+8H]                     ; 0AE0 _ 8B. 45, 08
+        mov     dword [eax+4H], edx                     ; 0AE3 _ 89. 50, 04
+?_066:  mov     eax, dword [ebp+8H]                     ; 0AE6 _ 8B. 45, 08
+        movzx   eax, byte [eax]                         ; 0AE9 _ 0F B6. 00
+        movzx   eax, al                                 ; 0AEC _ 0F B6. C0
+        and     eax, 20H                                ; 0AEF _ 83. E0, 20
+        test    eax, eax                                ; 0AF2 _ 85. C0
+        jz      ?_067                                   ; 0AF4 _ 74, 13
+        mov     eax, dword [ebp+8H]                     ; 0AF6 _ 8B. 45, 08
+        mov     eax, dword [eax+8H]                     ; 0AF9 _ 8B. 40, 08
+        or      eax, 0FFFFFF00H                         ; 0AFC _ 0D, FFFFFF00
+        mov     edx, eax                                ; 0B01 _ 89. C2
+        mov     eax, dword [ebp+8H]                     ; 0B03 _ 8B. 45, 08
+        mov     dword [eax+8H], edx                     ; 0B06 _ 89. 50, 08
+?_067:  mov     eax, dword [ebp+8H]                     ; 0B09 _ 8B. 45, 08
+        mov     eax, dword [eax+8H]                     ; 0B0C _ 8B. 40, 08
+        neg     eax                                     ; 0B0F _ F7. D8
+        mov     edx, eax                                ; 0B11 _ 89. C2
+        mov     eax, dword [ebp+8H]                     ; 0B13 _ 8B. 45, 08
+        mov     dword [eax+8H], edx                     ; 0B16 _ 89. 50, 08
+        mov     eax, 1                                  ; 0B19 _ B8, 00000001
+        jmp     ?_069                                   ; 0B1E _ EB, 05
+
+?_068:  mov     eax, 4294967295                         ; 0B20 _ B8, FFFFFFFF
+?_069:  leave                                           ; 0B25 _ C9
+        ret                                             ; 0B26 _ C3
 ; mouse_decode End of function
 
-intHandlerFromC_Spurious:; Function begin
-        push    ebp                                     ; 0A69 _ 55
-        mov     ebp, esp                                ; 0A6A _ 89. E5
-        sub     esp, 24                                 ; 0A6C _ 83. EC, 18
-        mov     eax, dword [bootInfo]                   ; 0A6F _ A1, 00000000(d)
-        mov     dword [ebp-14H], eax                    ; 0A74 _ 89. 45, EC
-        movzx   eax, word [bootInfo+4H]                 ; 0A77 _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 0A7E _ 98
-        mov     dword [ebp-10H], eax                    ; 0A7F _ 89. 45, F0
-        movzx   eax, word [bootInfo+6H]                 ; 0A82 _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 0A89 _ 98
-        mov     dword [ebp-0CH], eax                    ; 0A8A _ 89. 45, F4
-        sub     esp, 8                                  ; 0A8D _ 83. EC, 08
-        push    33                                      ; 0A90 _ 6A, 21
-        push    32                                      ; 0A92 _ 6A, 20
-        call    io_out8                                 ; 0A94 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0A99 _ 83. C4, 10
-        sub     esp, 12                                 ; 0A9C _ 83. EC, 0C
-        push    96                                      ; 0A9F _ 6A, 60
-        call    io_in8                                  ; 0AA1 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0AA6 _ 83. C4, 10
-        push    dword [ebp-0CH]                         ; 0AA9 _ FF. 75, F4
-        push    dword [ebp-10H]                         ; 0AAC _ FF. 75, F0
-        push    dword [ebp-14H]                         ; 0AAF _ FF. 75, EC
-        push    ?_077                                   ; 0AB2 _ 68, 00000000(d)
-        call    Printf                                  ; 0AB7 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0ABC _ 83. C4, 10
-        nop                                             ; 0ABF _ 90
-        leave                                           ; 0AC0 _ C9
-        ret                                             ; 0AC1 _ C3
-; intHandlerFromC_Spurious End of function
-
-intHandlerFromC_keyBoard:; Function begin
-        push    ebp                                     ; 0AC2 _ 55
-        mov     ebp, esp                                ; 0AC3 _ 89. E5
-        sub     esp, 24                                 ; 0AC5 _ 83. EC, 18
-        mov     eax, dword [bootInfo]                   ; 0AC8 _ A1, 00000000(d)
-        mov     dword [ebp-14H], eax                    ; 0ACD _ 89. 45, EC
-        movzx   eax, word [bootInfo+4H]                 ; 0AD0 _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 0AD7 _ 98
-        mov     dword [ebp-10H], eax                    ; 0AD8 _ 89. 45, F0
-        movzx   eax, word [bootInfo+6H]                 ; 0ADB _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 0AE2 _ 98
-        mov     dword [ebp-0CH], eax                    ; 0AE3 _ 89. 45, F4
-        sub     esp, 8                                  ; 0AE6 _ 83. EC, 08
-        push    33                                      ; 0AE9 _ 6A, 21
-        push    32                                      ; 0AEB _ 6A, 20
-        call    io_out8                                 ; 0AED _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0AF2 _ 83. C4, 10
-        sub     esp, 12                                 ; 0AF5 _ 83. EC, 0C
-        push    96                                      ; 0AF8 _ 6A, 60
-        call    io_in8                                  ; 0AFA _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0AFF _ 83. C4, 10
-        mov     byte [ebp-15H], al                      ; 0B02 _ 88. 45, EB
-        movzx   eax, byte [ebp-15H]                     ; 0B05 _ 0F B6. 45, EB
-        sub     esp, 8                                  ; 0B09 _ 83. EC, 08
-        push    eax                                     ; 0B0C _ 50
-        push    KEY_FIFO8                               ; 0B0D _ 68, 00000000(d)
-        call    fifo8_w                                 ; 0B12 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0B17 _ 83. C4, 10
-        nop                                             ; 0B1A _ 90
-        leave                                           ; 0B1B _ C9
-        ret                                             ; 0B1C _ C3
-; intHandlerFromC_keyBoard End of function
-
-intHandlerFromC_mouse:; Function begin
-        push    ebp                                     ; 0B1D _ 55
-        mov     ebp, esp                                ; 0B1E _ 89. E5
-        sub     esp, 24                                 ; 0B20 _ 83. EC, 18
-        mov     eax, dword [bootInfo]                   ; 0B23 _ A1, 00000000(d)
-        mov     dword [ebp-14H], eax                    ; 0B28 _ 89. 45, EC
-        movzx   eax, word [bootInfo+4H]                 ; 0B2B _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 0B32 _ 98
-        mov     dword [ebp-10H], eax                    ; 0B33 _ 89. 45, F0
-        movzx   eax, word [bootInfo+6H]                 ; 0B36 _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 0B3D _ 98
-        mov     dword [ebp-0CH], eax                    ; 0B3E _ 89. 45, F4
-        sub     esp, 8                                  ; 0B41 _ 83. EC, 08
-        push    32                                      ; 0B44 _ 6A, 20
-        push    160                                     ; 0B46 _ 68, 000000A0
-        call    io_out8                                 ; 0B4B _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0B50 _ 83. C4, 10
-        sub     esp, 8                                  ; 0B53 _ 83. EC, 08
-        push    32                                      ; 0B56 _ 6A, 20
-        push    32                                      ; 0B58 _ 6A, 20
-        call    io_out8                                 ; 0B5A _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0B5F _ 83. C4, 10
-        sub     esp, 12                                 ; 0B62 _ 83. EC, 0C
-        push    96                                      ; 0B65 _ 6A, 60
-        call    io_in8                                  ; 0B67 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0B6C _ 83. C4, 10
-        mov     byte [ebp-15H], al                      ; 0B6F _ 88. 45, EB
-        movzx   eax, byte [ebp-15H]                     ; 0B72 _ 0F B6. 45, EB
-        sub     esp, 8                                  ; 0B76 _ 83. EC, 08
-        push    eax                                     ; 0B79 _ 50
-        push    MOUSE_FIFO8                             ; 0B7A _ 68, 00000000(d)
-        call    fifo8_w                                 ; 0B7F _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0B84 _ 83. C4, 10
-        nop                                             ; 0B87 _ 90
-        leave                                           ; 0B88 _ C9
-        ret                                             ; 0B89 _ C3
-; intHandlerFromC_mouse End of function
-
 eraseMouse:; Function begin
-        push    ebp                                     ; 0B8A _ 55
-        mov     ebp, esp                                ; 0B8B _ 89. E5
-        push    ebx                                     ; 0B8D _ 53
-        mov     eax, dword [ebp+10H]                    ; 0B8E _ 8B. 45, 10
-        mov     eax, dword [eax+4H]                     ; 0B91 _ 8B. 40, 04
-        lea     ebx, [eax+9H]                           ; 0B94 _ 8D. 58, 09
-        mov     eax, dword [ebp+10H]                    ; 0B97 _ 8B. 45, 10
-        mov     eax, dword [eax]                        ; 0B9A _ 8B. 00
-        lea     ecx, [eax+9H]                           ; 0B9C _ 8D. 48, 09
-        mov     eax, dword [ebp+10H]                    ; 0B9F _ 8B. 45, 10
-        mov     edx, dword [eax+4H]                     ; 0BA2 _ 8B. 50, 04
-        mov     eax, dword [ebp+10H]                    ; 0BA5 _ 8B. 45, 10
-        mov     eax, dword [eax]                        ; 0BA8 _ 8B. 00
-        push    ebx                                     ; 0BAA _ 53
-        push    ecx                                     ; 0BAB _ 51
-        push    edx                                     ; 0BAC _ 52
-        push    eax                                     ; 0BAD _ 50
-        push    15                                      ; 0BAE _ 6A, 0F
-        push    dword [ebp+0CH]                         ; 0BB0 _ FF. 75, 0C
-        push    dword [ebp+8H]                          ; 0BB3 _ FF. 75, 08
-        call    boxfill8                                ; 0BB6 _ E8, FFFFFFFC(rel)
-        add     esp, 28                                 ; 0BBB _ 83. C4, 1C
-        nop                                             ; 0BBE _ 90
-        mov     ebx, dword [ebp-4H]                     ; 0BBF _ 8B. 5D, FC
-        leave                                           ; 0BC2 _ C9
-        ret                                             ; 0BC3 _ C3
+        push    ebp                                     ; 0B27 _ 55
+        mov     ebp, esp                                ; 0B28 _ 89. E5
+        push    ebx                                     ; 0B2A _ 53
+        mov     eax, dword [ebp+10H]                    ; 0B2B _ 8B. 45, 10
+        mov     eax, dword [eax+4H]                     ; 0B2E _ 8B. 40, 04
+        lea     ebx, [eax+9H]                           ; 0B31 _ 8D. 58, 09
+        mov     eax, dword [ebp+10H]                    ; 0B34 _ 8B. 45, 10
+        mov     eax, dword [eax]                        ; 0B37 _ 8B. 00
+        lea     ecx, [eax+9H]                           ; 0B39 _ 8D. 48, 09
+        mov     eax, dword [ebp+10H]                    ; 0B3C _ 8B. 45, 10
+        mov     edx, dword [eax+4H]                     ; 0B3F _ 8B. 50, 04
+        mov     eax, dword [ebp+10H]                    ; 0B42 _ 8B. 45, 10
+        mov     eax, dword [eax]                        ; 0B45 _ 8B. 00
+        push    ebx                                     ; 0B47 _ 53
+        push    ecx                                     ; 0B48 _ 51
+        push    edx                                     ; 0B49 _ 52
+        push    eax                                     ; 0B4A _ 50
+        push    15                                      ; 0B4B _ 6A, 0F
+        push    dword [ebp+0CH]                         ; 0B4D _ FF. 75, 0C
+        push    dword [ebp+8H]                          ; 0B50 _ FF. 75, 08
+        call    boxfill8                                ; 0B53 _ E8, FFFFFFFC(rel)
+        add     esp, 28                                 ; 0B58 _ 83. C4, 1C
+        nop                                             ; 0B5B _ 90
+        mov     ebx, dword [ebp-4H]                     ; 0B5C _ 8B. 5D, FC
+        leave                                           ; 0B5F _ C9
+        ret                                             ; 0B60 _ C3
 ; eraseMouse End of function
 
 drawMouse:; Function begin
-        push    ebp                                     ; 0BC4 _ 55
-        mov     ebp, esp                                ; 0BC5 _ 89. E5
-        mov     eax, dword [ebp+10H]                    ; 0BC7 _ 8B. 45, 10
-        mov     edx, dword [eax+4H]                     ; 0BCA _ 8B. 50, 04
-        mov     eax, dword [ebp+10H]                    ; 0BCD _ 8B. 45, 10
-        mov     eax, dword [eax]                        ; 0BD0 _ 8B. 00
-        push    cursor                                  ; 0BD2 _ 68, 00000000(d)
-        push    edx                                     ; 0BD7 _ 52
-        push    eax                                     ; 0BD8 _ 50
-        push    dword [ebp+0CH]                         ; 0BD9 _ FF. 75, 0C
-        push    dword [ebp+8H]                          ; 0BDC _ FF. 75, 08
-        call    PrintRGB                                ; 0BDF _ E8, FFFFFFFC(rel)
-        add     esp, 20                                 ; 0BE4 _ 83. C4, 14
-        nop                                             ; 0BE7 _ 90
-        leave                                           ; 0BE8 _ C9
-        ret                                             ; 0BE9 _ C3
+        push    ebp                                     ; 0B61 _ 55
+        mov     ebp, esp                                ; 0B62 _ 89. E5
+        mov     eax, dword [ebp+10H]                    ; 0B64 _ 8B. 45, 10
+        mov     edx, dword [eax+4H]                     ; 0B67 _ 8B. 50, 04
+        mov     eax, dword [ebp+10H]                    ; 0B6A _ 8B. 45, 10
+        mov     eax, dword [eax]                        ; 0B6D _ 8B. 00
+        push    cursor                                  ; 0B6F _ 68, 00000000(d)
+        push    edx                                     ; 0B74 _ 52
+        push    eax                                     ; 0B75 _ 50
+        push    dword [ebp+0CH]                         ; 0B76 _ FF. 75, 0C
+        push    dword [ebp+8H]                          ; 0B79 _ FF. 75, 08
+        call    PrintRGB                                ; 0B7C _ E8, FFFFFFFC(rel)
+        add     esp, 20                                 ; 0B81 _ 83. C4, 14
+        nop                                             ; 0B84 _ 90
+        leave                                           ; 0B85 _ C9
+        ret                                             ; 0B86 _ C3
 ; drawMouse End of function
 
 computeMousePosition:; Function begin
-        push    ebp                                     ; 0BEA _ 55
-        mov     ebp, esp                                ; 0BEB _ 89. E5
-        mov     edx, dword [cur_pos]                    ; 0BED _ 8B. 15, 00000000(d)
-        mov     eax, dword [ebp+8H]                     ; 0BF3 _ 8B. 45, 08
-        mov     eax, dword [eax+4H]                     ; 0BF6 _ 8B. 40, 04
-        add     eax, edx                                ; 0BF9 _ 01. D0
-        mov     dword [cur_pos], eax                    ; 0BFB _ A3, 00000000(d)
-        mov     edx, dword [cur_pos+4H]                 ; 0C00 _ 8B. 15, 00000004(d)
-        mov     eax, dword [ebp+8H]                     ; 0C06 _ 8B. 45, 08
-        mov     eax, dword [eax+8H]                     ; 0C09 _ 8B. 40, 08
-        add     eax, edx                                ; 0C0C _ 01. D0
-        mov     dword [cur_pos+4H], eax                 ; 0C0E _ A3, 00000004(d)
-        mov     eax, dword [cur_pos]                    ; 0C13 _ A1, 00000000(d)
-        test    eax, eax                                ; 0C18 _ 85. C0
-        jns     ?_068                                   ; 0C1A _ 79, 0A
-        mov     dword [cur_pos], 0                      ; 0C1C _ C7. 05, 00000000(d), 00000000
-?_068:  mov     eax, dword [cur_pos+4H]                 ; 0C26 _ A1, 00000004(d)
-        test    eax, eax                                ; 0C2B _ 85. C0
-        jns     ?_069                                   ; 0C2D _ 79, 0A
-        mov     dword [cur_pos+4H], 0                   ; 0C2F _ C7. 05, 00000004(d), 00000000
-?_069:  mov     eax, dword [cur_pos]                    ; 0C39 _ A1, 00000000(d)
-        cmp     eax, dword [ebp+0CH]                    ; 0C3E _ 3B. 45, 0C
-        jle     ?_070                                   ; 0C41 _ 7E, 08
-        mov     eax, dword [ebp+0CH]                    ; 0C43 _ 8B. 45, 0C
-        mov     dword [cur_pos], eax                    ; 0C46 _ A3, 00000000(d)
-?_070:  mov     eax, dword [cur_pos+4H]                 ; 0C4B _ A1, 00000004(d)
-        cmp     eax, dword [ebp+10H]                    ; 0C50 _ 3B. 45, 10
-        jle     ?_071                                   ; 0C53 _ 7E, 08
-        mov     eax, dword [ebp+10H]                    ; 0C55 _ 8B. 45, 10
-        mov     dword [cur_pos+4H], eax                 ; 0C58 _ A3, 00000004(d)
-?_071:  nop                                             ; 0C5D _ 90
-        pop     ebp                                     ; 0C5E _ 5D
-        ret                                             ; 0C5F _ C3
+        push    ebp                                     ; 0B87 _ 55
+        mov     ebp, esp                                ; 0B88 _ 89. E5
+        mov     edx, dword [cur_pos]                    ; 0B8A _ 8B. 15, 00000000(d)
+        mov     eax, dword [ebp+8H]                     ; 0B90 _ 8B. 45, 08
+        mov     eax, dword [eax+4H]                     ; 0B93 _ 8B. 40, 04
+        add     eax, edx                                ; 0B96 _ 01. D0
+        mov     dword [cur_pos], eax                    ; 0B98 _ A3, 00000000(d)
+        mov     edx, dword [cur_pos+4H]                 ; 0B9D _ 8B. 15, 00000004(d)
+        mov     eax, dword [ebp+8H]                     ; 0BA3 _ 8B. 45, 08
+        mov     eax, dword [eax+8H]                     ; 0BA6 _ 8B. 40, 08
+        add     eax, edx                                ; 0BA9 _ 01. D0
+        mov     dword [cur_pos+4H], eax                 ; 0BAB _ A3, 00000004(d)
+        mov     eax, dword [cur_pos]                    ; 0BB0 _ A1, 00000000(d)
+        test    eax, eax                                ; 0BB5 _ 85. C0
+        jns     ?_070                                   ; 0BB7 _ 79, 0A
+        mov     dword [cur_pos], 0                      ; 0BB9 _ C7. 05, 00000000(d), 00000000
+?_070:  mov     eax, dword [cur_pos+4H]                 ; 0BC3 _ A1, 00000004(d)
+        test    eax, eax                                ; 0BC8 _ 85. C0
+        jns     ?_071                                   ; 0BCA _ 79, 0A
+        mov     dword [cur_pos+4H], 0                   ; 0BCC _ C7. 05, 00000004(d), 00000000
+?_071:  mov     eax, dword [cur_pos]                    ; 0BD6 _ A1, 00000000(d)
+        cmp     eax, dword [ebp+0CH]                    ; 0BDB _ 3B. 45, 0C
+        jle     ?_072                                   ; 0BDE _ 7E, 08
+        mov     eax, dword [ebp+0CH]                    ; 0BE0 _ 8B. 45, 0C
+        mov     dword [cur_pos], eax                    ; 0BE3 _ A3, 00000000(d)
+?_072:  mov     eax, dword [cur_pos+4H]                 ; 0BE8 _ A1, 00000004(d)
+        cmp     eax, dword [ebp+10H]                    ; 0BED _ 3B. 45, 10
+        jle     ?_073                                   ; 0BF0 _ 7E, 08
+        mov     eax, dword [ebp+10H]                    ; 0BF2 _ 8B. 45, 10
+        mov     dword [cur_pos+4H], eax                 ; 0BF5 _ A3, 00000004(d)
+?_073:  nop                                             ; 0BFA _ 90
+        pop     ebp                                     ; 0BFB _ 5D
+        ret                                             ; 0BFC _ C3
 ; computeMousePosition End of function
 
 CMain:  ; Function begin
-        push    ebp                                     ; 0C60 _ 55
-        mov     ebp, esp                                ; 0C61 _ 89. E5
-        sub     esp, 56                                 ; 0C63 _ 83. EC, 38
-        call    pict_init                               ; 0C66 _ E8, FFFFFFFC(rel)
-        sub     esp, 4                                  ; 0C6B _ 83. EC, 04
-        push    128                                     ; 0C6E _ 68, 00000080
-        push    key_buf                                 ; 0C73 _ 68, 00000000(d)
-        push    KEY_FIFO8                               ; 0C78 _ 68, 00000000(d)
-        call    fifo8_init                              ; 0C7D _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0C82 _ 83. C4, 10
-        sub     esp, 4                                  ; 0C85 _ 83. EC, 04
-        push    256                                     ; 0C88 _ 68, 00000100
-        push    mouse_buf                               ; 0C8D _ 68, 00000000(d)
-        push    MOUSE_FIFO8                             ; 0C92 _ 68, 00000000(d)
-        call    fifo8_init                              ; 0C97 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0C9C _ 83. C4, 10
-        call    init_keyboard                           ; 0C9F _ E8, FFFFFFFC(rel)
-        call    io_sti                                  ; 0CA4 _ E8, FFFFFFFC(rel)
-        call    enable_mouse                            ; 0CA9 _ E8, FFFFFFFC(rel)
-        mov     eax, dword [bootInfo]                   ; 0CAE _ A1, 00000000(d)
-        mov     dword [ebp-28H], eax                    ; 0CB3 _ 89. 45, D8
-        movzx   eax, word [bootInfo+4H]                 ; 0CB6 _ 0F B7. 05, 00000004(d)
-        cwde                                            ; 0CBD _ 98
-        mov     dword [ebp-24H], eax                    ; 0CBE _ 89. 45, DC
-        movzx   eax, word [bootInfo+6H]                 ; 0CC1 _ 0F B7. 05, 00000006(d)
-        cwde                                            ; 0CC8 _ 98
-        mov     dword [ebp-20H], eax                    ; 0CC9 _ 89. 45, E0
-        sub     esp, 8                                  ; 0CCC _ 83. EC, 08
-        push    15                                      ; 0CCF _ 6A, 0F
-        push    dword [ebp-28H]                         ; 0CD1 _ FF. 75, D8
-        call    fillAll                                 ; 0CD4 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0CD9 _ 83. C4, 10
-        mov     edx, dword [cur_pos+4H]                 ; 0CDC _ 8B. 15, 00000004(d)
-        mov     eax, dword [cur_pos]                    ; 0CE2 _ A1, 00000000(d)
-        sub     esp, 12                                 ; 0CE7 _ 83. EC, 0C
-        push    cursor                                  ; 0CEA _ 68, 00000000(d)
-        push    edx                                     ; 0CEF _ 52
-        push    eax                                     ; 0CF0 _ 50
-        push    dword [ebp-24H]                         ; 0CF1 _ FF. 75, DC
-        push    dword [ebp-28H]                         ; 0CF4 _ FF. 75, D8
-        call    PrintRGB                                ; 0CF7 _ E8, FFFFFFFC(rel)
-        add     esp, 32                                 ; 0CFC _ 83. C4, 20
-        call    GET_MEMOTY_BLOCK_COUNT                  ; 0CFF _ E8, FFFFFFFC(rel)
-        mov     dword [ebp-1CH], eax                    ; 0D04 _ 89. 45, E4
-        mov     eax, dword [ebp-1CH]                    ; 0D07 _ 8B. 45, E4
-        sub     esp, 12                                 ; 0D0A _ 83. EC, 0C
-        push    eax                                     ; 0D0D _ 50
-        call    intToHexStr                             ; 0D0E _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0D13 _ 83. C4, 10
-        mov     dword [ebp-18H], eax                    ; 0D16 _ 89. 45, E8
-        push    dword [ebp-20H]                         ; 0D19 _ FF. 75, E0
-        push    dword [ebp-24H]                         ; 0D1C _ FF. 75, DC
-        push    dword [ebp-28H]                         ; 0D1F _ FF. 75, D8
-        push    dword [ebp-18H]                         ; 0D22 _ FF. 75, E8
-        call    Printf                                  ; 0D25 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0D2A _ 83. C4, 10
-?_072:  call    io_cli                                  ; 0D2D _ E8, FFFFFFFC(rel)
-        sub     esp, 12                                 ; 0D32 _ 83. EC, 0C
-        push    KEY_FIFO8                               ; 0D35 _ 68, 00000000(d)
-        call    fifo8_isEmpty                           ; 0D3A _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0D3F _ 83. C4, 10
-        mov     dword [ebp-14H], eax                    ; 0D42 _ 89. 45, EC
-        sub     esp, 12                                 ; 0D45 _ 83. EC, 0C
-        push    MOUSE_FIFO8                             ; 0D48 _ 68, 00000000(d)
-        call    fifo8_isEmpty                           ; 0D4D _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0D52 _ 83. C4, 10
-        mov     dword [ebp-10H], eax                    ; 0D55 _ 89. 45, F0
-        cmp     dword [ebp-14H], 0                      ; 0D58 _ 83. 7D, EC, 00
-        jz      ?_073                                   ; 0D5C _ 74, 10
-        cmp     dword [ebp-10H], 0                      ; 0D5E _ 83. 7D, F0, 00
-        jz      ?_073                                   ; 0D62 _ 74, 0A
-        call    io_stihlt                               ; 0D64 _ E8, FFFFFFFC(rel)
-        jmp     ?_075                                   ; 0D69 _ E9, 000000CB
+        push    ebp                                     ; 0BFD _ 55
+        mov     ebp, esp                                ; 0BFE _ 89. E5
+        sub     esp, 56                                 ; 0C00 _ 83. EC, 38
+        call    pict_init                               ; 0C03 _ E8, FFFFFFFC(rel)
+        sub     esp, 4                                  ; 0C08 _ 83. EC, 04
+        push    128                                     ; 0C0B _ 68, 00000080
+        push    key_buf                                 ; 0C10 _ 68, 00000000(d)
+        push    KEY_FIFO8                               ; 0C15 _ 68, 00000000(d)
+        call    fifo8_init                              ; 0C1A _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0C1F _ 83. C4, 10
+        sub     esp, 4                                  ; 0C22 _ 83. EC, 04
+        push    256                                     ; 0C25 _ 68, 00000100
+        push    mouse_buf                               ; 0C2A _ 68, 00000000(d)
+        push    MOUSE_FIFO8                             ; 0C2F _ 68, 00000000(d)
+        call    fifo8_init                              ; 0C34 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0C39 _ 83. C4, 10
+        call    init_keyboard                           ; 0C3C _ E8, FFFFFFFC(rel)
+        call    GET_MEMDESC_ADDR                        ; 0C41 _ E8, FFFFFFFC(rel)
+        mov     dword [ebp-30H], eax                    ; 0C46 _ 89. 45, D0
+        mov     dword [ebp-2CH], 0                      ; 0C49 _ C7. 45, D4, 00000000
+        call    io_sti                                  ; 0C50 _ E8, FFFFFFFC(rel)
+        call    enable_mouse                            ; 0C55 _ E8, FFFFFFFC(rel)
+        mov     eax, dword [bootInfo]                   ; 0C5A _ A1, 00000000(d)
+        mov     dword [ebp-28H], eax                    ; 0C5F _ 89. 45, D8
+        movzx   eax, word [bootInfo+4H]                 ; 0C62 _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 0C69 _ 98
+        mov     dword [ebp-24H], eax                    ; 0C6A _ 89. 45, DC
+        movzx   eax, word [bootInfo+6H]                 ; 0C6D _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 0C74 _ 98
+        mov     dword [ebp-20H], eax                    ; 0C75 _ 89. 45, E0
+        sub     esp, 8                                  ; 0C78 _ 83. EC, 08
+        push    15                                      ; 0C7B _ 6A, 0F
+        push    dword [ebp-28H]                         ; 0C7D _ FF. 75, D8
+        call    fillAll                                 ; 0C80 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0C85 _ 83. C4, 10
+        mov     edx, dword [cur_pos+4H]                 ; 0C88 _ 8B. 15, 00000004(d)
+        mov     eax, dword [cur_pos]                    ; 0C8E _ A1, 00000000(d)
+        sub     esp, 12                                 ; 0C93 _ 83. EC, 0C
+        push    cursor                                  ; 0C96 _ 68, 00000000(d)
+        push    edx                                     ; 0C9B _ 52
+        push    eax                                     ; 0C9C _ 50
+        push    dword [ebp-24H]                         ; 0C9D _ FF. 75, DC
+        push    dword [ebp-28H]                         ; 0CA0 _ FF. 75, D8
+        call    PrintRGB                                ; 0CA3 _ E8, FFFFFFFC(rel)
+        add     esp, 32                                 ; 0CA8 _ 83. C4, 20
+        call    GET_MEMOTY_BLOCK_COUNT                  ; 0CAB _ E8, FFFFFFFC(rel)
+        mov     dword [ebp-1CH], eax                    ; 0CB0 _ 89. 45, E4
+        mov     eax, dword [ebp-1CH]                    ; 0CB3 _ 8B. 45, E4
+        sub     esp, 12                                 ; 0CB6 _ 83. EC, 0C
+        push    eax                                     ; 0CB9 _ 50
+        call    intToHexStr                             ; 0CBA _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0CBF _ 83. C4, 10
+        mov     dword [ebp-18H], eax                    ; 0CC2 _ 89. 45, E8
+        sub     esp, 12                                 ; 0CC5 _ 83. EC, 0C
+        push    dword [ebp-18H]                         ; 0CC8 _ FF. 75, E8
+        call    strlen                                  ; 0CCB _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0CD0 _ 83. C4, 10
+        push    txtCursor                               ; 0CD3 _ 68, 00000000(d)
+        push    bootInfo                                ; 0CD8 _ 68, 00000000(d)
+        push    eax                                     ; 0CDD _ 50
+        push    dword [ebp-18H]                         ; 0CDE _ FF. 75, E8
+        call    Printf                                  ; 0CE1 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0CE6 _ 83. C4, 10
+?_074:  call    io_cli                                  ; 0CE9 _ E8, FFFFFFFC(rel)
+        sub     esp, 12                                 ; 0CEE _ 83. EC, 0C
+        push    KEY_FIFO8                               ; 0CF1 _ 68, 00000000(d)
+        call    fifo8_isEmpty                           ; 0CF6 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0CFB _ 83. C4, 10
+        mov     dword [ebp-14H], eax                    ; 0CFE _ 89. 45, EC
+        sub     esp, 12                                 ; 0D01 _ 83. EC, 0C
+        push    MOUSE_FIFO8                             ; 0D04 _ 68, 00000000(d)
+        call    fifo8_isEmpty                           ; 0D09 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0D0E _ 83. C4, 10
+        mov     dword [ebp-10H], eax                    ; 0D11 _ 89. 45, F0
+        cmp     dword [ebp-14H], 0                      ; 0D14 _ 83. 7D, EC, 00
+        jz      ?_075                                   ; 0D18 _ 74, 10
+        cmp     dword [ebp-10H], 0                      ; 0D1A _ 83. 7D, F0, 00
+        jz      ?_075                                   ; 0D1E _ 74, 0A
+        call    io_stihlt                               ; 0D20 _ E8, FFFFFFFC(rel)
+        jmp     ?_077                                   ; 0D25 _ E9, 000000F0
 
-?_073:  cmp     dword [ebp-14H], 0                      ; 0D6E _ 83. 7D, EC, 00
-        jnz     ?_074                                   ; 0D72 _ 75, 44
-        call    io_sti                                  ; 0D74 _ E8, FFFFFFFC(rel)
-        sub     esp, 12                                 ; 0D79 _ 83. EC, 0C
-        push    KEY_FIFO8                               ; 0D7C _ 68, 00000000(d)
-        call    fifo8_r                                 ; 0D81 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0D86 _ 83. C4, 10
-        mov     byte [ebp-2AH], al                      ; 0D89 _ 88. 45, D6
-        movzx   eax, byte [ebp-2AH]                     ; 0D8C _ 0F B6. 45, D6
-        sub     esp, 12                                 ; 0D90 _ 83. EC, 0C
-        push    eax                                     ; 0D93 _ 50
-        call    charToHexStr                            ; 0D94 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0D99 _ 83. C4, 10
-        mov     dword [ebp-0CH], eax                    ; 0D9C _ 89. 45, F4
-        push    dword [ebp-20H]                         ; 0D9F _ FF. 75, E0
-        push    dword [ebp-24H]                         ; 0DA2 _ FF. 75, DC
-        push    dword [ebp-28H]                         ; 0DA5 _ FF. 75, D8
-        push    dword [ebp-0CH]                         ; 0DA8 _ FF. 75, F4
-        call    Printf                                  ; 0DAB _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0DB0 _ 83. C4, 10
-        jmp     ?_072                                   ; 0DB3 _ E9, FFFFFF75
+?_075:  cmp     dword [ebp-14H], 0                      ; 0D2A _ 83. 7D, EC, 00
+        jnz     ?_076                                   ; 0D2E _ 75, 69
+        call    io_sti                                  ; 0D30 _ E8, FFFFFFFC(rel)
+        sub     esp, 12                                 ; 0D35 _ 83. EC, 0C
+        push    KEY_FIFO8                               ; 0D38 _ 68, 00000000(d)
+        call    fifo8_r                                 ; 0D3D _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0D42 _ 83. C4, 10
+        mov     byte [ebp-32H], al                      ; 0D45 _ 88. 45, CE
+        movzx   eax, byte [ebp-32H]                     ; 0D48 _ 0F B6. 45, CE
+        sub     esp, 12                                 ; 0D4C _ 83. EC, 0C
+        push    eax                                     ; 0D4F _ 50
+        call    charToHexStr                            ; 0D50 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0D55 _ 83. C4, 10
+        mov     dword [ebp-0CH], eax                    ; 0D58 _ 89. 45, F4
+        sub     esp, 12                                 ; 0D5B _ 83. EC, 0C
+        push    dword [ebp-0CH]                         ; 0D5E _ FF. 75, F4
+        call    strlen                                  ; 0D61 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0D66 _ 83. C4, 10
+        push    txtCursor                               ; 0D69 _ 68, 00000000(d)
+        push    bootInfo                                ; 0D6E _ 68, 00000000(d)
+        push    eax                                     ; 0D73 _ 50
+        push    dword [ebp-0CH]                         ; 0D74 _ FF. 75, F4
+        call    Printf                                  ; 0D77 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0D7C _ 83. C4, 10
+        sub     esp, 8                                  ; 0D7F _ 83. EC, 08
+        push    txtCursor                               ; 0D82 _ 68, 00000000(d)
+        push    bootInfo                                ; 0D87 _ 68, 00000000(d)
+        call    PrintTab                                ; 0D8C _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0D91 _ 83. C4, 10
+        jmp     ?_074                                   ; 0D94 _ E9, FFFFFF50
 
-?_074:  cmp     dword [ebp-10H], 0                      ; 0DB8 _ 83. 7D, F0, 00
-        jne     ?_072                                   ; 0DBC _ 0F 85, FFFFFF6B
-        call    io_sti                                  ; 0DC2 _ E8, FFFFFFFC(rel)
-        sub     esp, 12                                 ; 0DC7 _ 83. EC, 0C
-        push    MOUSE_FIFO8                             ; 0DCA _ 68, 00000000(d)
-        call    fifo8_r                                 ; 0DCF _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0DD4 _ 83. C4, 10
-        mov     byte [ebp-29H], al                      ; 0DD7 _ 88. 45, D7
-        movzx   eax, byte [ebp-29H]                     ; 0DDA _ 0F B6. 45, D7
-        sub     esp, 8                                  ; 0DDE _ 83. EC, 08
-        push    eax                                     ; 0DE1 _ 50
-        push    mdec                                    ; 0DE2 _ 68, 00000000(d)
-        call    mouse_decode                            ; 0DE7 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0DEC _ 83. C4, 10
-        test    eax, eax                                ; 0DEF _ 85. C0
-        je      ?_072                                   ; 0DF1 _ 0F 84, FFFFFF36
-        sub     esp, 4                                  ; 0DF7 _ 83. EC, 04
-        push    cur_pos                                 ; 0DFA _ 68, 00000000(d)
-        push    dword [ebp-24H]                         ; 0DFF _ FF. 75, DC
-        push    dword [ebp-28H]                         ; 0E02 _ FF. 75, D8
-        call    eraseMouse                              ; 0E05 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0E0A _ 83. C4, 10
-        sub     esp, 4                                  ; 0E0D _ 83. EC, 04
-        push    dword [ebp-20H]                         ; 0E10 _ FF. 75, E0
-        push    dword [ebp-24H]                         ; 0E13 _ FF. 75, DC
-        push    mdec                                    ; 0E16 _ 68, 00000000(d)
-        call    computeMousePosition                    ; 0E1B _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0E20 _ 83. C4, 10
-        sub     esp, 4                                  ; 0E23 _ 83. EC, 04
-        push    cur_pos                                 ; 0E26 _ 68, 00000000(d)
-        push    dword [ebp-24H]                         ; 0E2B _ FF. 75, DC
-        push    dword [ebp-28H]                         ; 0E2E _ FF. 75, D8
-        call    drawMouse                               ; 0E31 _ E8, FFFFFFFC(rel)
-        add     esp, 16                                 ; 0E36 _ 83. C4, 10
-?_075:  jmp     ?_072                                   ; 0E39 _ E9, FFFFFEEF
+?_076:  cmp     dword [ebp-10H], 0                      ; 0D99 _ 83. 7D, F0, 00
+        jne     ?_074                                   ; 0D9D _ 0F 85, FFFFFF46
+        call    io_sti                                  ; 0DA3 _ E8, FFFFFFFC(rel)
+        sub     esp, 12                                 ; 0DA8 _ 83. EC, 0C
+        push    MOUSE_FIFO8                             ; 0DAB _ 68, 00000000(d)
+        call    fifo8_r                                 ; 0DB0 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0DB5 _ 83. C4, 10
+        mov     byte [ebp-31H], al                      ; 0DB8 _ 88. 45, CF
+        movzx   eax, byte [ebp-31H]                     ; 0DBB _ 0F B6. 45, CF
+        sub     esp, 8                                  ; 0DBF _ 83. EC, 08
+        push    eax                                     ; 0DC2 _ 50
+        push    mdec                                    ; 0DC3 _ 68, 00000000(d)
+        call    mouse_decode                            ; 0DC8 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0DCD _ 83. C4, 10
+        test    eax, eax                                ; 0DD0 _ 85. C0
+        je      ?_074                                   ; 0DD2 _ 0F 84, FFFFFF11
+        sub     esp, 4                                  ; 0DD8 _ 83. EC, 04
+        push    cur_pos                                 ; 0DDB _ 68, 00000000(d)
+        push    dword [ebp-24H]                         ; 0DE0 _ FF. 75, DC
+        push    dword [ebp-28H]                         ; 0DE3 _ FF. 75, D8
+        call    eraseMouse                              ; 0DE6 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0DEB _ 83. C4, 10
+        sub     esp, 4                                  ; 0DEE _ 83. EC, 04
+        push    dword [ebp-20H]                         ; 0DF1 _ FF. 75, E0
+        push    dword [ebp-24H]                         ; 0DF4 _ FF. 75, DC
+        push    mdec                                    ; 0DF7 _ 68, 00000000(d)
+        call    computeMousePosition                    ; 0DFC _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0E01 _ 83. C4, 10
+        sub     esp, 4                                  ; 0E04 _ 83. EC, 04
+        push    cur_pos                                 ; 0E07 _ 68, 00000000(d)
+        push    dword [ebp-24H]                         ; 0E0C _ FF. 75, DC
+        push    dword [ebp-28H]                         ; 0E0F _ FF. 75, D8
+        call    drawMouse                               ; 0E12 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0E17 _ 83. C4, 10
+?_077:  jmp     ?_074                                   ; 0E1A _ E9, FFFFFECA
 ; CMain End of function
+
+intHandlerFromC_Spurious:; Function begin
+        push    ebp                                     ; 0E1F _ 55
+        mov     ebp, esp                                ; 0E20 _ 89. E5
+        sub     esp, 24                                 ; 0E22 _ 83. EC, 18
+        mov     eax, dword [bootInfo]                   ; 0E25 _ A1, 00000000(d)
+        mov     dword [ebp-14H], eax                    ; 0E2A _ 89. 45, EC
+        movzx   eax, word [bootInfo+4H]                 ; 0E2D _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 0E34 _ 98
+        mov     dword [ebp-10H], eax                    ; 0E35 _ 89. 45, F0
+        movzx   eax, word [bootInfo+6H]                 ; 0E38 _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 0E3F _ 98
+        mov     dword [ebp-0CH], eax                    ; 0E40 _ 89. 45, F4
+        sub     esp, 8                                  ; 0E43 _ 83. EC, 08
+        push    33                                      ; 0E46 _ 6A, 21
+        push    32                                      ; 0E48 _ 6A, 20
+        call    io_out8                                 ; 0E4A _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0E4F _ 83. C4, 10
+        sub     esp, 12                                 ; 0E52 _ 83. EC, 0C
+        push    96                                      ; 0E55 _ 6A, 60
+        call    io_in8                                  ; 0E57 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0E5C _ 83. C4, 10
+        push    txtCursor                               ; 0E5F _ 68, 00000000(d)
+        push    bootInfo                                ; 0E64 _ 68, 00000000(d)
+        push    2                                       ; 0E69 _ 6A, 02
+        push    ?_079                                   ; 0E6B _ 68, 00000000(d)
+        call    Printf                                  ; 0E70 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0E75 _ 83. C4, 10
+        nop                                             ; 0E78 _ 90
+        leave                                           ; 0E79 _ C9
+        ret                                             ; 0E7A _ C3
+; intHandlerFromC_Spurious End of function
+
+intHandlerFromC_keyBoard:; Function begin
+        push    ebp                                     ; 0E7B _ 55
+        mov     ebp, esp                                ; 0E7C _ 89. E5
+        sub     esp, 24                                 ; 0E7E _ 83. EC, 18
+        mov     eax, dword [bootInfo]                   ; 0E81 _ A1, 00000000(d)
+        mov     dword [ebp-14H], eax                    ; 0E86 _ 89. 45, EC
+        movzx   eax, word [bootInfo+4H]                 ; 0E89 _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 0E90 _ 98
+        mov     dword [ebp-10H], eax                    ; 0E91 _ 89. 45, F0
+        movzx   eax, word [bootInfo+6H]                 ; 0E94 _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 0E9B _ 98
+        mov     dword [ebp-0CH], eax                    ; 0E9C _ 89. 45, F4
+        sub     esp, 8                                  ; 0E9F _ 83. EC, 08
+        push    33                                      ; 0EA2 _ 6A, 21
+        push    32                                      ; 0EA4 _ 6A, 20
+        call    io_out8                                 ; 0EA6 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0EAB _ 83. C4, 10
+        sub     esp, 12                                 ; 0EAE _ 83. EC, 0C
+        push    96                                      ; 0EB1 _ 6A, 60
+        call    io_in8                                  ; 0EB3 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0EB8 _ 83. C4, 10
+        mov     byte [ebp-15H], al                      ; 0EBB _ 88. 45, EB
+        movzx   eax, byte [ebp-15H]                     ; 0EBE _ 0F B6. 45, EB
+        sub     esp, 8                                  ; 0EC2 _ 83. EC, 08
+        push    eax                                     ; 0EC5 _ 50
+        push    KEY_FIFO8                               ; 0EC6 _ 68, 00000000(d)
+        call    fifo8_w                                 ; 0ECB _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0ED0 _ 83. C4, 10
+        nop                                             ; 0ED3 _ 90
+        leave                                           ; 0ED4 _ C9
+        ret                                             ; 0ED5 _ C3
+; intHandlerFromC_keyBoard End of function
+
+intHandlerFromC_mouse:; Function begin
+        push    ebp                                     ; 0ED6 _ 55
+        mov     ebp, esp                                ; 0ED7 _ 89. E5
+        sub     esp, 24                                 ; 0ED9 _ 83. EC, 18
+        mov     eax, dword [bootInfo]                   ; 0EDC _ A1, 00000000(d)
+        mov     dword [ebp-14H], eax                    ; 0EE1 _ 89. 45, EC
+        movzx   eax, word [bootInfo+4H]                 ; 0EE4 _ 0F B7. 05, 00000004(d)
+        cwde                                            ; 0EEB _ 98
+        mov     dword [ebp-10H], eax                    ; 0EEC _ 89. 45, F0
+        movzx   eax, word [bootInfo+6H]                 ; 0EEF _ 0F B7. 05, 00000006(d)
+        cwde                                            ; 0EF6 _ 98
+        mov     dword [ebp-0CH], eax                    ; 0EF7 _ 89. 45, F4
+        sub     esp, 8                                  ; 0EFA _ 83. EC, 08
+        push    32                                      ; 0EFD _ 6A, 20
+        push    160                                     ; 0EFF _ 68, 000000A0
+        call    io_out8                                 ; 0F04 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0F09 _ 83. C4, 10
+        sub     esp, 8                                  ; 0F0C _ 83. EC, 08
+        push    32                                      ; 0F0F _ 6A, 20
+        push    32                                      ; 0F11 _ 6A, 20
+        call    io_out8                                 ; 0F13 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0F18 _ 83. C4, 10
+        sub     esp, 12                                 ; 0F1B _ 83. EC, 0C
+        push    96                                      ; 0F1E _ 6A, 60
+        call    io_in8                                  ; 0F20 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0F25 _ 83. C4, 10
+        mov     byte [ebp-15H], al                      ; 0F28 _ 88. 45, EB
+        movzx   eax, byte [ebp-15H]                     ; 0F2B _ 0F B6. 45, EB
+        sub     esp, 8                                  ; 0F2F _ 83. EC, 08
+        push    eax                                     ; 0F32 _ 50
+        push    MOUSE_FIFO8                             ; 0F33 _ 68, 00000000(d)
+        call    fifo8_w                                 ; 0F38 _ E8, FFFFFFFC(rel)
+        add     esp, 16                                 ; 0F3D _ 83. C4, 10
+        nop                                             ; 0F40 _ 90
+        leave                                           ; 0F41 _ C9
+        ret                                             ; 0F42 _ C3
+; intHandlerFromC_mouse End of function
 
 
 
@@ -1467,10 +1587,8 @@ imgHook:                                                ; byte
         db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 00H, 2EH       ; 0158 _ ........
         db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0160 _ ........
         db 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 00H       ; 0168 _ ........
-        db 00H, 00H, 00H, 00H                           ; 0170 _ ....
-
-bootInfo: dq 00C80140000A0000H                          ; 0174 _ 00C80140000A0000 
-        db 00H, 00H, 00H, 00H                           ; 017C _ ....
+        db 00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H       ; 0170 _ ........
+        db 00H, 00H, 00H, 00H, 00H, 00H, 00H, 00H       ; 0178 _ ........
 
 pict:                                                   ; byte
         db 00H, 00H, 00H, 0FFH, 00H, 00H, 00H, 0FFH     ; 0180 _ ........
@@ -1480,19 +1598,19 @@ pict:                                                   ; byte
         db 00H, 84H, 84H, 00H, 00H, 00H, 84H, 84H       ; 01A0 _ ........
         db 00H, 84H, 00H, 84H, 84H, 84H, 84H, 84H       ; 01A8 _ ........
 
-width:  dd 00000008H                                    ; 01B0 _ 8 
+cur_pos: dq 0000001400000014H                           ; 01B0 _ 0000001400000014 
 
-height: dd 00000010H                                    ; 01B4 _ 16 
+bootInfo: dq 00C80140000A0000H                          ; 01B8 _ 00C80140000A0000 
 
-pointerX: dd 00000014H                                  ; 01B8 _ 20 
-
-pointerY: dd 00000012H                                  ; 01BC _ 18 
-
-cur_pos: dq 0000001400000014H                           ; 01C0 _ 0000001400000014 
+txtCursor:                                              ; byte
+        db 14H, 00H, 00H, 00H, 14H, 00H, 00H, 00H       ; 01C0 _ ........
+        db 08H, 00H, 00H, 00H, 10H, 00H, 00H, 00H       ; 01C8 _ ........
+        db 14H, 00H, 00H, 00H, 14H, 00H, 00H, 00H       ; 01D0 _ ........
+        db 0AH, 00H, 00H, 00H                           ; 01D8 _ ....
 
 str.1506:                                               ; byte
-        db 30H, 58H, 00H, 00H, 00H, 00H, 00H, 00H       ; 01C8 _ 0X......
-        db 00H, 00H, 00H                                ; 01D0 _ ...
+        db 30H, 58H, 00H, 00H, 00H, 00H, 00H, 00H       ; 01DC _ 0X......
+        db 00H, 00H, 00H                                ; 01E4 _ ...
 
 
 
@@ -1512,15 +1630,15 @@ KEY_FIFO8:                                              ; byte
 mdec:                                                   ; oword
         resb    16                                      ; 01A8
 
-keystr.1664:                                            ; byte
+keystr.1697:                                            ; byte
         resb    1                                       ; 01B8
 
-?_076:  resb    2                                       ; 01B9
+?_078:  resb    2                                       ; 01B9
 
 
 
 
-?_077:                                                  ; byte
+?_079:                                                  ; byte
         db 73H, 70H, 00H                                ; 0000 _ sp.
 
 

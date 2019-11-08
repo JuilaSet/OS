@@ -23,21 +23,6 @@
 #define KEY_BUF_SIZE 128
 #define MOUSE_BUF_SIZE 256
 
-char charToHex(char c){
-	if(c >= 10){
-		return 'a' + (c - 10);
-	}
-	return '0' + c;
-}
-
-char *charToHexStr(unsigned char c){
-	static char keystr[3] = {};
-	keystr[1] = charToHex(c % 16);	// 1E -> E, [00E]
-	c >>= 4;						// 1
-	keystr[0] = charToHex(c % 16);	// 1, [01E]
-	return keystr;
-}
-
 /*
  * 分离缓存
  */
@@ -136,46 +121,4 @@ int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat) {
 	}
 
 	return -1;
-}
-
-/*
- * 主程序
- */ 
-
-// 未知中断
-void intHandlerFromC_Spurious(char *esp){
-	char* vram = bootInfo.vgaRam;
-	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
-	// 告诉端口我接收了数据，你可以去继续监听了
-	io_out8(PIC_OCW2, 0x21);
-	io_in8(PORT_KEYDAT);
-
-	Printf("sp", vram, xsize, ysize);
-}
-
-// 键盘中断
-void intHandlerFromC_keyBoard(char *esp){
-
-	char* vram = bootInfo.vgaRam;
-	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
-	io_out8(PIC_OCW2, 0x21);
-	unsigned char data = io_in8(PORT_KEYDAT);	// 获取中断数据
-
-	// 保存到队列中
-	fifo8_w(&KEY_FIFO8, data);
-}
-
-// 鼠标中断
-void intHandlerFromC_mouse(char *esp){
-	char* vram = bootInfo.vgaRam;
-	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
-
-    io_out8(SUBPIC_OCW2, 0x20);
-    io_out8(PIC_OCW2, 0x20);
-	unsigned char data = io_in8(PORT_KEYDAT);	// 获取中断数据
-
-	// 保存到队列中
-	fifo8_w(&MOUSE_FIFO8, data);
 }

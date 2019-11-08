@@ -8,6 +8,21 @@ int strlen(char* sptr){
 	return len - 1;
 }
 
+char charToHex(char c){
+	if(c >= 10){
+		return 'a' + (c - 10);
+	}
+	return '0' + c;
+}
+
+char *charToHexStr(unsigned char c){
+	static char keystr[3] = {};
+	keystr[1] = charToHex(c % 16);	// 1E -> E, [00E]
+	c >>= 4;						// 1
+	keystr[0] = charToHex(c % 16);	// 1, [01E]
+	return keystr;
+}
+
 char* intToHexStr(unsigned int d) {
 	static char str[11] = {'0', 'X'};
 	for(int i = 2; i < 10; i++)

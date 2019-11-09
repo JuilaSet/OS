@@ -137,12 +137,13 @@ void CMain(){
 
 	// 查看可用内存
 	// 描述符个数
-	int memBlkCount = GET_MEMOTY_BLOCK_COUNT();
-	char* pStr = intToHexStr(memBlkCount);
-	Printf(pStr, &bootInfo, &txtCursor);
+	// int memBlkCount = GET_MEMOTY_BLOCK_COUNT();
 
 	// 数据缓冲区地址
-	struct AddrRangeDesc* memDesc = (struct AddrRangeDesc *)GET_MEMDESC_ADDR();
+	// struct AddrRangeDesc* memDesc = GET_MEMDESC_ADDR();
+
+	// 获取描述符容器
+	struct AddrRangeDescArray* descArray = getAddrRangeDescArray();
 	
 	// 初始化队列
 	fifo8_init(&KEY_FIFO8, key_buf, KEY_BUF_SIZE);
@@ -168,11 +169,12 @@ void CMain(){
 			char ch = getKeyMakeChar(data_key);
 			if(data_key == 0x1C){				// 回车
 				Println(&bootInfo, &txtCursor);
+
 				// 打印
 				clear(&bootInfo, COL8_848484);
 				initCursor(&txtCursor);
-				showMemoryInfo(memDesc + count++, &bootInfo, &txtCursor);
-				if (count > memBlkCount) count = 0;
+				showMemoryInfo(descArray->memDesc + count++, &bootInfo, &txtCursor);
+				if (count >= descArray->size) count = 0;
 			}else if(ch == '\t'){
 				PrintTab(&bootInfo, &txtCursor, 1);
 			}else if(ch != '\0'){

@@ -19,6 +19,23 @@ extern char vsFont_Debug[16];
 extern int FONT_SIZE;
 extern int* PTR_OFFSET;
 
+#define  COL8_000000  0
+#define  COL8_FF0000  1
+#define  COL8_00FF00  2
+#define  COL8_FFFF00  3
+#define  COL8_0000FF  4
+#define  COL8_FF00FF  5
+#define  COL8_00FFFF  6
+#define  COL8_FFFFFF  7
+#define  COL8_C6C6C6  8
+#define  COL8_840000  9
+#define  COL8_008400  10
+#define  COL8_848400  11
+#define  COL8_000084  12
+#define  COL8_840084  13
+#define  COL8_008484  14
+#define  COL8_848484  15
+
 /*
  * 显示结构
  */
@@ -129,17 +146,22 @@ void showFont8(char *vram, int xsize, int x, int y, char c, char* font){
 	}
 }
 
-void Print(char *vram, int xsize, int x, int y, int width, int height, int font, unsigned char str[]){
-	for(int i = 0; str[i]; ++i){
-		char c = str[i];
-		if(c <= '9' && c >= '0')
-			showFont8(vram, xsize, x + width * i, y, font, getAddrOffsetNumber(c));
-		else if (c <= 'z' && c >= 'a')
-			showFont8(vram, xsize, x + width * i, y, font, getAddrOffsetAlpha(c));
-		else if(c <= 'Z' && c >= 'A')
-			showFont8(vram, xsize, x + width * i, y, font, getAddrOffsetAlpha(c - 'A' + 'a'));
-		else if(c == ' ')
-			showFont8(vram, xsize, x + width * i, y, font, vsFont_EMPTY);
+// 打印可见字符
+void putChar(char *vram, int xsize, int x, int y, int font, unsigned char c){
+	if(c <= '9' && c >= '0')
+		showFont8(vram, xsize, x, y, font, getAddrOffsetNumber(c));
+	else if (c <= 'z' && c >= 'a')
+		showFont8(vram, xsize, x, y, font, getAddrOffsetAlpha(c));
+	else if(c <= 'Z' && c >= 'A')
+		showFont8(vram, xsize, x, y, font, getAddrOffsetAlpha(c - 'A' + 'a'));
+	else if(c == ' ')
+		showFont8(vram, xsize, x, y, font, vsFont_EMPTY);
+}
+
+// 打印可见字符串
+void putStr(char *vram, int xsize, int x, int y, int width, int font, unsigned char str[], int len){
+	for(int i = 0; i < len; ++i){
+		putChar(vram, xsize, x + width * i, y, font, str[i]);
 	}
 }
 
@@ -212,9 +234,21 @@ void Println(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
 void Printf(char* sptr, int len, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
 	int xsize = bootinfo->screenX, ysize = bootinfo->screenY;
 	char* vram = bootinfo->vgaRam;
-	Print(vram, xsize, tcursor->pointerX, tcursor->pointerY, tcursor->width, tcursor->height, COL8_FFFFFF, sptr);
+	putStr(vram, xsize, tcursor->pointerX, tcursor->pointerY, tcursor->width, COL8_FFFFFF, sptr, len);
 
 	tcursor->pointerX += tcursor->width * len;
+	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
+		Println(bootinfo, tcursor);
+	}
+}
+
+// 打印字符
+void PrintChar(char ch, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+	int xsize = bootinfo->screenX, ysize = bootinfo->screenY;
+	char* vram = bootinfo->vgaRam;
+	putChar(vram, xsize, tcursor->pointerX, tcursor->pointerY, COL8_FFFFFF, ch);
+
+	tcursor->pointerX += tcursor->width;
 	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
 		Println(bootinfo, tcursor);
 	}

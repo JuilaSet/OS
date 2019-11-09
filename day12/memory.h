@@ -16,4 +16,3 @@ char* GET_MEMDESC_ADDR(void);
 
 // 获取BIOS填充次数
 int GET_MEMOTY_BLOCK_COUNT(void);
-

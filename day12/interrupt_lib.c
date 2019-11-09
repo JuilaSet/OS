@@ -122,3 +122,49 @@ int mouse_decode(struct MOUSE_DEC *mdec, unsigned char dat) {
 
 	return -1;
 }
+
+/*
+ * 键盘输入实现
+ */
+
+
+char getKeyMakeChar(unsigned char code){
+	// chars: 0x0f - 0x35
+	static char keyintToChar[] = {
+		// 0x0f, 0x10, ... , 0x19, 0x1a, 0x1b, 0x1c
+		'\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\',
+		// 0x1e, 0x1f, ... , 'l' - 0x26, 0x27, 0x28, 0x29, 
+		'\0', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '\n', 
+		// 0x2A, 0x2b, 0x2c, ... 'm' -- 0x32, 0x33, 0x34, 0x35
+		'\0', '\0', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'
+	};
+
+	// numbers: 0x02 - 0x0e
+	static char keyintToNumChar[] = {
+		// 0x02, ... , 0 -- 0x0b, 0x0c, 0x0d, 0x0e
+		'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
+	};
+
+	if(code >= 0x0f && code <= 0x35)
+		return keyintToChar[code - 0x0f];
+	else if(code >= 0x02 && code <= 0x0e)
+		return keyintToNumChar[code - 0x02];
+	return '\0';
+}
+
+char getKeyBreakChar(unsigned char code){
+	static char keyintToChar[] = {
+		'\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\',
+		'\0', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '\n', 
+		'\0', '\0', 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/'
+	};
+	static char keyintToNumChar[] = {
+		'1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
+	};
+
+	if(code >= 0x8f && code <= 0xb5)
+		return keyintToChar[code - 0x8f];
+	else if(code >= 0x82 && code <= 0x8e)
+		return keyintToNumChar[code - 0x82];
+	return '\0';
+}

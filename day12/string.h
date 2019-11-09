@@ -16,11 +16,11 @@ char charToHex(char c){
 }
 
 char *charToHexStr(unsigned char c){
-	static char keystr[3] = {};
-	keystr[1] = charToHex(c % 16);	// 1E -> E, [00E]
+	static char str[3] = {};
+	str[1] = charToHex(c % 16);	// 1E -> E, [00E]
 	c >>= 4;						// 1
-	keystr[0] = charToHex(c % 16);	// 1, [01E]
-	return keystr;
+	str[0] = charToHex(c % 16);	// 1, [01E]
+	return str;
 }
 
 char* intToHexStr(unsigned int d) {
@@ -38,3 +38,4 @@ char* intToHexStr(unsigned int d) {
 	}
 	return str;
 }
+

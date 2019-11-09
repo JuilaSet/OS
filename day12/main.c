@@ -52,22 +52,6 @@ void computeMousePosition(struct MOUSE_DEC* mdec, int xsize, int ysize) {
 void CMain(){
 
 	pict_init();
-	
-	// 初始化队列
-	fifo8_init(&KEY_FIFO8, key_buf, KEY_BUF_SIZE);
-	fifo8_init(&MOUSE_FIFO8, mouse_buf, MOUSE_BUF_SIZE);
-
-	init_keyboard();
-
-	// 数据缓冲区地址
-	struct AddrRangeDesc* memDesc = (struct AddrRangeDesc *)GET_MEMDESC_ADDR();
-
-	// 第几个描述符
-	int count = 0;
-
-	// 允许开启中断
-    io_sti();
-	enable_mouse();
 
 	// 显示
 	char* vram = bootInfo.vgaRam;
@@ -77,10 +61,37 @@ void CMain(){
 	fillAll(vram, COL8_848484);
 	PrintRGB(vram, xsize, cur_pos.x, cur_pos.y, cursor);
 
+	static char* testString = "abcdefghi";
+	Printf(testString, strlen(testString), &bootInfo, &txtCursor);
+	Println(&bootInfo, &txtCursor);
+
+	static char* testString2 = "jklmnopqrstuvw";
+	Printf(testString2, strlen(testString2), &bootInfo, &txtCursor);
+	Println(&bootInfo, &txtCursor);
+
+	static char* testNumString = "0123456789";
+	Printf(testNumString, strlen(testNumString), &bootInfo, &txtCursor);
+	
+	// 允许开启中断
+    io_sti();
+	enable_mouse();
+
 	// 查看可用内存
-	int memBlkCount = GET_MEMOTY_BLOCK_COUNT();
-	char* pStr = intToHexStr(memBlkCount);
-	Printf(pStr, strlen(pStr), &bootInfo, &txtCursor);
+//	int memBlkCount = GET_MEMOTY_BLOCK_COUNT();
+//	char* pStr = intToHexStr(memBlkCount);
+//	Printf(pStr, strlen(pStr), &bootInfo, &txtCursor);
+
+	// 数据缓冲区地址
+	struct AddrRangeDesc* memDesc = (struct AddrRangeDesc *)GET_MEMDESC_ADDR();
+
+	// 第几个描述符
+	int count = 0;
+	
+	// 初始化队列
+	fifo8_init(&KEY_FIFO8, key_buf, KEY_BUF_SIZE);
+	fifo8_init(&MOUSE_FIFO8, mouse_buf, MOUSE_BUF_SIZE);
+
+	init_keyboard();
 
 	for(;;) {
 		io_cli();
@@ -101,8 +112,9 @@ void CMain(){
 			// 	count = 0;
 
 			unsigned char data_key = fifo8_r(&KEY_FIFO8);
-			char* pStr = charToHexStr(data_key);
-			Printf(pStr, strlen(pStr), &bootInfo, &txtCursor);
+			char ch = getKeyMakeChar(data_key);
+			if(ch != '\0')
+				PrintChar(ch, &bootInfo, &txtCursor);
 		}else if(!mouse_empty){
 			// 处理鼠标
 			io_sti();

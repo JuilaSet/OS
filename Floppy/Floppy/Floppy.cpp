@@ -91,9 +91,9 @@ public:
 		bool icon = true;
 		// 读取柱面
 		for (int cylinder = 0; cylinder < CYLINDER::COUNT; ++cylinder) {
-			// 翻面
+			// 翻面 []][
 			for (int magnetic = 0; magnetic < 2; ++magnetic) {
-				MAGNETIC head = magnetic == 0 ? MAGNETIC::HEAD_0 : MAGNETIC::HEAD_1;
+				MAGNETIC head = (magnetic == 0 ? MAGNETIC::HEAD_0 : MAGNETIC::HEAD_1);
 				// 读取18个扇区
 				for (int sector = 0; sector < SECTOR::COUNT; ++sector) {
 					auto buf = read(head, cylinder, sector);

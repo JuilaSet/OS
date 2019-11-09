@@ -1,7 +1,9 @@
 // 
 // string.h 文件
 // 
-
+#define STRING_FILE_INC
+#ifdef STRING_FILE_INC
+#else
 int strlen(char* sptr){
 	int len = 0;
 	while(sptr[len++]);
@@ -38,4 +40,4 @@ char* intToHexStr(unsigned int d) {
 	}
 	return str;
 }
-
+#endif

@@ -15,10 +15,14 @@ dwMCRNumber:
 [code] |<
 // 内存描述符
 struct AddrRangeDesc {
+	// 基地址: 当时考虑了64位, 因此有高低2位
 	unsigned int baseAddrLow;
 	unsigned int baseAddrHigh;
+
+	// 长度: 
 	unsigned int lengthLow;
 	unsigned int lengthHigh;
+	
 	unsigned int type;
 };
 
@@ -31,13 +35,13 @@ void showMemoryInfo(struct AddrRangeDesc* desc, char* vram, int page, int xsize,
 
 * 获取数据缓冲区地址: 
 [ex~]
-|| struct AddrRangeDesc* memDesc = (struct AddrRangeDesc*)get_adr_buffer();
+|| struct AddrRangeDesc* memDesc = (struct AddrRangeDesc *)GET_MEMDESC_ADDR();
 
 * 按下回车时, 显示内存信息: 
 [code] |<
 count++;
 ...
-// 键盘中断处理函数, 回车 -- 0x!C
+// 键盘中断处理函数, 回车 -- 0x1C
 if (data == 0x1C) {
 	showMemoryInfo(memDesc + count, vram, count, xsize, COL8_FFFFFF);
 	count++;

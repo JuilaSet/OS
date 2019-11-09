@@ -1,6 +1,6 @@
 ﻿  Floppy.cpp
 D:\D_box\wkspc\OS\Floppy\Floppy\Floppy.cpp(88,77): warning C4290: C++ exception specification ignored except to indicate a function is not __declspec(nothrow)
-D:\D_box\wkspc\OS\Floppy\Floppy\Floppy.cpp(103,31): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
-D:\D_box\wkspc\OS\Floppy\Floppy\Floppy.cpp(103,31): warning C4309: 'initializing': truncation of constant value
-D:\D_box\wkspc\OS\Floppy\Floppy\Floppy.cpp(114,20): warning C4309: '=': truncation of constant value
+D:\D_box\wkspc\OS\Floppy\Floppy\Floppy.cpp(104,31): warning C4838: conversion from 'int' to 'char' requires a narrowing conversion
+D:\D_box\wkspc\OS\Floppy\Floppy\Floppy.cpp(104,31): warning C4309: 'initializing': truncation of constant value
+D:\D_box\wkspc\OS\Floppy\Floppy\Floppy.cpp(115,20): warning C4309: '=': truncation of constant value
   Floppy.vcxproj -> D:\D_box\wkspc\OS\Floppy\Debug\Floppy.exe

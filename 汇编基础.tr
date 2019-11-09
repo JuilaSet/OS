@@ -84,6 +84,8 @@
 
 			* `JBE`
 
+			* jmp模式: `near`(调用程序和子程序在同一代码段中, 只改写eip), `far`(同时改写EIP和CS), `short`()
+
 		}
 
 		* `iretd`: 中断返回

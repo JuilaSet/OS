@@ -5,6 +5,7 @@
 
 // 图像文件
 #include "images.c"
+#include "string.h"
 
 // 绘图函数
 extern char FONT_LIST[16];
@@ -12,9 +13,13 @@ extern char IMAGE_FONT_LIST[16];
 extern char ALPHA_FONT_LIST[16];
 extern char NUMBER_FONT_LIST[16];
 
+
 // 空格
 extern char vsFont_EMPTY[16];
 extern char vsFont_Debug[16];
+extern char vsFont_ASK[16];
+extern char vsFont__[16];
+extern char vsFont_colon[16];
 
 extern int FONT_SIZE;
 extern int* PTR_OFFSET;
@@ -156,6 +161,12 @@ void putChar(char *vram, int xsize, int x, int y, int font, unsigned char c){
 		showFont8(vram, xsize, x, y, font, getAddrOffsetAlpha(c - 'A' + 'a'));
 	else if(c == ' ')
 		showFont8(vram, xsize, x, y, font, vsFont_EMPTY);
+	else if(c == '?')
+		showFont8(vram, xsize, x, y, font, vsFont_ASK);
+	else if(c == '_')
+		showFont8(vram, xsize, x, y, font, vsFont__);
+	else if(c == ':')
+		showFont8(vram, xsize, x, y, font, vsFont_colon);
 }
 
 // 打印可见字符串
@@ -215,11 +226,25 @@ void fillAll(char* vram, int font){
 */
 
 struct TXTCursor {
-	int pointerX, pointerY;
+	int pointerX, pointerY;			// dynamic
 	int width, height;				// 每个字的宽度, 高度
 	int initPointerX, initPointerY;	// 初始位置
 	int tabSplitCount;				// tab的格子个数
+	int color;						// 颜色
 };
+
+// initCursor: 初始化
+void initCursor(struct TXTCursor* tcursor){
+	tcursor->pointerX = tcursor->initPointerX;
+	tcursor->pointerY = tcursor->initPointerY;
+}
+
+// clear: 清空背景
+void clear(struct BOOTINFO* bootinfo, int font){
+	for(int i=0; i < 0xffff; i++){
+		bootinfo->vgaRam[i] = font;
+	}
+}
 
 // 回车
 void Println(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
@@ -230,11 +255,20 @@ void Println(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
 	}
 }
 
+void PrintlnMult(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor, int n){
+	tcursor->pointerX = tcursor->initPointerX;
+	tcursor->pointerY += tcursor->height * n;
+	if(tcursor->pointerY >= bootinfo->screenY){
+		tcursor->pointerY = tcursor->initPointerY;
+	}
+}
+
 // 打印字符串
-void Printf(char* sptr, int len, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+void Printf(char* sptr, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
 	int xsize = bootinfo->screenX, ysize = bootinfo->screenY;
 	char* vram = bootinfo->vgaRam;
-	putStr(vram, xsize, tcursor->pointerX, tcursor->pointerY, tcursor->width, COL8_FFFFFF, sptr, len);
+	int len = strlen(sptr);
+	putStr(vram, xsize, tcursor->pointerX, tcursor->pointerY, tcursor->width, tcursor->color, sptr, len);
 
 	tcursor->pointerX += tcursor->width * len;
 	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
@@ -246,7 +280,7 @@ void Printf(char* sptr, int len, struct BOOTINFO* bootinfo, struct TXTCursor* tc
 void PrintChar(char ch, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
 	int xsize = bootinfo->screenX, ysize = bootinfo->screenY;
 	char* vram = bootinfo->vgaRam;
-	putChar(vram, xsize, tcursor->pointerX, tcursor->pointerY, COL8_FFFFFF, ch);
+	putChar(vram, xsize, tcursor->pointerX, tcursor->pointerY, tcursor->color, ch);
 
 	tcursor->pointerX += tcursor->width;
 	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
@@ -255,22 +289,14 @@ void PrintChar(char ch, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
 }
 
 // Tab键: n(将一行分为几格)
-void PrintTab(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+void PrintTab(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor, int n){
 	int xsize = bootinfo->screenX, ysize = bootinfo->screenY;
 	// 得到每一个格子的大小
 	short blkSize = (bootinfo->screenX / tcursor->tabSplitCount);
 	// 将光标移动到下一个格子处
-	tcursor->pointerX = blkSize * ((tcursor->pointerX + blkSize) / blkSize);
+	tcursor->pointerX = blkSize * ((tcursor->pointerX + blkSize * n) / blkSize);
 	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
 		Println(bootinfo, tcursor);
 	}
 }
 
-// 将地址描述符的信息显示到桌面上: showMemoryInfo(memDesc + count, vram, count, xsize, COL8_FFFFFF);
-void showMemoryInfo(struct AddrRangeDesc* desc, char* vram, int page, int xsize, int color) {
-//	Printf("baseAddrLow: ");
-//	Printf("baseAddrHigh: ");
-//	Printf("lengthLow: ");
-//	Printf("lengthHigh: ");
-//	Printf("type: ");
-}

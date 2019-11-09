@@ -23,7 +23,7 @@ class Floppy {
 public:
 	// 针头
 	enum class MAGNETIC {
-		HEAD_1,
+		HEAD_1 = 0,
 		HEAD_0
 	};
 
@@ -87,13 +87,14 @@ public:
 	// 生成二进制文件
 	void writeIntoFile(string filename, bool flag = false) throw(FileWriteError) {
 		ofstream of(filename, ios::binary);
-		// 只写一次55aa
+		// 只写一次 55aa
 		bool icon = true;
 		// 读取柱面
 		for (int cylinder = 0; cylinder < CYLINDER::COUNT; ++cylinder) {
-			// 翻面 []][
+			// 翻面
 			for (int magnetic = 0; magnetic < 2; ++magnetic) {
-				MAGNETIC head = (magnetic == 0 ? MAGNETIC::HEAD_0 : MAGNETIC::HEAD_1);
+				MAGNETIC head = _getMagnetic(magnetic);
+				// MAGNETIC head = (magnetic == 0 ? MAGNETIC::HEAD_0 : MAGNETIC::HEAD_1);
 				// 读取18个扇区
 				for (int sector = 0; sector < SECTOR::COUNT; ++sector) {
 					auto buf = read(head, cylinder, sector);
@@ -152,8 +153,8 @@ public:
 				sectorID = 0;
 				++mag;
 				if (mag >= 2) {
-					++cylinderID;
 					mag = 0;
+					++cylinderID;
 					if (cylinderID >= CYLINDER::COUNT) {
 						std::cerr << "Floppy full" << std::endl;
 						exit(2);
@@ -168,11 +169,11 @@ private:
 
 	// 返回值
 	int _getInt(Floppy::MAGNETIC mag) {
-		return (int)mag;
+		return (mag == Floppy::MAGNETIC::HEAD_0 ? 0 : 1);
 	}
 
 	MAGNETIC _getMagnetic(int mag) {
-		return (MAGNETIC)mag;
+		return (mag == 0 ? Floppy::MAGNETIC::HEAD_0 : Floppy::MAGNETIC::HEAD_1);
 	}
 
 	// 磁盘数据

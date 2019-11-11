@@ -13,6 +13,7 @@ io_in16:
 io_in32:
 	mov edx, [esp + 4]
 	in  eax, dx
+	ret
 
 io_out8:
 	mov edx, [esp + 4]

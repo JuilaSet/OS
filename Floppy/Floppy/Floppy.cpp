@@ -204,7 +204,10 @@ private:
 
 };
 
+void func() {}
+
 int main(int argv, char* args[]) {
+	func();
 	Floppy flp;
 
 	std::string path(args[argv - 1]);

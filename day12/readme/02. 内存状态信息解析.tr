@@ -24,6 +24,7 @@ struct AddrRangeDesc {
 	unsigned int lengthHigh;
 	
 	unsigned int type;
+	// => type: 1(表示当前内存块可以被内核使用), 2(表示当前内存块已经被占用), 3(保留给未来使用, 内核也不能用当前内存块)
 };
 
 // 获取BIOS填充的数据缓冲区地址
@@ -32,6 +33,7 @@ char* get_adr_buffer(void);
 // 将地址描述符的信息显示到桌面上
 void showMemoryInfo(struct AddrRangeDesc* desc, char* vram, int page, int xsize, int color);
 >| [uncode]
+
 
 * 获取数据缓冲区地址: 
 [ex~]

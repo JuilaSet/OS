@@ -119,6 +119,13 @@ void showMemoryInfo(struct AddrRangeDesc* desc, struct BOOTINFO* bootinfo, struc
 	Println(bootinfo, tcursor);
 }
 
+void displayMem_8(memaddr8_t addr, int n, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+	for(int i = 0; i < n; ++i){
+		Printf(charToHexStr(*(addr + i)), bootinfo, tcursor);
+		Printf(" ", bootinfo, tcursor);
+	}
+}
+
 void CMain(){
 
 	pict_init();
@@ -130,21 +137,20 @@ void CMain(){
 	// 系统背景
 	fillAll(vram, COL8_848484);
 	PrintRGB(vram, xsize, cur_pos.x, cur_pos.y, cursor);
+
+	// 查看可用内存
+	// 获取描述符容器
+	struct AddrRangeDescArray* descArray = getAddrRangeDescArray();
+	struct MEM_MAN memman;
+
+	// 分配32位内存
+	memman_init(&memman);
+	memman_free(&memman, (memaddr32_t)0x0, 0x9FC00);
 	
 	// 允许开启中断
     io_sti();
 	enable_mouse();
 
-	// 查看可用内存
-	// 描述符个数
-	// int memBlkCount = GET_MEMOTY_BLOCK_COUNT();
-
-	// 数据缓冲区地址
-	// struct AddrRangeDesc* memDesc = GET_MEMDESC_ADDR();
-
-	// 获取描述符容器
-	struct AddrRangeDescArray* descArray = getAddrRangeDescArray();
-	
 	// 初始化队列
 	fifo8_init(&KEY_FIFO8, key_buf, KEY_BUF_SIZE);
 	fifo8_init(&MOUSE_FIFO8, mouse_buf, MOUSE_BUF_SIZE);
@@ -168,6 +174,7 @@ void CMain(){
 			unsigned char data_key = fifo8_r(&KEY_FIFO8);
 			char ch = getKeyMakeChar(data_key);
 			if(data_key == 0x1C){				// 回车
+
 				Println(&bootInfo, &txtCursor);
 
 				// 打印
@@ -175,6 +182,11 @@ void CMain(){
 				initCursor(&txtCursor);
 				showMemoryInfo(descArray->memDesc + count++, &bootInfo, &txtCursor);
 				if (count >= descArray->size) count = 0;
+
+				// 查看总共可用的内存
+				Printf("Total: ", &bootInfo, &txtCursor);
+				Printf(intToHexStr(memman_total(&memman)), &bootInfo, &txtCursor);
+
 			}else if(ch == '\t'){
 				PrintTab(&bootInfo, &txtCursor, 1);
 			}else if(ch != '\0'){

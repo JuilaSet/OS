@@ -23,8 +23,8 @@
 		[ex~] 
 		|| MemChkBuf: times 256 db 0
 
-	* ecx寄存器存储es:di所指向的内存大小, 以字节为单位, BIOS最多会填充ecx个字节的数据, 通常情况下, 无论ecx的数值是多少, 
-		BIOS都只填充20字节, 有些BIOS直接忽略ecx的值, 总是填充20字节。
+	* ecx寄存器存储`es:di`所指向的内存大小, 以字节为单位, BIOS最多会填充ecx个字节的数据, 通常情况下, 无论ecx的数值是多少, 
+		BIOS都只填充20字节, 有些BIOS直接忽略ecx的值, 总是填充20字节
 		|| mov   ecx, 20
 
 	* edx寄存器的值设置为0534D4150h, 这个数值其实对应的是字符组合”SMAP”,其作用我们可以暂时忽略。
@@ -84,7 +84,7 @@
 		mov   edx, 0534D4150h
 		int   15h
 		jc    LABEL_MEM_CHK_FAIL
-		add   di, 20   
+		add   di, 20
 		inc   dword [dwMCRNumber]	; BIOS成功填充地址描述符后, 自加1
 		cmp   ebx, 0
 		jne   .loop

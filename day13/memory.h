@@ -5,7 +5,7 @@
 typedef unsigned int* memaddr32_t;
 typedef unsigned char* memaddr8_t;
 
-// 系统函数
+// 内存管理函数
 void memset_8(memaddr8_t dest, unsigned char val, int n){
 	while(n--) *dest++ = val;
 }
@@ -13,6 +13,16 @@ void memset_8(memaddr8_t dest, unsigned char val, int n){
 void memcpy_8(memaddr8_t src, memaddr8_t dest, int n){
 	if (src == dest) return;
 	while(n--) *dest++ = *src++;
+}
+
+// 如果非0, 就复制
+void memcmb(memaddr8_t src, memaddr8_t dest, int n){
+	if (src == dest) return;
+	while(n--) {
+		if(*dest == 0) *dest = *src;
+		dest++;
+		src++;
+	}
 }
 
 // 内存描述符
@@ -48,7 +58,7 @@ struct AddrRangeDescArray* getAddrRangeDescArray(){
  * 内存管理算法
  */
 
-#define MEMMAN_MAXLEN 500
+#define MEMMAN_MAXLEN 400
 
 // 存放可用内存信息
 struct FREE_MEM_INFO {
@@ -134,7 +144,6 @@ int memman_free(struct MEM_MAN *man, memaddr32_t addr, unsigned int size){
         }
     }
 
-	// 
     if (i < man->freeMemBackIndex) {
         if (addr + size == man->meminfos[i].addr) {
            man->meminfos[i].addr = addr;
@@ -165,7 +174,27 @@ int memman_free(struct MEM_MAN *man, memaddr32_t addr, unsigned int size){
     return -1;
 }
 
-// malloc
-memaddr8_t malloc(struct MEM_MAN *man, memaddr8_t , unsigned int size){
-	return memman_alloc(man, size);
+/*
+ * 封装
+ */
+
+// 分配4k内存
+memaddr32_t memman_alloc_4k(struct MEMMAN *man, int size) {
+	memaddr32_t a;
+	size = (size + 0xfff) & 0xfffff000;	// 0x1000 = 4k, 取高位 = 4k * size
+	a = memman_alloc(man, size);
+	return a;
 }
+
+// 分配n个字节的内存
+memaddr8_t malloc(struct MEMMAN *man, int size){
+	return (memaddr8_t)memman_alloc(man, size);
+}
+
+// 释放内存, 失败返回-1
+int free(struct MEMMAN *man, memaddr32_t addr, int size){
+	memset_8((memaddr8_t)addr, 0, size);
+	return memman_free(man, addr, size);
+}
+
+

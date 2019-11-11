@@ -1,0 +1,53 @@
+/*
+ * 图层技术
+ */
+#def [text~]
+====================
+* 内存管理 {
+
+	* 更改内存描述符
+
+	* 测试内存写入: 
+	|| eb <addr> <value>
+
+	* 申请4k内存: 
+	[code] |<
+	unsigned int memman_alloc_4k(struct MEMMAN *man, unsigned int size) {
+		unsigned int a;
+		size = (size + 0xfff) & 0xfffff000;	// 0x1000 = 4k, 取高位 = 4k * size个
+		a = memman_alloc(man, size);
+		return a;
+	}
+	>| [uncode]
+
+	* 分配内存函数: 
+	|| memaddr32_t memman_alloc(struct MEM_MAN *man, unsigned int size)
+
+}
+
+* 实现图层对象 {
+
+	* 需求: OS绘图的时候不会覆盖高层图层的内容
+
+	* 实现 {
+
+		* 图层对象: 
+		[code] |<
+		struct Coverage {
+			int width, height;
+			int x, y;
+		};
+		>| [uncode]
+
+		* 图层队列: 
+		[code] |<
+		#define MAX_COVERAGE_COUNT 10;
+		struct CoverageList[MAX_COVERAGE_COUNT];
+		>| [uncode]
+
+		* 图层方法: 创建图层; 图层上绘画; 
+
+	}
+
+}
+====================

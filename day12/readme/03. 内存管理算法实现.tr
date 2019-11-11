@@ -23,7 +23,7 @@ int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int size);
 
 	* 分配: size-分配的size, 若为0, 从队列中删除
 
-	* 释放: 插入队列, 合并可用内存
+	* 释放: 插入队列; 合并可用内存;
 
 }
 ====================

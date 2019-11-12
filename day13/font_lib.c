@@ -25,22 +25,32 @@ extern char vsFont_colon[16];
 extern int FONT_SIZE;
 extern int* PTR_OFFSET;
 
-#define  COL8_000000  0
-#define  COL8_FF0000  1
-#define  COL8_00FF00  2
-#define  COL8_FFFF00  3
-#define  COL8_0000FF  4
-#define  COL8_FF00FF  5
-#define  COL8_00FFFF  6
-#define  COL8_FFFFFF  7
-#define  COL8_C6C6C6  8
-#define  COL8_840000  9
-#define  COL8_008400  10
-#define  COL8_848400  11
-#define  COL8_000084  12
-#define  COL8_840084  13
-#define  COL8_008484  14
-#define  COL8_848484  15
+#define COL8_000000  0
+#define COL8_FF0000  1
+#define COL8_00FF00  2
+#define COL8_FFFF00  3
+#define COL8_0000FF  4
+#define COL8_FF00FF  5
+#define COL8_00FFFF  6
+#define COL8_FFFFFF  7
+#define COL8_C6C6C6  8
+#define COL8_840000  9
+#define COL8_008400  10
+#define COL8_848400  11
+#define COL8_000084  12
+#define COL8_840084  13
+#define COL8_008484  14
+#define COL8_848484  15
+#define COL8_TP		 0xFF
+
+// 工具对象
+typedef struct {
+	int x, y;
+} Position;
+
+typedef struct {
+	int width, height;
+} Size;
 
 /*
  * 初始化调色板
@@ -305,22 +315,22 @@ void PrintTab(struct BOOTINFO* bootinfo, struct TXTCursor* tcursor, int n){
 void showMemoryInfo(struct AddrRangeDesc* desc, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor) {
 	Printf("baseAddr_Low: ",  bootinfo, tcursor);
 	PrintTab(bootinfo, tcursor, 1);
-	Printf(intToHexStr(desc->baseAddrLow), bootinfo, tcursor);
+	Printf(intToHexStr((int)desc->baseAddrLow), bootinfo, tcursor);
 	Println(bootinfo, tcursor);
 	
 	Printf("baseAddr_Hight: ", bootinfo, tcursor);
 	PrintTab(bootinfo, tcursor, 1);
-	Printf(intToHexStr(desc->baseAddrHigh), bootinfo, tcursor);
+	Printf(intToHexStr((int)desc->baseAddrHigh), bootinfo, tcursor);
 	Println(bootinfo, tcursor);
 	
 	Printf("length_Low: ", bootinfo, tcursor);
 	PrintTab(bootinfo, tcursor, 2);
-	Printf(intToHexStr(desc->lengthLow), bootinfo, tcursor);
+	Printf(intToHexStr((int)desc->lengthLow), bootinfo, tcursor);
 	Println(bootinfo, tcursor);
 	
 	Printf("length_Hight: ", bootinfo, tcursor);
 	PrintTab(bootinfo, tcursor, 1);
-	Printf(intToHexStr(desc->lengthHigh), bootinfo, tcursor);
+	Printf(intToHexStr((int)desc->lengthHigh), bootinfo, tcursor);
 	Println(bootinfo, tcursor);
 	
 	Printf("type: ", bootinfo, tcursor);
@@ -341,102 +351,103 @@ void displayMem_8(memaddr8_t addr, int n, struct BOOTINFO* bootinfo, struct TXTC
  * 图层
  */
 #define MAX_COVERAGE_COUNT 50
-#define VRAM_LENGTH 0xfff
-
-struct Position {
-	int x, y;
-};
-
-struct Size {
-	int width, height;
-};
+#define VRAM_LENGTH 0xffff
+#define VALIED_FLAG 0x11223344
 
 // 图层对象
-struct Sheet {
-	struct Position* pos;
-	struct Size* size;
+typedef struct {
+	Position* pos;
+	Size* size;
 	int layer;
-	int length;
+	unsigned int length;
 	int index;
+	int valid;	// == 0x11223344 时有效
 	memaddr8_t vram;
-};
+} Sheet;
 
-// 图层管理对象
-struct SheetManager{
+// 全局图层管理类
+typedef struct {
 	int size;
-	struct Sheet *sheetList;
-};
+	Sheet sheetList[MAX_COVERAGE_COUNT];
+} SheetManager;
 
-// 初始化图层管理器
-void initSheetManager(struct SheetManager* shtman){
-	static struct Sheet SheetList[MAX_COVERAGE_COUNT];
-	shtman->sheetList = &SheetList;
-	shtman->size = 0;
-}
+// 全局图层管理对象
+SheetManager sheetman = {0, {}};
 
 // 添加图层
-struct Sheet* insertSheet(struct SheetManager* shtman, struct Position* pos, struct Size* size, int layer, memaddr8_t vram){
+Sheet* insertSheet(Position* pos, Size* size, 
+	unsigned int length, int layer, memaddr8_t vram){
 	int i = 0;
-	while(i < size){
-		if(shtman->sheetList[i].layer > layer){
-			for(int j = size; j > i; j--)
-				shtman->sheetList[j] = shtman->sheetList[j - 1];
+	while(i < sheetman.size){
+		Sheet* sheett = &(sheetman.sheetList[i]);
+		if(sheett->valid == VALIED_FLAG && sheett->layer > layer){
+			for(int j = sheetman.size; j > i; j--){
+				sheetman.sheetList[j].pos = sheetman.sheetList[j - 1].pos;
+				sheetman.sheetList[j].size = sheetman.sheetList[j - 1].size;
+				sheetman.sheetList[j].layer = sheetman.sheetList[j - 1].layer;
+				sheetman.sheetList[j].length = sheetman.sheetList[j - 1].length;
+				sheetman.sheetList[j].index = sheetman.sheetList[j - 1].index;
+				sheetman.sheetList[j].valid = sheetman.sheetList[j - 1].valid;
+				sheetman.sheetList[j].vram = sheetman.sheetList[j - 1].vram;
+			}
 			break;
-		}else if(shtman->sheetList[i].layer == layer){	// 相同覆盖
-			memcmb(vram, shtman->sheetList[i].vram, VRAM_LENGTH);
-			return;
+		}else if(sheett->valid == VALIED_FLAG && sheett->layer == layer){	// 相同覆盖
+			memcmb(vram, sheett->vram, sheett->length);
+			return sheett;
 		}
 		i++;
 	}
 	// 插入图层
-	struct Sheet* sheet = &shtman->sheetList[i];
-	shtman->size++;
+	Sheet* sheet = &(sheetman.sheetList[i]);
+	sheetman.size++;
 
 	sheet->pos = pos;
 	sheet->size = size;
 	sheet->layer = layer;
-	sheet->length = VRAM_LENGTH;
+	sheet->length = length;
 	sheet->index = i;
 	sheet->vram = vram;
+	sheet->valid = VALIED_FLAG;
 	return sheet;
 }
 
 // 删除图层
-void removeSheet(struct SheetManager* shtman, int layer){
+void removeSheet(int layer){
 	int found = 0;
-	for(int i = 0; i < shtman->size; ++i){
-		if(!found && shtman->sheetList[i].layer == layer)found = 1;
+	for(int i = 0; i < sheetman.size; ++i){
+		if(!found && sheetman.sheetList[i].layer == layer)found = 1;
 		if(found){
-			shtman->sheetList[i] = shtman->sheetList[i + 1];
+			sheetman.sheetList[i] = sheetman.sheetList[i + 1];
 		}
 	}
+	if(found) sheetman.sheetList[sheetman.size - 1].valid = 0;
 }
 
 // 得到图层
-struct Sheet* getSheet(struct SheetManager* shtman, int layer){
-	struct Sheet* sheet;
-	for(int i = 0; i< shtman->size; ++i){
-		if(shtman->sheetList[i].layer == layer)
-			return &shtman->sheetList[i];
+Sheet* getSheet(int layer){
+	Sheet* sheet;
+	for(int i = 0; i< sheetman.size; ++i){
+		if(sheetman.sheetList[i].layer == layer)
+			return &(sheetman.sheetList[i]);
 	}
 	return 0;
 }
 
 // 更改图层
-void alterSheetLayer(struct SheetManager* shtman, struct Sheet* sheet, int layer, memaddr8_t vram){
+void alterSheetLayer(Sheet* sheet, int layer, memaddr8_t vram){
 	if(layer == sheet->layer)return;
 	if(layer < sheet->layer){
 		// <--
 		for(int i = sheet->index; i > 0 && sheet[i - 1].layer < layer; i--){
-			struct Sheet temp;
+			Sheet temp;
 			temp = sheet[i];
 			sheet[i] = sheet[i-1];
 			sheet[i-1] = temp;
 		}
 	}else{
 		// -->
-		for(int i = sheet->index; i + 1 < shtman->size - 1 && sheet[i + 1].layer > layer; i--){
-			struct Sheet temp;
+		for(int i = sheet->index; i + 1 < sheetman.size - 1 && sheet[i + 1].layer > layer; i--){
+			Sheet temp;
 			temp = sheet[i];
 			sheet[i] = sheet[i+1];
 			sheet[i+1] = temp;
@@ -444,11 +455,19 @@ void alterSheetLayer(struct SheetManager* shtman, struct Sheet* sheet, int layer
 	}
 }
 
-// 绘制图层: sheet的vram写入gs显存的vram, 从size开始绘制, layer大的被覆盖
-void drawSheetList(struct SheetManager* shtman, memaddr8_t vram){
-	struct Sheet* sheet;
-	for(int i = shtman->size - 1; i >= 0; --i){
-		sheet = &shtman->sheetList[i];
-		memcmb(sheet->vram, vram, sheet->length);
+// 绘制图层: sheet的vram写入gs显存的vram, 从size-1开始绘制, layer大的被覆盖
+void drawSheetList(struct BOOTINFO* bootinfo){
+	memaddr8_t vram = bootinfo->vgaRam;
+	int xsize = bootinfo->screenX;
+
+	Sheet* sheet;
+	for(int i = sheetman.size - 1; i >= 0; --i){
+		sheet = &(sheetman.sheetList[i]);
+		if(sheet->valid == VALIED_FLAG){
+			for(int y0 = sheet->pos->y; y0 < sheet->pos->y + sheet->size->height; y0++)
+				for(int x0 = sheet->pos->x; x0 < sheet->pos->x + sheet->size->width; x0++)
+					if(*(sheet->vram + y0 * xsize + x0) != COL8_TP)
+						*(vram + y0 * xsize + x0) = *(sheet->vram + y0 * xsize + x0);
+		}
 	}
 }

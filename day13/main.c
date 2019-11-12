@@ -6,8 +6,11 @@
 #define MOUSE_LAYER 0
 
 struct MOUSE_DEC mdec = {};
-struct CURSOR_INFO cur_pos = {20, 20};
+
 struct BOOTINFO bootInfo = { (memaddr8_t)0xa0000, 320, 200 };
+struct BOOTINFO txtInfo_1 = { (memaddr8_t)0x0, 320, 200 };	// 文本图层
+struct BOOTINFO bgInfo_255 = { (memaddr8_t)0x0, 320, 200 };	// 背景图层
+
 struct TXTCursor txtCursor = {
 		20, 20, 
 		8, 16, 
@@ -16,39 +19,37 @@ struct TXTCursor txtCursor = {
 		COL8_FFFFFF
 };
 
-void eraseMouse(char* vram, int xsize, struct CURSOR_INFO* pos) {
-	boxfill8(vram, xsize, COL8_848484, 
+void eraseMouse(char* vram, int xsize, Position* pos) {
+	boxfill8(vram, xsize, COL8_TP, 
 		pos->x, 
 		pos->y, 
 		pos->x + 9, 
 		pos->y + 9);
 }
 
-void drawMouse(char* vram, int xsize, struct CURSOR_INFO* pos) {
+void drawMouse(char* vram, int xsize, Position* pos) {
 	PrintRGB(vram, xsize, pos->x, pos->y, cursor);
 }
 
-void computeMousePosition(struct MOUSE_DEC* mdec, int xsize, int ysize) {
-	cur_pos.x = (cur_pos.x + mdec->pos.x);
-	cur_pos.y = (cur_pos.y + mdec->pos.y);
+void computeMousePosition(struct MOUSE_DEC* mdec, Position* cur_pos, int xsize, int ysize) {
+	cur_pos->x = (cur_pos->x + mdec->pos.x);
+	cur_pos->y = (cur_pos->y + mdec->pos.y);
 	
-    if (cur_pos.x < 0) {
-       cur_pos.x = 0;
+    if (cur_pos->x < 0) {
+       cur_pos->x = 0;
     }
 
-    if (cur_pos.y < 0) {
-       cur_pos.y = 0;
+    if (cur_pos->y < 0) {
+       cur_pos->y = 0;
     }
 
-    if (cur_pos.x > xsize) {
-       cur_pos.x = xsize;
+    if (cur_pos->x > xsize) {
+       cur_pos->x = xsize;
     }
-    if (cur_pos.y > ysize) {
-       cur_pos.y = ysize;
+    if (cur_pos->y > ysize) {
+       cur_pos->y = ysize;
     }
-
 }
-
 
 /*
  * 中断程序
@@ -98,33 +99,53 @@ void CMain(){
 	// 查看可用内存
 	// 获取描述符容器
 	struct AddrRangeDescArray* descArray = getAddrRangeDescArray();
-	struct MEM_MAN memman;
 
-	// 分配32位内存
-	memman_init(&memman);
-	memman_free(&memman, (memaddr32_t)0x00100000, 0xd05f0000);
+	// 分配32位堆区内存
+	if(-1 == memman_free(HEAP_BASE_ADDR, 0xd05f0000)){
+		Printf("Free failed!", &bootInfo, &txtCursor);
+	}
 
 	// 显示
 	// 获取显示属性
 	memaddr8_t vram = bootInfo.vgaRam;
 	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
 
-	// 系统背景
-	fillAll(vram, COL8_848484);
-
-	// 初始化图层管理器
-	struct SheetManager sheetman;
-	initSheetManager(&sheetman);
-
-	// 插入鼠标图层
-	struct Position* pos_0 = (struct Position*)malloc(&memman, sizeof(struct Position));
+	Position* pos_0 = (Position*)malloc_8(sizeof(Position));
 	pos_0->x = 0;
 	pos_0->y = 0;
-	struct Size* size_0 = (struct Size*)malloc(&memman, sizeof(struct Size));
-	size_0->width = 320;
-	size_0->height = 200;
-	memaddr8_t vram_0 = memman_alloc_4k(&memman, 1);
-	struct Sheet* mouseSheet = insertSheet(&sheetman, pos_0, size_0, MOUSE_LAYER, vram_0);
+
+	Size* size_all = (Size*)malloc_8(sizeof(Size));
+	size_all->width = bootInfo.screenX;
+	size_all->height = bootInfo.screenY;
+
+	Size* size_0 = (Size*)malloc_8(sizeof(Size));
+	size_0->width = 9;
+	size_0->height = 9;
+	
+	// 鼠标位置
+	Position* cur_pos = (Position*)malloc_8(sizeof(Position));
+	cur_pos->x = 20;
+	cur_pos->y = 20;
+
+	// 插入鼠标图层
+	memaddr8_t vram_0 = (memaddr8_t)malloc_8(0xffff);
+	memset_8((memaddr8_t)vram_0, COL8_TP, 0xffff);
+	Sheet* mouseSheet = insertSheet(cur_pos, size_0, 0xffff, MOUSE_LAYER, vram_0);
+
+	// 插入文本图层
+	memaddr8_t vram_1 = (memaddr8_t)malloc_8(0xffff);
+	memset_8((memaddr8_t)vram_1, COL8_TP, 0xffff);
+	txtInfo_1.vgaRam = vram_1;
+	Sheet* txtSheet = insertSheet(pos_0, size_all, 0xffff, 1, vram_1);
+
+	// 插入背景图层
+	memaddr8_t vram_255 = (memaddr8_t)malloc_8(0xffff);
+	memset_8((memaddr8_t)vram_255, COL8_848484, 0xffff);
+	bgInfo_255.vgaRam = vram_255;
+	insertSheet(pos_0, size_all, 0xffff, 255, vram_255);
+
+	Printf(intToHexStr((int)cur_pos), &bootInfo, &txtCursor);
+	Println(&bootInfo, &txtCursor);
 
 	// 中断相关
 	// 允许开启中断
@@ -136,6 +157,8 @@ void CMain(){
 	fifo8_init(&MOUSE_FIFO8, mouse_buf, MOUSE_BUF_SIZE);
 
 	init_keyboard();
+
+	drawSheetList(&bootInfo);
 
 	// 第几个描述符
 	int count = 0;
@@ -153,40 +176,32 @@ void CMain(){
 
 			unsigned char data_key = fifo8_r(&KEY_FIFO8);
 			char ch = getKeyMakeChar(data_key);
-			if(data_key == 0x1C){				// 回车
-
-				Println(&bootInfo, &txtCursor);
-
-				// 打印
-				clear(&bootInfo, COL8_848484);
-				initCursor(&txtCursor);
-				showMemoryInfo(descArray->memDesc + count++, &bootInfo, &txtCursor);
-				if (count >= descArray->size) count = 0;
-
-				// 查看总共可用的内存
-				Printf("Total: ", &bootInfo, &txtCursor);
-				Printf(intToHexStr(memman_total(&memman)), &bootInfo, &txtCursor);
-				Println(&bootInfo, &txtCursor);
-
-				// 测试分层
-				PrintRGB(&sheetman.sheetList[0].vram, xsize, cur_pos.x, cur_pos.y, imgHook);
-				memcpy_8(&sheetman.sheetList[0].vram, vram, 0xffff);
-				// drawSheetList(&sheetman, (memaddr8_t)vram);
-
+			if(data_key == 0x1C){
+				// 回车
+				
 			}else if(ch == '\t'){
 				PrintTab(&bootInfo, &txtCursor, 1);
 			}else if(ch != '\0'){
-				PrintChar(ch, &bootInfo, &txtCursor);
+				PrintChar(ch, &txtInfo_1, &txtCursor);
 			}
+			drawSheetList(&bootInfo);
 		}else if(!mouse_empty){
 			// 处理鼠标
 			io_sti();
 
 			unsigned char data_mouse = fifo8_r(&MOUSE_FIFO8);
 			if (mouse_decode(&mdec, data_mouse) != 0) {
-				eraseMouse(vram, xsize, &cur_pos);
-				computeMousePosition(&mdec, xsize, ysize);
-				drawMouse(vram, xsize, &cur_pos);
+				eraseMouse(mouseSheet->vram, xsize, cur_pos);
+				computeMousePosition(&mdec, cur_pos, xsize, ysize);
+				drawMouse(mouseSheet->vram, xsize, cur_pos);
+				drawSheetList(&bootInfo);
+				
+				initCursor(&txtCursor);
+				clear(&txtInfo_1, COL8_TP);
+				Printf(intToHexStr((int)mouseSheet->pos->x), &txtInfo_1, &txtCursor);
+				Println(&txtInfo_1, &txtCursor);
+				Printf(intToHexStr((int)mouseSheet->pos->y), &txtInfo_1, &txtCursor);
+				Println(&txtInfo_1, &txtCursor);
 			}
 		}
 	}

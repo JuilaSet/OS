@@ -19,7 +19,7 @@ void memcpy_8(memaddr8_t src, memaddr8_t dest, int n){
 void memcmb(memaddr8_t src, memaddr8_t dest, int n){
 	if (src == dest) return;
 	while(n--) {
-		if(*dest == 0) *dest = *src;
+		if(*src != 0) *dest = *src;
 		dest++;
 		src++;
 	}
@@ -27,8 +27,8 @@ void memcmb(memaddr8_t src, memaddr8_t dest, int n){
 
 // 内存描述符
 struct AddrRangeDesc {
-	memaddr32_t baseAddrLow;
-	memaddr32_t baseAddrHigh;
+	memaddr8_t baseAddrLow;
+	memaddr8_t baseAddrHigh;
 	unsigned int lengthLow;
 	unsigned int lengthHigh;
 	unsigned int type;
@@ -58,63 +58,58 @@ struct AddrRangeDescArray* getAddrRangeDescArray(){
  * 内存管理算法
  */
 
-#define MEMMAN_MAXLEN 400
+#define MEMMAN_MAXLEN 1024
 
 // 存放可用内存信息
-struct FREE_MEM_INFO {
-	memaddr32_t addr;
+typedef struct {
+	memaddr8_t addr;
 	unsigned int size;
-};
+} FREE_MEM_INFO;
 
 // 内存管理器
-struct MEM_MAN {
+typedef struct {
 	int freeMemBackIndex;	// 总共有多少个info有效
 	// 丢弃信息
 	int lostsize;			// 不能插入时丢弃, +丢弃的size
 	int losts;				// 不能插入时丢弃, +1
 	// 内存info
 	int maxlen;				// = MEMMAN_MAXLEN
-	struct FREE_MEM_INFO* meminfos;
-};
+	FREE_MEM_INFO *meminfos;
+} MEM_MAN;
 
-// 初始化内存管理器
-void memman_init(struct MEM_MAN *man){
+// 全局内存管理对象	- 在堆区
+MEM_MAN memman = {0, 0, 0, MEMMAN_MAXLEN, (FREE_MEM_INFO*)0x00100000};
 
-	static struct FREE_MEM_INFO MEMINFOS[MEMMAN_MAXLEN];
-
-	man->freeMemBackIndex = 0;
-	man->maxlen = MEMMAN_MAXLEN;
-	man->lostsize = 0;
-	man->losts = 0;
-	man->meminfos = &MEMINFOS;
-}
+// 堆区基地址
+memaddr8_t HEAP_BASE_ADDR = (memaddr8_t)0x00100000 + MEMMAN_MAXLEN * sizeof(FREE_MEM_INFO);
 
 // 可用的内存总容量
-unsigned int memman_total(struct MEM_MAN *man){
+unsigned int memman_total(){
 	unsigned int i, t = 0;
-	for(i = 0; i < man->freeMemBackIndex; ++i){
-		t += man->meminfos[i].size;
+	for(i = 0; i < memman.freeMemBackIndex; ++i){
+		t += memman.meminfos[i].size;
 	}
 	return t;
 }
 
 // 用来从内存管理器对象中获取可用内存
-memaddr32_t memman_alloc(struct MEM_MAN *man, unsigned int size){
+memaddr8_t memman_alloc(unsigned int size){
 	unsigned int i;
-	memaddr32_t a;
-	for(i = 9; i < man->maxlen; ++i){
-		if(man->meminfos[i].size >= size){	// 还可分配
-			a = man->meminfos[i].addr;
-			man->meminfos[i].size -= size;	// 当前内存块总量减少
-			if(man->meminfos[i].size == 0){	// 如果为0, 代表这块内存刚好被分配干净
+	memaddr8_t a;
+	for(i = 0; i < memman.maxlen; ++i){
+		if(memman.meminfos[i].size >= size){	// 还可分配
+			a = memman.meminfos[i].addr;
+			memman.meminfos[i].addr += size;	// 更改起始位置
+			memman.meminfos[i].size -= size;	// 当前内存块总量减少
+			if(memman.meminfos[i].size == 0){	// 如果为0, 代表这块内存刚好被分配干净
 				// 从队列中剔除
 				unsigned int j;
-				for (j = i; j < man->freeMemBackIndex; j++) {
-					man->meminfos[j] = man->meminfos[j + 1];
+				for (j = i; j < memman.freeMemBackIndex; j++) {
+					memman.meminfos[j] = memman.meminfos[j + 1];
 				}
-				man->meminfos[j + i].addr = 0;
-				man->meminfos[j + i].size = 0;
-				man->freeMemBackIndex--;
+				memman.meminfos[j + i].addr = 0;
+				memman.meminfos[j + i].size = 0;
+				memman.freeMemBackIndex--;
 			}
 			return a;
 		}
@@ -122,21 +117,21 @@ memaddr32_t memman_alloc(struct MEM_MAN *man, unsigned int size){
 }
 
 // 用于释放不再需要的内存片(addr: 要释放的内存地址, size: 长度)
-int memman_free(struct MEM_MAN *man, memaddr32_t addr, unsigned int size){
+int memman_free(memaddr8_t addr, unsigned int size){
     int i, j;
-    for (i = 0; i < man->freeMemBackIndex; i++) {
-        if (man->meminfos[i].addr > addr) {
+    for (i = 0; i < memman.freeMemBackIndex; i++) {
+        if (memman.meminfos[i].addr > addr) {
             break;
         }
     }
 
     if (i > 0) {
-        if (man->meminfos[i-1].addr + man->meminfos[i-1].size == addr) {
-           man->meminfos[i-1].size += size;
-           if (i < man->freeMemBackIndex) {
-               if (addr + size == man->meminfos[i].addr) {
-                   man->meminfos[i-1].size += man->meminfos[i].size;
-                   man->freeMemBackIndex--;
+        if (memman.meminfos[i-1].addr + memman.meminfos[i-1].size == addr) {
+           memman.meminfos[i-1].size += size;
+           if (i < memman.freeMemBackIndex) {
+               if (addr + size == memman.meminfos[i].addr) {
+                   memman.meminfos[i-1].size += memman.meminfos[i].size;
+                   memman.freeMemBackIndex--;
                }
            }
 
@@ -144,33 +139,33 @@ int memman_free(struct MEM_MAN *man, memaddr32_t addr, unsigned int size){
         }
     }
 
-    if (i < man->freeMemBackIndex) {
-        if (addr + size == man->meminfos[i].addr) {
-           man->meminfos[i].addr = addr;
-           man->meminfos[i].size += size;
+    if (i < memman.freeMemBackIndex) {
+        if (addr + size == memman.meminfos[i].addr) {
+           memman.meminfos[i].addr = addr;
+           memman.meminfos[i].size += size;
            return 0;
         }
     }
 
 	// 插入中间位置
-    if (man->freeMemBackIndex < MEMMAN_MAXLEN) {
-        for (j = man->freeMemBackIndex; j > i; j--) {
-            man->meminfos[j] = man->meminfos[j-1];
+    if (memman.freeMemBackIndex < MEMMAN_MAXLEN) {
+        for (j = memman.freeMemBackIndex; j > i; j--) {
+            memman.meminfos[j] = memman.meminfos[j-1];
         }
 
-        man->freeMemBackIndex++;
-        if (man->maxlen < man->freeMemBackIndex) {
-            man->maxlen = man->freeMemBackIndex;
+        memman.freeMemBackIndex++;
+        if (memman.maxlen < memman.freeMemBackIndex) {
+            memman.maxlen = memman.freeMemBackIndex;
         }
 
 		// 初始化info
-        man->meminfos[i].addr = addr;
-        man->meminfos[i].size = size;
+        memman.meminfos[i].addr = addr;
+        memman.meminfos[i].size = size;
         return 0;
     }
 
-    man->losts++;
-    man->lostsize += size;
+    memman.losts++;
+    memman.lostsize += size;
     return -1;
 }
 
@@ -179,22 +174,21 @@ int memman_free(struct MEM_MAN *man, memaddr32_t addr, unsigned int size){
  */
 
 // 分配4k内存
-memaddr32_t memman_alloc_4k(struct MEMMAN *man, int size) {
-	memaddr32_t a;
+memaddr8_t malloc_4k(int size) {
+	memaddr8_t a;
 	size = (size + 0xfff) & 0xfffff000;	// 0x1000 = 4k, 取高位 = 4k * size
-	a = memman_alloc(man, size);
-	return a;
+	return memman_alloc(size);
 }
 
 // 分配n个字节的内存
-memaddr8_t malloc(struct MEMMAN *man, int size){
-	return (memaddr8_t)memman_alloc(man, size);
+memaddr8_t malloc_8(int size){
+	return (memaddr8_t)memman_alloc(size);
 }
 
 // 释放内存, 失败返回-1
-int free(struct MEMMAN *man, memaddr32_t addr, int size){
-	memset_8((memaddr8_t)addr, 0, size);
-	return memman_free(man, addr, size);
+int free_8(memaddr8_t addr, int size){
+	memset_8(addr, 0, size);
+	return memman_free(addr, size);
 }
 
 

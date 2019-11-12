@@ -141,8 +141,10 @@ function moveDown(fontGrid){
 }
 
 function generateText(showinline = false){
-	let string = showinline ? "\"" : "";
+	let string = showinline ? "{" : "";
 	for(var i=0; i<heightN; ++i){
+		if(showinline)
+			string += '\"';
 		for(var j=0; j<widthN; ++j){
 			if(grid[i][j].state == 1){
 				string += getColorIdentifier(grid[i][j].color).ch;
@@ -151,14 +153,14 @@ function generateText(showinline = false){
 			}
 		}
 		if(showinline)
-			string += '\\0';
+			string += '\\0\"\n';
 		else
 			string += '\n';
 	}
-		if(showinline)
-			output.innerHTML = string + "\\0\";";
-		else
-			output.innerHTML = string;
+	if(showinline)
+		output.innerHTML = string + "\\0\"};";
+	else
+		output.innerHTML = string;
 }
 
 // 根据数据应用到界面

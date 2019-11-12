@@ -6,17 +6,36 @@
 * 定义内存管理模块相关的数值:  
 [code] |<
 #define MEMMAN_FREES 4096
-struct FREEINFO {
-    unsigned int addr, size;
-};
-struct MEMMAN {
-    int frees, maxfrees, lostsize, losts;
-    struct FREEINFO free[MEMMAN_FREES];
-};
+// 存放可用内存信息
+typedef struct {
+	memaddr8_t addr;
+	unsigned int size;
+} FREE_MEM_INFO;
+
+// 内存管理器
+typedef struct {
+	int freeMemBackIndex;	// 总共有多少个info有效
+	// 丢弃信息
+	int lostsize;		// 不能插入时丢弃, +丢弃的size
+	int losts;		// 不能插入时丢弃, +1
+	// 内存info
+	int maxlen;		// = MEMMAN_MAXLEN
+	FREE_MEM_INFO *meminfos;
+} MEM_MAN;
+
 void memman_init(struct MEMMAN *man);
 unsigned int memman_total(struct MEMMAN *man);
 unsigned int memman_alloc(struct MEMMAN *man, unsigned int size);
 int memman_free(struct MEMMAN *man, unsigned int addr, unsigned int size);
+>| [uncode]
+
+* 在堆区分配1024个内存信息对象: 
+[code] |<
+// 全局内存管理对象	- 在堆区
+MEM_MAN memman = {0, 0, 0, MEMMAN_MAXLEN, (FREE_MEM_INFO*)0x00100000};
+
+// 用户可用的堆区基地址
+memaddr8_t HEAP_BASE_ADDR = (memaddr8_t)0x00100000 + MEMMAN_MAXLEN * sizeof(FREE_MEM_INFO);
 >| [uncode]
 
 => free: 按照addr排序 {

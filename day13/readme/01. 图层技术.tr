@@ -33,19 +33,59 @@
 
 		* 图层对象: 
 		[code] |<
-		struct Coverage {
-			int width, height;
-			int x, y;
-		};
+		typedef struct {
+			struct Position* pos;
+			struct Size* size;
+			int layer;
+			unsigned int length;
+			int index;
+			int valid;	// == 0x11223344 时有效
+			memaddr8_t vram;
+		} Sheet;
 		>| [uncode]
+
+		=> `valid`代表有效: 因为当颜色为0时, 标识黑色, 其他值在未来保留, 不能通过颜色值来判断图层是否有效
 
 		* 图层队列: 
 		[code] |<
 		#define MAX_COVERAGE_COUNT 10;
-		struct CoverageList[MAX_COVERAGE_COUNT];
+		typedef struct {
+			int size;
+			Sheet sheetList[MAX_COVERAGE_COUNT];
+		} SheetManager;
 		>| [uncode]
 
-		* 图层方法: 创建图层; 图层上绘画; 
+		* 图层方法 {
+
+			* 创建图层: 
+			[ex~]
+			|| memaddr8_t vram_0 = (memaddr8_t)malloc_4k(1);
+
+			* 图层上绘画: 
+			[ex~]
+			|| PrintRGB(mouseSheet->vram, xsize, cur_pos.x, cur_pos.y, imgHook);
+
+			* 设置-1为透明像素: 
+			[code] |<
+			// 绘制图层: sheet的vram写入gs显存的vram, 从size-1开始绘制, layer大的被覆盖
+			void drawSheetList(struct BOOTINFO* bootinfo){
+				memaddr8_t vram = bootinfo->vgaRam;
+				int xsize = bootinfo->screenX;
+
+				Sheet* sheet;
+				for(int i = sheetman.size - 1; i >= 0; --i){
+					sheet = &(sheetman.sheetList[i]);
+					if(sheet->valid == VALIED_FLAG){
+						for(int y0 = sheet->pos->y; y0 < sheet->pos->y + sheet->size->height; y0++)
+							for(int x0 = sheet->pos->x; x0 < sheet->pos->x + sheet->size->width; x0++)
+								if(*(sheet->vram + y0 * xsize + x0) != COL8_TP)
+									*(vram + y0 * xsize + x0) = *(sheet->vram + y0 * xsize + x0);
+					}
+				}
+			}
+			>| [uncode]
+
+		}
 
 	}
 

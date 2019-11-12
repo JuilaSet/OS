@@ -471,3 +471,46 @@ void drawSheetList(struct BOOTINFO* bootinfo){
 		}
 	}
 }
+
+// 打印换行 -- 到sheet
+void SheetPrintln(Sheet* sheet, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+	int ysize = bootinfo->screenY;
+	tcursor->pointerX = tcursor->initPointerX;
+	tcursor->pointerY += tcursor->height;
+	if(tcursor->pointerY >= ysize){
+		tcursor->pointerY = tcursor->initPointerY;
+	}
+}
+
+// 打印字符串 -- 到sheet
+void SheetPrintf(char* sptr, Sheet* sheet, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor){
+	int xsize = bootinfo->screenX;
+	char* vram = sheet->vram;
+	int len = strlen(sptr);
+	putStr(vram, xsize, tcursor->pointerX, tcursor->pointerY, tcursor->width, tcursor->color, sptr, len);
+
+	tcursor->pointerX += tcursor->width * len;
+	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
+		SheetPrintln(sheet, bootinfo, tcursor);
+	}
+}
+
+// clear: 清空背景
+void SheetClear(Sheet* sheet, struct BOOTINFO* bootinfo, int font){
+	int xsize = bootinfo->screenX;
+	for(int y0 = sheet->pos->y; y0 < sheet->pos->y + sheet->size->height; y0++)
+		for(int x0 = sheet->pos->x; x0 < sheet->pos->x + sheet->size->width; x0++)
+				*(sheet->vram + y0 * xsize + x0) = font;
+}
+
+// Tab键: n(将一行分为几格)
+void SheetPrintTab(Sheet* sheet, struct BOOTINFO* bootinfo, struct TXTCursor* tcursor, int n){
+	int xsize = bootinfo->screenX;
+	// 得到每一个格子的大小
+	short blkSize = (xsize / tcursor->tabSplitCount);
+	// 将光标移动到下一个格子处
+	tcursor->pointerX = blkSize * ((tcursor->pointerX + blkSize * n) / blkSize);
+	if(tcursor->pointerX >= xsize - tcursor->initPointerX){
+		SheetPrintln(sheet, bootinfo, tcursor);
+	}
+}

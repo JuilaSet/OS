@@ -9,7 +9,6 @@ struct MOUSE_DEC mdec = {};
 
 struct BOOTINFO bootInfo = { (memaddr8_t)0xa0000, 320, 200 };
 struct BOOTINFO txtInfo_1 = { (memaddr8_t)0x0, 320, 200 };	// 文本图层
-struct BOOTINFO bgInfo_255 = { (memaddr8_t)0x0, 320, 200 };	// 背景图层
 
 struct TXTCursor txtCursor = {
 		20, 20, 
@@ -17,6 +16,14 @@ struct TXTCursor txtCursor = {
 		20, 20,	// 初始位置
 		10,
 		COL8_FFFFFF
+};
+
+struct TXTCursor mouseinfoCursor = {
+		20, 20, 
+		8, 16, 
+		20, 20,	// 初始位置
+		10,
+		COL8_FFFF00
 };
 
 void eraseMouse(char* vram, int xsize, Position* pos) {
@@ -110,9 +117,9 @@ void CMain(){
 	memaddr8_t vram = bootInfo.vgaRam;
 	int xsize = bootInfo.screenX, ysize = bootInfo.screenY;
 
-	Position* pos_0 = (Position*)malloc_8(sizeof(Position));
-	pos_0->x = 0;
-	pos_0->y = 0;
+	Position* pos_zero = (Position*)malloc_8(sizeof(Position));
+	pos_zero->x = 0;
+	pos_zero->y = 0;
 
 	Size* size_all = (Size*)malloc_8(sizeof(Size));
 	size_all->width = bootInfo.screenX;
@@ -121,6 +128,10 @@ void CMain(){
 	Size* size_0 = (Size*)malloc_8(sizeof(Size));
 	size_0->width = 9;
 	size_0->height = 9;
+
+	Size* size_short = (Size*)malloc_8(sizeof(Size));
+	size_short->width = 160;
+	size_short->height = 80;
 	
 	// 鼠标位置
 	Position* cur_pos = (Position*)malloc_8(sizeof(Position));
@@ -136,16 +147,17 @@ void CMain(){
 	memaddr8_t vram_1 = (memaddr8_t)malloc_8(0xffff);
 	memset_8((memaddr8_t)vram_1, COL8_TP, 0xffff);
 	txtInfo_1.vgaRam = vram_1;
-	Sheet* txtSheet = insertSheet(pos_0, size_all, 0xffff, 1, vram_1);
+	Sheet* txtSheet = insertSheet(pos_zero, size_all, 0xffff, 1, vram_1);
+
+	// 插入鼠标位置信息图层
+	memaddr8_t vram_2 = (memaddr8_t)malloc_8(0xffff);
+	memset_8((memaddr8_t)vram_2, COL8_TP, 0xffff);
+	Sheet* mousePosSheet = insertSheet(pos_zero, size_short, 0xffff, 2, vram_2);
 
 	// 插入背景图层
 	memaddr8_t vram_255 = (memaddr8_t)malloc_8(0xffff);
 	memset_8((memaddr8_t)vram_255, COL8_848484, 0xffff);
-	bgInfo_255.vgaRam = vram_255;
-	insertSheet(pos_0, size_all, 0xffff, 255, vram_255);
-
-	Printf(intToHexStr((int)cur_pos), &bootInfo, &txtCursor);
-	Println(&bootInfo, &txtCursor);
+	insertSheet(pos_zero, size_all, 0xffff, 255, vram_255);
 
 	// 中断相关
 	// 允许开启中断
@@ -178,12 +190,16 @@ void CMain(){
 			char ch = getKeyMakeChar(data_key);
 			if(data_key == 0x1C){
 				// 回车
-				
+				// 删除文字图层
+				SheetClear(txtSheet, &bootInfo, COL8_TP);
+				initCursor(&txtCursor);
 			}else if(ch == '\t'){
 				PrintTab(&bootInfo, &txtCursor, 1);
 			}else if(ch != '\0'){
 				PrintChar(ch, &txtInfo_1, &txtCursor);
 			}
+			
+			// 中断处理结束时绘制
 			drawSheetList(&bootInfo);
 		}else if(!mouse_empty){
 			// 处理鼠标
@@ -194,14 +210,17 @@ void CMain(){
 				eraseMouse(mouseSheet->vram, xsize, cur_pos);
 				computeMousePosition(&mdec, cur_pos, xsize, ysize);
 				drawMouse(mouseSheet->vram, xsize, cur_pos);
-				drawSheetList(&bootInfo);
 				
-				initCursor(&txtCursor);
-				clear(&txtInfo_1, COL8_TP);
-				Printf(intToHexStr((int)mouseSheet->pos->x), &txtInfo_1, &txtCursor);
-				Println(&txtInfo_1, &txtCursor);
-				Printf(intToHexStr((int)mouseSheet->pos->y), &txtInfo_1, &txtCursor);
-				Println(&txtInfo_1, &txtCursor);
+				// 鼠标移动的时候打印信息
+				initCursor(&mouseinfoCursor);
+				SheetClear(mousePosSheet, &bootInfo, COL8_TP);
+				SheetPrintf(intToHexStr((int)mouseSheet->pos->x), mousePosSheet, &bootInfo, &mouseinfoCursor);
+				SheetPrintln(mousePosSheet, &bootInfo, &mouseinfoCursor);
+				SheetPrintf(intToHexStr((int)mouseSheet->pos->y), mousePosSheet, &bootInfo, &mouseinfoCursor);
+				SheetPrintln(mousePosSheet, &bootInfo, &mouseinfoCursor);
+
+				// 中断处理结束时绘制
+				drawSheetList(&bootInfo);
 			}
 		}
 	}

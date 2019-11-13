@@ -180,7 +180,7 @@ memaddr8_t malloc_4k(int size) {
 	return memman_alloc(size);
 }
 
-// 分配n个字节的内存
+// 分配n个字节的内存, []][实现内存整理
 memaddr8_t malloc_8(int size){
 	return (memaddr8_t)memman_alloc(size);
 }

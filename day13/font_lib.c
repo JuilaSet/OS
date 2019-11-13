@@ -244,6 +244,18 @@ struct TXTCursor {
 	int color;						// 颜色
 };
 
+// 创建光标
+#define CURSOR_INIT(txtCursor)	\
+(txtCursor).pointerX = 20;	\
+(txtCursor).pointerY = 20;	\
+(txtCursor).width = 8;		\
+(txtCursor).height = 16;		\
+(txtCursor).initPointerX = 20;	\
+(txtCursor).initPointerY = 20;	\
+(txtCursor).tabSplitCount = 10;	\
+(txtCursor).color = COL8_FFFFFF;	\
+\
+
 // initCursor: 初始化
 void initCursor(struct TXTCursor* tcursor){
 	tcursor->pointerX = tcursor->initPointerX;
@@ -352,7 +364,8 @@ void displayMem_8(memaddr8_t addr, int n, struct BOOTINFO* bootinfo, struct TXTC
  */
 #define MAX_COVERAGE_COUNT 50
 #define VRAM_LENGTH 0xffff
-#define VALIED_FLAG 0x11223344
+#define VALID_FLAG 0x1	// 是否有效
+#define HIDE_FLAG 0x2	// 是否不显示
 
 // 图层对象
 typedef struct {
@@ -361,45 +374,53 @@ typedef struct {
 	int layer;
 	unsigned int length;
 	int index;
-	int valid;	// == 0x11223344 时有效
+	int flag;
+	int id;	// 指向sheet指针的指针
 	memaddr8_t vram;
 } Sheet;
 
 // 全局图层管理类
 typedef struct {
 	int size;
+	int lastid;
+	int backlayer;	// 最低的图层层数
 	Sheet sheetList[MAX_COVERAGE_COUNT];
 } SheetManager;
 
 // 全局图层管理对象
-SheetManager sheetman = {0, {}};
+SheetManager sheetman = {0, 0, 0, {}};
 
 // 添加图层
-Sheet* insertSheet(Position* pos, Size* size, 
-	unsigned int length, int layer, memaddr8_t vram){
+void insertSheet(int id, Position* pos, Size* size, 
+	unsigned int length, int layer, memaddr8_t vram, int FLAGS){
 	int i = 0;
 	while(i < sheetman.size){
 		Sheet* sheett = &(sheetman.sheetList[i]);
-		if(sheett->valid == VALIED_FLAG && sheett->layer > layer){
+		if(sheett->flag & VALID_FLAG && sheett->layer > layer){
 			for(int j = sheetman.size; j > i; j--){
 				sheetman.sheetList[j].pos = sheetman.sheetList[j - 1].pos;
 				sheetman.sheetList[j].size = sheetman.sheetList[j - 1].size;
 				sheetman.sheetList[j].layer = sheetman.sheetList[j - 1].layer;
 				sheetman.sheetList[j].length = sheetman.sheetList[j - 1].length;
 				sheetman.sheetList[j].index = sheetman.sheetList[j - 1].index;
-				sheetman.sheetList[j].valid = sheetman.sheetList[j - 1].valid;
+				sheetman.sheetList[j].flag = sheetman.sheetList[j - 1].flag;
 				sheetman.sheetList[j].vram = sheetman.sheetList[j - 1].vram;
 			}
 			break;
-		}else if(sheett->valid == VALIED_FLAG && sheett->layer == layer){	// 相同覆盖
+		}else if(sheett->flag & VALID_FLAG && sheett->layer == layer){	// 相同覆盖 []][
 			memcmb(vram, sheett->vram, sheett->length);
-			return sheett;
 		}
 		i++;
 	}
 	// 插入图层
 	Sheet* sheet = &(sheetman.sheetList[i]);
 	sheetman.size++;
+	if(sheetman.backlayer < layer){
+		sheetman.backlayer = layer;
+	}
+	if(sheetman.lastid <= id){
+		sheetman.lastid = id + 1;
+	}
 
 	sheet->pos = pos;
 	sheet->size = size;
@@ -407,27 +428,58 @@ Sheet* insertSheet(Position* pos, Size* size,
 	sheet->length = length;
 	sheet->index = i;
 	sheet->vram = vram;
-	sheet->valid = VALIED_FLAG;
-	return sheet;
+	sheet->flag = VALID_FLAG | FLAGS;
+	sheet->id = id;
+}
+
+// 将插入图层到第1层
+void insertToFirst(int id, Position* pos, Size* size, 
+	unsigned int length, memaddr8_t vram, int FLAGS){
+	int layer = 1, index = 1;
+
+	for(int i = sheetman.size; i > index; i--){
+		sheetman.sheetList[i] = sheetman.sheetList[i-1];
+	}
+
+	// 插入图层
+	Sheet* sheet = &(sheetman.sheetList[1]);
+	sheetman.size++;
+	if(sheetman.backlayer < layer){
+		sheetman.backlayer = layer;
+	}
+	if(sheetman.lastid <= id){
+		sheetman.lastid = id + 1;
+	}
+
+	sheet->pos = pos;
+	sheet->size = size;
+	sheet->layer = layer;
+	sheet->length = length;
+	sheet->index = index;
+	sheet->vram = vram;
+	sheet->flag = VALID_FLAG | FLAGS;
+	sheet->id = id;
 }
 
 // 删除图层
-void removeSheet(int layer){
+void removeSheet(int id){
 	int found = 0;
 	for(int i = 0; i < sheetman.size; ++i){
-		if(!found && sheetman.sheetList[i].layer == layer)found = 1;
+		if(!found && (sheetman.sheetList[i].flag & VALID_FLAG) && sheetman.sheetList[i].id == id)
+			found = 1;
 		if(found){
 			sheetman.sheetList[i] = sheetman.sheetList[i + 1];
 		}
 	}
-	if(found) sheetman.sheetList[sheetman.size - 1].valid = 0;
+	if(found) 
+		sheetman.sheetList[sheetman.size - 1].flag = 0;
 }
 
 // 得到图层
-Sheet* getSheet(int layer){
+Sheet* getSheet(int id){
 	Sheet* sheet;
 	for(int i = 0; i< sheetman.size; ++i){
-		if(sheetman.sheetList[i].layer == layer)
+		if((sheetman.sheetList[i].flag & VALID_FLAG) && sheetman.sheetList[i].id == id)
 			return &(sheetman.sheetList[i]);
 	}
 	return 0;
@@ -437,20 +489,21 @@ Sheet* getSheet(int layer){
 void alterSheetLayer(Sheet* sheet, int layer, memaddr8_t vram){
 	if(layer == sheet->layer)return;
 	if(layer < sheet->layer){
-		// <--
-		for(int i = sheet->index; i > 0 && sheet[i - 1].layer < layer; i--){
+		// <-- 用sheet[i]也行
+		for(int i = sheet->index; i > 0 && sheetman.sheetList[i - 1].layer < layer; i--){
 			Sheet temp;
-			temp = sheet[i];
-			sheet[i] = sheet[i-1];
-			sheet[i-1] = temp;
+			temp = sheetman.sheetList[i];
+			// 交换
+			sheetman.sheetList[i] = sheetman.sheetList[i-1];
+			sheetman.sheetList[i-1] = temp;
 		}
 	}else{
-		// -->
-		for(int i = sheet->index; i + 1 < sheetman.size - 1 && sheet[i + 1].layer > layer; i--){
+		// --> 
+		for(int i = sheet->index; i + 1 < sheetman.size - 1 && sheetman.sheetList[i + 1].layer > layer; i--){
 			Sheet temp;
-			temp = sheet[i];
-			sheet[i] = sheet[i+1];
-			sheet[i+1] = temp;
+			temp = sheetman.sheetList[i];
+			sheetman.sheetList[i] = sheetman.sheetList[i+1];
+			sheetman.sheetList[i+1] = temp;
 		}
 	}
 }
@@ -463,11 +516,18 @@ void drawSheetList(struct BOOTINFO* bootinfo){
 	Sheet* sheet;
 	for(int i = sheetman.size - 1; i >= 0; --i){
 		sheet = &(sheetman.sheetList[i]);
-		if(sheet->valid == VALIED_FLAG){
-			for(int y0 = sheet->pos->y; y0 < sheet->pos->y + sheet->size->height; y0++)
-				for(int x0 = sheet->pos->x; x0 < sheet->pos->x + sheet->size->width; x0++)
-					if(*(sheet->vram + y0 * xsize + x0) != COL8_TP)
-						*(vram + y0 * xsize + x0) = *(sheet->vram + y0 * xsize + x0);
+		int ey = sheet->pos->y + sheet->size->height;
+		int ex = sheet->pos->x + sheet->size->width;
+		if(sheet->flag & VALID_FLAG && ~sheet->flag & HIDE_FLAG){
+			for(int y0 = sheet->pos->y; y0 < ey; y0++){
+				int y1 = y0 - sheet->pos->y;
+				for(int x0 = sheet->pos->x; x0 < ex; x0++){
+					int x1 = x0 - sheet->pos->x;
+					if(*(sheet->vram + y0 * xsize + x0) != COL8_TP && x0 < xsize){
+						*(vram + y0 * xsize + x0) = *(sheet->vram + y1 * xsize + x1);
+					}
+				}
+			}
 		}
 	}
 }
@@ -498,8 +558,8 @@ void SheetPrintf(char* sptr, Sheet* sheet, struct BOOTINFO* bootinfo, struct TXT
 // clear: 清空背景
 void SheetClear(Sheet* sheet, struct BOOTINFO* bootinfo, int font){
 	int xsize = bootinfo->screenX;
-	for(int y0 = sheet->pos->y; y0 < sheet->pos->y + sheet->size->height; y0++)
-		for(int x0 = sheet->pos->x; x0 < sheet->pos->x + sheet->size->width; x0++)
+	for(int y0 = 0; y0 < sheet->size->height; y0++)
+		for(int x0 = 0; x0 < sheet->size->width; x0++)
 				*(sheet->vram + y0 * xsize + x0) = font;
 }
 
@@ -514,3 +574,54 @@ void SheetPrintTab(Sheet* sheet, struct BOOTINFO* bootinfo, struct TXTCursor* tc
 		SheetPrintln(sheet, bootinfo, tcursor);
 	}
 }
+
+/*
+ * 窗口
+ */
+
+typedef struct {
+	Sheet *sheet;
+	struct TXTCursor txtCursor;
+} Window;
+
+Window* createWindow(struct BOOTINFO* bootinfo, Position* pos, Size* size, int FLAGS){
+	int xsize = bootinfo->screenX;
+	memaddr8_t vram_t = (memaddr8_t)malloc_8(0xffff);
+	memset_8((memaddr8_t)vram_t, COL8_C6C6C6, 0xffff);
+	// 中间的小白格子
+	int x0 = pos->x, y0 = pos->y;
+	boxfill8(vram_t, xsize, COL8_FFFFFF, 2, 2, size->width - 2, size->height - 2);
+
+	// 生成window对象
+	Window* window = (Window*)malloc_8(sizeof(Window));
+	insertToFirst(sheetman.lastid, pos, size, VRAM_LENGTH, vram_t, FLAGS);
+	CURSOR_INIT(window->txtCursor);
+	return window;
+}
+
+Window* showMsg(Window* window, struct BOOTINFO* bootinfo, const char* sptr, int font){
+	Sheet *sheet = window->sheet;
+	int xsize = bootinfo->screenX;
+	for(int i = 0; sptr[i]; i++){
+		char ch = sptr[i];
+		if(ch == '\n'){
+			SheetPrintln(sheet, bootinfo, &window->txtCursor);
+		}else if(ch == '\t'){
+			SheetPrintTab(sheet, bootinfo, &window->txtCursor, 1);
+		}else{
+			putChar(sheet->vram, xsize, window->txtCursor.pointerX, window->txtCursor.pointerY, font, ch);
+			window->txtCursor.pointerX += window->txtCursor.width;
+			if(window->txtCursor.pointerX >= xsize - window->txtCursor.initPointerX){
+				Println(bootinfo, &(window->txtCursor));
+			}
+		}
+	}
+	return window;
+}
+
+Window* clearMsg(Window* window, struct BOOTINFO* bootinfo){
+	SheetClear(window->sheet, bootinfo, COL8_TP);
+	initCursor(&(window->txtCursor));
+}
+
+

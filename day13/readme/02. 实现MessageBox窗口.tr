@@ -1,0 +1,18 @@
+/*
+ * 实现MessageBox窗口
+ */
+#def [text~]
+====================
+* 目标: 按下回车键弹出窗口
+
+* 实现: 分配内存 -> 插入 -> 设置图层为`HID_FLAG` -> 弹出和隐藏: 使用异或反转某一位
+|| txtSheet->flag ^= HIDE_FLAG;
+
+* Window对象: 
+[code] |<
+typedef struct {
+	Sheet *sheet;
+	struct TXTCursor txtCursor;
+} Window;
+>| [uncode]
+====================

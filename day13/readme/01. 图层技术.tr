@@ -34,8 +34,8 @@
 		* 图层对象: 
 		[code] |<
 		typedef struct {
-			struct Position* pos;
-			struct Size* size;
+			struct Position* pos;	// 决定了图层在屏幕上的坐标
+			struct Size* size;	// 决定了图层在屏幕上的大小
 			int layer;
 			unsigned int length;
 			int index;
@@ -96,6 +96,8 @@
 	* 只更新鼠标位置的图层: 根据`位置属性`刷新
 
 	* 只更新文字显示的图层: 根据`大小属性`刷新
+
+	* 在鼠标中断的时候不绘制鼠标
 
 }
 ====================

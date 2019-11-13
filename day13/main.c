@@ -34,10 +34,6 @@ void eraseMouse(char* vram, int xsize, Position* pos) {
 		pos->y + 9);
 }
 
-void drawMouse(char* vram, int xsize, Position* pos) {
-	PrintRGB(vram, xsize, pos->x, pos->y, cursor);
-}
-
 void computeMousePosition(struct MOUSE_DEC* mdec, Position* cur_pos, int xsize, int ysize) {
 	cur_pos->x = (cur_pos->x + mdec->pos.x);
 	cur_pos->y = (cur_pos->y + mdec->pos.y);
@@ -132,32 +128,43 @@ void CMain(){
 	Size* size_short = (Size*)malloc_8(sizeof(Size));
 	size_short->width = 160;
 	size_short->height = 80;
+
+	Size* size_squar = (Size*)malloc_8(sizeof(Size));
+	size_squar->width = 80;
+	size_squar->height = 80;
 	
 	// 鼠标位置
 	Position* cur_pos = (Position*)malloc_8(sizeof(Position));
 	cur_pos->x = 20;
 	cur_pos->y = 20;
 
+	// 图层
+	const int mouseSheet = 0x1;
+	const int txtSheet = 0x2;
+	const int mousePosSheet = 0x3;
+	const int bgSheet = 0x4;
+
 	// 插入鼠标图层
 	memaddr8_t vram_0 = (memaddr8_t)malloc_8(0xffff);
-	memset_8((memaddr8_t)vram_0, COL8_TP, 0xffff);
-	Sheet* mouseSheet = insertSheet(cur_pos, size_0, 0xffff, MOUSE_LAYER, vram_0);
+	memset_8((memaddr8_t)vram_0, COL8_848400, 0xffff);
+	PrintRGB(vram_0, xsize, 0, 0, cursor);
+	insertSheet(mouseSheet, cur_pos, size_0, 0xffff, MOUSE_LAYER, vram_0, VALID_FLAG);
 
 	// 插入文本图层
 	memaddr8_t vram_1 = (memaddr8_t)malloc_8(0xffff);
 	memset_8((memaddr8_t)vram_1, COL8_TP, 0xffff);
 	txtInfo_1.vgaRam = vram_1;
-	Sheet* txtSheet = insertSheet(pos_zero, size_all, 0xffff, 1, vram_1);
+	insertSheet(txtSheet, pos_zero, size_all, 0xffff, 1, vram_1, VALID_FLAG);
 
 	// 插入鼠标位置信息图层
 	memaddr8_t vram_2 = (memaddr8_t)malloc_8(0xffff);
 	memset_8((memaddr8_t)vram_2, COL8_TP, 0xffff);
-	Sheet* mousePosSheet = insertSheet(pos_zero, size_short, 0xffff, 2, vram_2);
+	insertSheet(mousePosSheet, pos_zero, size_short, 0xffff, 2, vram_2, VALID_FLAG);
 
 	// 插入背景图层
 	memaddr8_t vram_255 = (memaddr8_t)malloc_8(0xffff);
 	memset_8((memaddr8_t)vram_255, COL8_848484, 0xffff);
-	insertSheet(pos_zero, size_all, 0xffff, 255, vram_255);
+	insertSheet(bgSheet, pos_zero, size_all, 0xffff, 255, vram_255, VALID_FLAG);
 
 	// 中断相关
 	// 允许开启中断
@@ -174,6 +181,7 @@ void CMain(){
 
 	// 第几个描述符
 	int count = 0;
+	Window* window = 0;
 	for(;;) {
 		io_cli();
 		int key_empty = fifo8_isEmpty(&KEY_FIFO8);
@@ -190,13 +198,20 @@ void CMain(){
 			char ch = getKeyMakeChar(data_key);
 			if(data_key == 0x1C){
 				// 回车
-				// 删除文字图层
-				SheetClear(txtSheet, &bootInfo, COL8_TP);
-				initCursor(&txtCursor);
+				// 插入图层
+				if(!window){
+					window = createWindow(&bootInfo, cur_pos, size_short, VALID_FLAG);
+					showMsg(window, &bootInfo, "Hello", COL8_848400);
+				}
 			}else if(ch == '\t'){
 				PrintTab(&bootInfo, &txtCursor, 1);
 			}else if(ch != '\0'){
 				PrintChar(ch, &txtInfo_1, &txtCursor);
+			}else if(data_key == 0x01){
+				// ESC 键位
+				Sheet* ts = getSheet(txtSheet);
+				SheetClear(ts, &bootInfo, COL8_TP);
+				initCursor(&txtCursor);
 			}
 			
 			// 中断处理结束时绘制
@@ -204,21 +219,21 @@ void CMain(){
 		}else if(!mouse_empty){
 			// 处理鼠标
 			io_sti();
-
+			
 			unsigned char data_mouse = fifo8_r(&MOUSE_FIFO8);
 			if (mouse_decode(&mdec, data_mouse) != 0) {
-				eraseMouse(mouseSheet->vram, xsize, cur_pos);
 				computeMousePosition(&mdec, cur_pos, xsize, ysize);
-				drawMouse(mouseSheet->vram, xsize, cur_pos);
+
+				Sheet* mst = getSheet(mousePosSheet);
+				Sheet* ms = getSheet(mouseSheet);
 				
 				// 鼠标移动的时候打印信息
 				initCursor(&mouseinfoCursor);
-				SheetClear(mousePosSheet, &bootInfo, COL8_TP);
-				SheetPrintf(intToHexStr((int)mouseSheet->pos->x), mousePosSheet, &bootInfo, &mouseinfoCursor);
-				SheetPrintln(mousePosSheet, &bootInfo, &mouseinfoCursor);
-				SheetPrintf(intToHexStr((int)mouseSheet->pos->y), mousePosSheet, &bootInfo, &mouseinfoCursor);
-				SheetPrintln(mousePosSheet, &bootInfo, &mouseinfoCursor);
-
+				SheetClear(mst, &bootInfo, COL8_TP);
+				SheetPrintf(intToHexStr((int)ms->pos->x), mst, &bootInfo, &mouseinfoCursor);
+				SheetPrintln(mst, &bootInfo, &mouseinfoCursor);
+				SheetPrintf(intToHexStr((int)ms->pos->y), mst, &bootInfo, &mouseinfoCursor);
+				SheetPrintln(mst, &bootInfo, &mouseinfoCursor);
 				// 中断处理结束时绘制
 				drawSheetList(&bootInfo);
 			}

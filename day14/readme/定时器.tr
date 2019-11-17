@@ -1,0 +1,161 @@
+/*
+ * 定时器
+ */
+#def [text~]
+====================
+* 定时器(时钟中断) {
+
+	* 允许键盘和时钟中断: 
+	[code] |<
+	mov	al, 11111000b
+	out	021h, al
+	call	io_delay
+	>| [uncode]
+
+	* 响应时钟中断的中断描述符: 
+	[code] |<
+	...
+	.020h: 
+		Gate SelectorCode32, timerHandler,0, DA_386IGate
+	...
+	>| [uncode]
+
+	* timerHandler的实现: 
+	[code] |<
+	_timerHandler:
+	timerHandler equ _timerHandler - $$
+		push es
+		push ds
+		pushad
+		mov  eax, esp
+		push eax
+
+		call intHandlerForTimer
+
+		pop  eax
+		mov  esp, eax
+		popad
+		pop  ds
+		pop  es
+		iretd
+	>| [uncode]
+
+	* 配置时钟中断, 使其在一秒内发生几次中断 {
+
+		* `Timer.h`: 
+		[code] |<
+		#define PIT_CTRL   0x0043
+		#define PIT_CNT0   0x0040
+
+
+		void init_pit(void);
+
+		// 时钟管理器
+		struct TIMERCTL {
+		    unsigned int count;
+		    unsigned int timeout;
+		    struct FIFO8 *fifo;
+		    unsigned char data;
+		};
+
+		struct TIMERCTL* getTimerController();
+
+		void settimer(unsigned int timeout, struct FIFO8 *fifo, unsigned char data);
+		>| [uncode]
+
+		* 时钟中断的初始化实现: 
+			向8259A芯片的对应端口发送指定数据, 向端口0x43发送一个数值0x34, 再向端口0x40发送0x9c和0x2d
+		[code] |<
+		void init_pit(void) {
+			io_out8(PIT_CTRL, 0x34);
+			io_out8(PIT_CNT0, 0x9c);
+			io_out8(PIT_CNT0, 0x2e);
+			
+			timerctl.count = 0;
+			timerctl.timeout = 0;
+		}
+		>| [uncode]
+
+		* 设定超时对应的时间片: 
+		[code] |<
+		void settimer(unsigned int timeout, struct FIFO8 *fifo, unsigned char data) {
+			int eflags = io_load_eflags();
+			// 暂时停止接收中断信号
+			io_cli();
+			// 设定时间片
+			timerctl.timeout = timeout;
+			// 设定信号队列, 内核在主循环中将监控这个队列
+			timerctl.fifo = fifo;
+			timerctl.data = data;
+			// 恢复接收中断信号
+			io_store_eflags(eflags);
+			return;
+		}
+
+		struct TIMERCTL* getTimerController() {
+			return &timerctl;	// timerctl是全局数据
+		}
+		>| [uncode]
+
+		* C语言中断处理函数: 
+		[code] |<
+		void intHandlerFromC_timer(char *esp) {
+			// 要求8259A下次继续发送中断信号
+			io_out8(PIC0_OCW2, 0x60);
+			timerctl.count++;
+			if (timerctl.timeout > 0) {
+				// 每次中断发送, 时间片数值减一
+				timerctl.timeout--;
+				
+				// 如果时间片减少到0, 表明超时, 向时钟管理器附带的FIFO队列写入一个数据
+				if (timerctl.timeout == 0) {
+					// 放入队列, 告诉内核超时事件发生
+					fifo8_put(timerctl.fifo, timerctl.data);
+				}
+			}
+			return;
+		}
+		>| [uncode]
+
+		* 主循环: 
+		[code] |<
+		....
+		static struct FIFO8 timerinfo;
+		static char timerbuf[8];
+		....
+		void CMain(void) {
+			....
+			init_pit();
+			fifo8_init(&timerinfo, 8, timerbuf);
+			settimer(500, &timerinfo, 1);
+			....
+			int data = 0;
+			int count = 0;
+			
+			struct TIMERCTL *timerctl = getTimerController();
+			Window* window = createWindow(&bootInfo, cur_pos, size_short, VALID_FLAG);
+			
+			for(;;) {
+				char* pStr = intToHexStr(timerctl->timeout);
+				boxfill8(shtMsgBox->buf, 160, COL8_C6C6C6, 40, 28, 119, 43);
+				
+				// 显示字符串: 当前还拥有的时间片数目
+				showMsg(window, &bootInfo, pStr, COL8_848400);
+				
+				io_cli();
+				if (...鼠标和键盘中断...) {
+					io_sti();
+					....
+				} else if(!timer_empty){
+					// 超时发生后进入这里
+					io_sti();
+					showString(shtctl, sht_back, 0, 0, COL8_FFFFFF, "5[sec]");
+				}
+			}
+		}
+		>| [uncode]
+
+	}
+
+}
+====================

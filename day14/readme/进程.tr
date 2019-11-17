@@ -1,0 +1,66 @@
+/*
+ * 进程
+ */
+#def [text~]
+====================
+* 基本数据结构 {
+
+	* 任务门描述符: 
+	[code] |<
+	// TSS32数据结构
+	struct TSS32 {
+	    int backlink, esp0, ss0, esp1, ss1, esp2, ss2, cr3;
+	    int eip, eflags, eax, ecx, edx, ebx, esp, ebp, esi, edi;
+	    int es, cs, ss, ds, fs, gs;
+	    int ldtr, iomap;
+	};
+	>| [uncode]
+
+	* 任务门: 分配一个描述符来指向这块TSS32内存, 这个描述符称为~
+
+	* 全局描述符数据结构: 
+	[code] |<
+	struct SEGMENT_DESCRIPTOR {
+	    short limit_low, base_low;
+	    char base_mid, access_right;
+	    char limit_high, base_high;
+	};
+
+	// 填充描述符
+	void set_segmdesc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int ar);
+
+	#define AR_TSS32 0x0089
+	>| [uncode]
+
+	=> 实现: 
+	[code] |<
+	void set_segmdesc(struct SEGMENT_DESCRIPTOR *sd, unsigned int limit, int base, int ar){
+	    if (limit > 0xfffff) {
+		ar |= 0x8000; /* G_bit = 1 */
+		limit /= 0x1000;
+	    }
+	    sd->limit_low    = limit & 0xffff;
+	    sd->base_low     = base & 0xffff;
+	    sd->base_mid     = (base >> 16) & 0xff;
+	    sd->access_right = ar & 0xff;
+	    sd->limit_high   = ((limit >> 16) & 0x0f) | ((ar >> 8) & 0xf0);
+	    sd->base_high    = (base >> 24) & 0xff;
+	    return;
+	}
+	>| [uncode]
+
+}
+
+* 进程切换代码 {
+
+	* 将表加载到CPU: 
+	[code] |<
+	load_tr:
+		LTR  [esp + 4]
+		ret
+	>| [uncode]
+
+	* : 
+
+}
+====================

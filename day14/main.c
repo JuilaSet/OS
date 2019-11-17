@@ -85,16 +85,20 @@ void intHandlerFromC_keyBoard(char *esp){
 
 // 时钟中断
 void intHandlerFromC_timer(char *esp) {
-	// 要求8259A下次继续发送中断信号
+	TIMERCTL *timerctl = getTimerController();
+
 	io_out8(PIC_OCW2, 0x60);
-	timerctl.count++;
-	if (timerctl.timeout > 0) {
-		// 每次中断发送, 时间片数值减一
-		timerctl.timeout--;
-		// 如果时间片减少到0, 表明超时, 向时钟管理器附带的FIFO队列写入一个数据
-		if (timerctl.timeout == 0) {
-			// 放入队列, 告诉内核超时事件发生
-			fifo8_w(timerctl.fifo, timerctl.data);	// TIME_FIFO8
+	timerctl->count++;
+	int i;
+	for (i = 0; i < MAX_TIMER; i++) {
+		if (timerctl->timer[i].flags == TIMER_FLAGS_USING) {
+			// 把数组中时钟对象的时间片减1
+			timerctl->timer[i].timeout--;
+			if (timerctl->timer[i].timeout == 0) {
+				// 某个时钟的时间片已经消耗完毕, 往对应时钟的数据队列里写入一个数据
+				timerctl->timer[i].flags = TIMER_FLAGS_ALLOC;
+				fifo8_w(timerctl->timer[i].fifo, timerctl->timer[i].data);
+			}
 		}
 	}
 	return;
@@ -192,13 +196,28 @@ void CMain(){
 	// 初始化队列
 	fifo8_init(&KEY_FIFO8, key_buf, KEY_BUF_SIZE);
 	fifo8_init(&MOUSE_FIFO8, mouse_buf, MOUSE_BUF_SIZE);
-	fifo8_init(&TIMER_FIFO8, timer_buf, TIMER_BUF_SIZE);
 
 	init_keyboard();
-	init_pit();
 
 	// 时钟中断
-	settimer(500, &TIMER_FIFO8, 0x1);
+	init_pit();
+	TIMER *timer1, *timer2, *timer3;
+	
+	fifo8_init(&timerfifo1, timerbuf1, 8);
+	timer1 = timer_alloc();
+	timer_init(timer1, &timerfifo1, 1);
+	timer_settime(timer1, 500);
+
+	fifo8_init(&timerfifo2, timerbuf2, 8);
+	timer2 = timer_alloc();
+	timer_init(timer2, &timerfifo2, 1);
+	timer_settime(timer2, 300);
+
+	fifo8_init(&timerfifo3, timerbuf3, 8);
+	timer3 = timer_alloc();
+	timer_init(timer3, &timerfifo3, 1);
+	timer_settime(timer3, 50);
+
 	TIMERCTL *timerctl = getTimerController();
 
 	// 绘制图层
@@ -211,14 +230,22 @@ void CMain(){
 		io_cli();
 		int key_empty = fifo8_isEmpty(&KEY_FIFO8);
 		int mouse_empty = fifo8_isEmpty(&MOUSE_FIFO8);
-		int timer_empty = fifo8_isEmpty(timerctl->fifo);
+
+		// 时钟中断
+		int t1info = fifo8_isEmpty(&timerfifo1), t2info = fifo8_isEmpty(&timerfifo2), t3info = fifo8_isEmpty(&timerfifo3);
+		int timer_empty = t1info && t2info && t3info;
 				
 		// 显示字符串: 当前还拥有的时间片数目
 		Sheet* mst = getSheet(mousePosSheet);
 		Sheet* ms = getSheet(mouseSheet);
+
 		initCursor(&mouseinfoCursor);
 		SheetClear(mst, &bootInfo, COL8_TP);
-		SheetPrintf(intToHexStr(timerctl->timeout), mst, &bootInfo, &mouseinfoCursor);
+		SheetPrintf(intToHexStr(timer1->timeout), mst, &bootInfo, &mouseinfoCursor);
+		SheetPrintln(mst, &bootInfo, &mouseinfoCursor);
+		SheetPrintf(intToHexStr(timer2->timeout), mst, &bootInfo, &mouseinfoCursor);
+		SheetPrintln(mst, &bootInfo, &mouseinfoCursor);
+		SheetPrintf(intToHexStr(timer3->timeout), mst, &bootInfo, &mouseinfoCursor);
 		SheetPrintln(mst, &bootInfo, &mouseinfoCursor);
 
 		if(key_empty && mouse_empty && timer_empty){
@@ -255,11 +282,33 @@ void CMain(){
 				redraw = 1;
 			}
 		}else if(!timer_empty){
-			// 超时发生后进入这里
-			io_sti();
-
-			SheetClear(mst, &bootInfo, COL8_TP);
-			SheetPrintf("TimeFinish", mst, &bootInfo, &mouseinfoCursor);
+			// 只要有一个时间片超时, 就进入这里
+			if(!t1info){
+				io_sti();
+				unsigned char timer1 = fifo8_r(&timerfifo1);
+				SheetPrintf("t1info", mst, &bootInfo, &mouseinfoCursor);
+				redraw = 1;
+			}
+			if(!t2info){
+				io_sti();
+				unsigned char timer2 = fifo8_r(&timerfifo2);
+				SheetPrintf("t2info", mst, &bootInfo, &mouseinfoCursor);
+				redraw = 1;
+			}
+			if(!t3info){
+				// 闪烁效果
+				io_sti();
+				unsigned char data = fifo8_r(&timerfifo3);
+				if(data != 0){
+					timer_init(timer3, &timerfifo3, 0x0);
+					showMsg(window, &bootInfo, "A3", COL8_848400);
+				}else{
+					timer_init(timer3, &timerfifo3, 0x1);
+					clearMsg(window, &bootInfo, COL8_FFFFFF);
+				}
+				timer_settime(timer3, 50);
+				redraw = 1;
+			}
 		}
 
 		// 重新绘制

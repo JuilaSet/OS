@@ -32,11 +32,13 @@
 
 unsigned char mouse_buf[MOUSE_BUF_SIZE] = {};
 unsigned char key_buf[KEY_BUF_SIZE] = {};
-unsigned char timer_buf[TIMER_BUF_SIZE] = {};
+
+// 时钟中断
+static struct FIFO8 timerfifo1, timerfifo2, timerfifo3;
+static char timerbuf1[8], timerbuf2[8], timerbuf3[8];
 
 struct FIFO8 MOUSE_FIFO8 = {};
 struct FIFO8 KEY_FIFO8 = {};
-struct FIFO8 TIMER_FIFO8 = {};
 
 /*
  * 鼠标中断

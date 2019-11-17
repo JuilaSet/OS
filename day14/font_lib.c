@@ -620,9 +620,13 @@ Window* showMsg(Window* window, struct BOOTINFO* bootinfo, const char* sptr, int
 	return window;
 }
 
-Window* clearMsg(Window* window, struct BOOTINFO* bootinfo){
-	Sheet *sheet = getSheet(window->sheet_id);
-	SheetClear(sheet, bootinfo, COL8_TP);
+Window* clearMsg(Window* window, struct BOOTINFO* bootinfo, int font){
+	Sheet* sheet = getSheet(window->sheet_id);
+	int xsize = bootinfo->screenX;
+	// 中间的小白格子
+	memset_8((memaddr8_t)sheet->vram, COL8_C6C6C6, 0xffff);
+	int x0 = sheet->pos->x, y0 = sheet->pos->y;
+	boxfill8(sheet->vram, xsize, COL8_FFFFFF, 2, 2, sheet->size->width - 2, sheet->size->height - 2);
 	initCursor(&(window->txtCursor));
 }
 

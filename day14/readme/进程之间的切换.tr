@@ -1,0 +1,75 @@
+/*
+ * 进程之间的切换
+ */
+#def [text~]
+====================
+* 进程A, B互相切换: 进程A -{切换}-> 进程B -{切换}-> 进程A
+
+* 进程B主逻辑: 
+[code] |<
+void task_b_main(void) {
+	Sheet* ts = getSheet(txtSheet);
+	SheetPrintf("enter task b", ts, &bootInfo, &txtCursor);
+
+	// 初始化一个时钟
+	struct FIFO8 timerinfo_b;
+	char timerbuf_b[8];
+	struct TIMER *timer_b = 0;
+
+	fifo8_init(&timerinfo_b, timerbuf_b, 8); // 初始化消息队列
+
+	timer_b = timer_alloc();
+	timer_init(timer_b, &timerinfo_b, 123);	// 发送数据123
+
+	timer_settime(timer_b, 500);		// 时间片为500
+
+	int i = 0;
+	for(;;) {
+		io_cli();
+		if (fifo8_isEmpty(&timerinfo_b)) {
+			io_sti();
+		} else {
+			i = fifo8_r(&timerinfo_b);
+			io_sti();
+			if (i == 123) {
+				SheetPrintf("switch back", ts, &bootInfo, &txtCursor);
+				// 调度进程7, 即第7个tss, 进程A
+				taskswitch7();
+			}
+		}
+	}
+}
+>| [uncode]
+
+* 初始化A的TSS: 
+[code] |<
+tss_a.cs = 8;	// 指向LABEL_DESC_CODE32, 可执行代码段
+tss_a.ss = 32;	// 指向LABEL_DESC_STACK, 用户栈空间
+tss_a.ds = 24;	// 指向LABEL_DESC_VRAM, 整个4g内存
+>| [uncode]
+
+* 描述进程B的TSS结构: 
+[code] |<
+int addr_code32 = get_code32_addr();
+tss_b.eip = (task_b_main - addr_code32);
+tss_b.eflags = 0x00000202; 
+tss_b.eax = 0;
+tss_b.ecx = 0;
+tss_b.edx = 0;
+tss_b.ebx = 0;
+tss_b.esp = 1024;	// tss_a.esp;
+tss_b.ebp = 0;
+tss_b.esi = 0;
+tss_b.edi = 0;
+
+// 段寄存器与A一样
+tss_b.es = tss_a.es;
+tss_b.cs = tss_a.cs;	// 6 * 8;
+tss_b.ss = tss_a.ss;
+tss_b.ds = tss_a.ds;
+tss_b.fs = tss_a.fs;
+tss_b.gs = tss_a.gs;
+>| [uncode]
+
+* linux的做法: 每一个cpu使用一个tss段, tr寄存器保存该段
+====================

@@ -362,7 +362,7 @@ void displayMem_8(memaddr8_t addr, int n, struct BOOTINFO* bootinfo, struct TXTC
 /*
  * 图层
  */
-#define MAX_COVERAGE_COUNT 50
+#define MAX_COVERAGE_COUNT 5
 #define VRAM_LENGTH 0xffff
 #define VALID_FLAG 0x1	// 是否有效
 #define HIDE_FLAG 0x2	// 是否不显示

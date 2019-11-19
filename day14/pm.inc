@@ -12,6 +12,7 @@ DA_DRW		EQU	92h	; 存在的可读写数据段属性值
 DA_DRWA		EQU	93h	; 存在的已访问可读写数据段类型值
 DA_LIMIT_4K	EQU	8000h	; 段界限粒度为 4K 字节
 DA_386IGate	EQU	8Eh	; 中断调用门
+AR_TSS32	EQU	0x0089	; 指向TSS描述符
 
 ; Gate selector, offset, DCount, Attr
 %macro Gate 4

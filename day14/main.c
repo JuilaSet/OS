@@ -2,6 +2,7 @@
 #include "fifo.h"
 #include "font_lib.c"
 #include "interrupt_lib.c"
+#include "Task.h"
 #include "Timer.h"
 
 #define MOUSE_LAYER 0
@@ -12,9 +13,9 @@ struct BOOTINFO bootInfo = { (memaddr8_t)0xa0000, 320, 200 };
 struct BOOTINFO txtInfo_1 = { (memaddr8_t)0x0, 320, 200 };	// 文本图层
 
 struct TXTCursor txtCursor = {
-		20, 20, 
+		20, 70, 
 		8, 16, 
-		20, 20,	// 初始位置
+		20, 70,	// 初始位置
 		10,
 		COL8_FFFFFF
 };
@@ -117,6 +118,52 @@ void intHandlerFromC_mouse(char *esp){
 	fifo8_w(&MOUSE_FIFO8, data);
 }
 
+const int mouseSheet = 0x1;
+const int txtSheet = 0x2;
+const int mousePosSheet = 0x3;
+const int bgSheet = 0x4;
+
+// 任务B逻辑
+void task_b_main(void){
+	Sheet* ts = getSheet(txtSheet);
+
+	// 初始化一个时钟
+	struct FIFO8 timerinfo_b;
+	char timerbuf_b[8];
+	TIMER *timer_b = 0;
+
+	fifo8_init(&timerinfo_b, timerbuf_b, 8);	// 初始化消息队列
+
+	timer_b = timer_alloc();					// 添加到时钟管理器中, 自动减少
+	timer_init(timer_b, &timerinfo_b, 123);		// 发送数据123
+
+	timer_settime(timer_b, 500);				// 时间片为500
+
+	int i = 0;
+	for(;;) {
+		io_cli();
+		initCursor(&txtCursor);
+		SheetClear(ts, &bootInfo, COL8_TP);
+		SheetPrintf("enter task b", ts, &bootInfo, &txtCursor);
+		SheetPrintln(ts, &bootInfo, &txtCursor);
+		SheetPrintf(intToHexStr(timer_b->timeout), ts, &bootInfo, &txtCursor);
+		drawSheetList(&bootInfo);
+
+		if (fifo8_isEmpty(&timerinfo_b)) {
+			io_sti();
+		} else {
+			i = fifo8_r(&timerinfo_b);
+			io_sti();
+			if (i == 123) {
+				SheetPrintf("switch back", ts, &bootInfo, &txtCursor);
+				drawSheetList(&bootInfo);
+				// 调度进程7, 即第7个tss, 进程A
+				taskswitch7();
+			}
+		}
+	}
+}
+
 void CMain(){
 
 	pict_init();
@@ -127,7 +174,7 @@ void CMain(){
 
 	// 分配32位堆区内存
 	if(-1 == memman_free(HEAP_BASE_ADDR, 0xd05f0000)){
-		Printf("Free failed!", &bootInfo, &txtCursor);
+		return;
 	}
 
 	// 显示
@@ -138,6 +185,11 @@ void CMain(){
 	Position* pos_zero = (Position*)malloc_8(sizeof(Position));
 	pos_zero->x = 0;
 	pos_zero->y = 0;
+	
+	// 鼠标位置
+	Position* cur_pos = (Position*)malloc_8(sizeof(Position));
+	cur_pos->x = 150;
+	cur_pos->y = 50;
 
 	Size* size_all = (Size*)malloc_8(sizeof(Size));
 	size_all->width = bootInfo.screenX;
@@ -154,17 +206,8 @@ void CMain(){
 	Size* size_squar = (Size*)malloc_8(sizeof(Size));
 	size_squar->width = 80;
 	size_squar->height = 80;
-	
-	// 鼠标位置
-	Position* cur_pos = (Position*)malloc_8(sizeof(Position));
-	cur_pos->x = 50;
-	cur_pos->y = 50;
 
 	// 图层
-	const int mouseSheet = 0x1;
-	const int txtSheet = 0x2;
-	const int mousePosSheet = 0x3;
-	const int bgSheet = 0x4;
 
 	// 插入鼠标图层
 	memaddr8_t vram_0 = (memaddr8_t)malloc_8(0xffff);
@@ -188,6 +231,9 @@ void CMain(){
 	memset_8((memaddr8_t)vram_255, COL8_848484, 0xffff);
 	insertSheet(bgSheet, pos_zero, size_all, 0xffff, 255, vram_255, VALID_FLAG);
 
+	// 创建窗口
+	Window* window = createWindow(&bootInfo, cur_pos, size_short, VALID_FLAG);
+
 	// 中断相关
 	// 允许开启中断
     io_sti();
@@ -202,38 +248,87 @@ void CMain(){
 	// 时钟中断
 	init_pit();
 	TIMER *timer1, *timer2, *timer3;
-	
-	fifo8_init(&timerfifo1, timerbuf1, 8);
+
+	fifo8_init(&timerfifo, timerbuf, 8);
+
 	timer1 = timer_alloc();
-	timer_init(timer1, &timerfifo1, 1);
+	timer_init(timer1, &timerfifo, 10);	// 收到10表示A需要切换到B进程
 	timer_settime(timer1, 500);
 
-	fifo8_init(&timerfifo2, timerbuf2, 8);
 	timer2 = timer_alloc();
-	timer_init(timer2, &timerfifo2, 1);
+	timer_init(timer2, &timerfifo, 2);
 	timer_settime(timer2, 300);
 
-	fifo8_init(&timerfifo3, timerbuf3, 8);
 	timer3 = timer_alloc();
-	timer_init(timer3, &timerfifo3, 1);
+	timer_init(timer3, &timerfifo, 1);
 	timer_settime(timer3, 50);
 
 	TIMERCTL *timerctl = getTimerController();
+
+	// 任务初始化
+	// a, b任务
+	TSS32 *tss_a, *tss_b;
+	tss_a = (TSS32*)malloc_8(sizeof(TSS32));
+	tss_b = (TSS32*)malloc_8(sizeof(TSS32));
+	SEGMENT_DESCRIPTOR *gdt = (SEGMENT_DESCRIPTOR *)get_addr_gdt();
+	int addr_code32 = (int)get_code32_addr();
+
+	// tss_a
+	tss_a->ldtr = 0;
+	tss_a->iomap = 0x40000000;
+	// tss_b
+	tss_b->ldtr = 0;
+	tss_b->iomap = 0x40000000;
+
+	// 将 tss_a 的地址写入描述符
+	set_segmdesc(gdt + 7, 103, (int) tss_a, AR_TSS32);
+	set_segmdesc(gdt + 8, 103, (int) tss_a, AR_TSS32);
+	
+	// 将 tss_b 的地址写入描述符
+	set_segmdesc(gdt + 9, 103, (int) tss_b, AR_TSS32);
+	set_segmdesc(gdt + 6, 0xffff, (int) &task_b_main, 0x409a);
+
+	// 把描述符LABEL_DESC_7通过ltr指令加载到CPU中
+	load_tr(7 << 3);	// 左移空出3个比特位
+
+	// 切换到A任务(调度)
+	taskswitch8();	// jmp	8 << 3:0
+
+	// 创建任务B的TSS
+	int task_b_esp = (int)malloc_4k(64 * 1024) + 64 * 1024;
+	tss_b->eip = ((int)task_b_main - addr_code32);
+	tss_b->eflags = 0x00000202; 
+	tss_b->eax = 0;
+	tss_b->ecx = 0;
+	tss_b->edx = 0;
+	tss_b->ebx = 0;
+	tss_b->esp = 1024;	// tss_a.esp;
+	tss_b->ebp = 0;
+	tss_b->esi = 0;
+	tss_b->edi = 0;
+
+	// 段寄存器与A一样
+	tss_b->es = tss_a->es;
+	tss_b->cs = tss_a->cs;	// 指向LABEL_DESC_CODE32, 可执行代码段
+	tss_b->ss = tss_a->ss;	// 指向LABEL_DESC_STACK, 用户栈空间
+	tss_b->ds = tss_a->ds;	// 指向LABEL_DESC_VRAM, 整个4g内存
+	tss_b->fs = tss_a->fs;
+	tss_b->gs = tss_a->gs;
+
+	Sheet* ts = getSheet(txtSheet);
 
 	// 绘制图层
 	drawSheetList(&bootInfo);
 
 	// 第几个描述符
 	int count = 0;
-	Window* window = createWindow(&bootInfo, cur_pos, size_short, VALID_FLAG);
 	for(int redraw;;redraw = 1) {	// redraw : 重绘
 		io_cli();
 		int key_empty = fifo8_isEmpty(&KEY_FIFO8);
 		int mouse_empty = fifo8_isEmpty(&MOUSE_FIFO8);
 
 		// 时钟中断
-		int t1info = fifo8_isEmpty(&timerfifo1), t2info = fifo8_isEmpty(&timerfifo2), t3info = fifo8_isEmpty(&timerfifo3);
-		int timer_empty = t1info && t2info && t3info;
+		int timer_empty = fifo8_isEmpty(&timerfifo);
 				
 		// 显示字符串: 当前还拥有的时间片数目
 		Sheet* mst = getSheet(mousePosSheet);
@@ -259,7 +354,8 @@ void CMain(){
 			char ch = getKeyMakeChar(data_key);
 			if(data_key == 0x1C){
 				// 回车
-				showMsg(window, &bootInfo, "Hello", COL8_848400);
+				SheetPrintf("Hello", ts, &bootInfo, &txtCursor);
+				SheetPrintln(ts, &bootInfo, &txtCursor);
 				redraw = 1;
 			}else if(ch == '\t'){
 				PrintTab(&bootInfo, &txtCursor, 1);
@@ -282,28 +378,24 @@ void CMain(){
 				redraw = 1;
 			}
 		}else if(!timer_empty){
-			// 只要有一个时间片超时, 就进入这里
-			if(!t1info){
-				io_sti();
-				unsigned char timer1 = fifo8_r(&timerfifo1);
-				SheetPrintf("t1info", mst, &bootInfo, &mouseinfoCursor);
+			io_sti();
+			unsigned char data = fifo8_r(&timerfifo);
+			redraw = 1;
+			if(data == 10){
+				SheetPrintln(ts, &bootInfo, &txtCursor);
 				redraw = 1;
-			}
-			if(!t2info){
-				io_sti();
-				unsigned char timer2 = fifo8_r(&timerfifo2);
-				SheetPrintf("t2info", mst, &bootInfo, &mouseinfoCursor);
-				redraw = 1;
-			}
-			if(!t3info){
-				// 闪烁效果
-				io_sti();
-				unsigned char data = fifo8_r(&timerfifo3);
-				if(data != 0){
-					timer_init(timer3, &timerfifo3, 0x0);
+
+				// 切换进程B
+				taskswitch9();	// 9 << 3:0
+			}else if(data == 2){
+				
+			}else {
+				if(data == 1){
+					timer_init(timer3, &timerfifo, 0x0);
 					showMsg(window, &bootInfo, "A3", COL8_848400);
 				}else{
-					timer_init(timer3, &timerfifo3, 0x1);
+					// 闪烁效果
+					timer_init(timer3, &timerfifo, 0x1);
 					clearMsg(window, &bootInfo, COL8_FFFFFF);
 				}
 				timer_settime(timer3, 50);

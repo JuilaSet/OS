@@ -9,16 +9,23 @@ jmp	LABEL_BEGIN
 [SECTION .gdt]
 ;				段基址		段界限			属性
 LABEL_GDT:   	    Descriptor	0,		0,			0  
-LABEL_DESC_CODE32:  Descriptor	0,		SegCode32Len - 1,	DA_C | DA_32 | DA_LIMIT_4K
-LABEL_DESC_VIDEO:   Descriptor	0B8000h,	0ffffh,			DA_DRW
-LABEL_DESC_VRAM:    Descriptor	0,		0ffffffffh,		DA_DRW | DA_LIMIT_4K
+LABEL_DESC_CODE32:  Descriptor	0,		0fffffh,		DA_C | DA_32 | DA_LIMIT_4K
+LABEL_DESC_VIDEO:   Descriptor	0B8000h,	0fffffh,		DA_DRW
+LABEL_DESC_VRAM:    Descriptor	0,		0fffffh,		DA_DRW | DA_LIMIT_4K
 
 ; 把整个4G内存当做一段可读可写的内存
-LABEL_DESC_STACK:   Descriptor	0,		TopOfStack,		DA_DRWA | DA_32 | DA_LIMIT_4K
+LABEL_DESC_STACK:   Descriptor	0,		LenOfStackSection,	DA_DRWA | DA_32
 
 ; 图像与字体表只读
 LABEL_DESC_FONT:    Descriptor	0,		SystemFontLength - 1,	DA_DRW | DA_LIMIT_4K
 
+; 任务门
+LABEL_DESC_6:       Descriptor	0,		0fffffh,		0409Ah
+LABEL_DESC_7:       Descriptor	0,		0,			0
+LABEL_DESC_8:       Descriptor	0,		0,			0
+LABEL_DESC_9:       Descriptor	0,		0,			0
+
+; 段选择器
 GdtLen     equ    $ - LABEL_GDT
 GdtPtr     dw     GdtLen - 1
            dd     0
@@ -32,9 +39,12 @@ SelectorFont      equ   LABEL_DESC_FONT   -  LABEL_GDT
 ; 中断向量表 SpuriousHandler KeyBoardHandler MouseHandler timerHandler
 [SECTION .igt]
 LABEL_IDT:
-%rep  9 
-	Gate	SelectorCode32, timerHandler, 0, DA_386IGate
+%rep  8
+	Gate	SelectorCode32, SpuriousHandler, 0, DA_386IGate
 %endrep
+
+.08H: 
+	Gate	SelectorCode32, timerHandler, 0, DA_386IGate
 
 ; 9
 .09H:
@@ -165,7 +175,7 @@ LABEL_SEG_CODE32:
 
 	mov	ax, SelectorStack
 	mov	ss, ax
-	mov	esp, TopOfStack
+	mov	esp, TopOfStack1
 
 	mov	ax, SelectorVram
 	mov	ds,  ax
@@ -246,6 +256,9 @@ _MouseHandler:
 	iretd
 
 ; 头文件
+; 任务管理
+	%include	"task.asm"
+
 ; 内存信息
 	%include	"memory.asm"
 
@@ -261,9 +274,12 @@ SystemFontLength equ $ - LABEL_SYSTEM_FONT
 SegCode32Len   equ  $ - LABEL_SEG_CODE32
 
 [SECTION .gs]
-ALIGN 32
+	ALIGN 32
 [BITS 32]
 LABEL_STACK:
 	times 512  db 0
-	TopOfStack  equ  $ - LABEL_STACK
+TopOfStack1	equ $ - LABEL_STACK
+	times 512 db 0
+TopOfStack2	equ $ - LABEL_STACK
 
+LenOfStackSection equ $ - LABEL_STACK

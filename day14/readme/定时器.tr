@@ -177,7 +177,7 @@
 	} TIMERCTL;
 	>| [uncode]
 
-	* 每次检查数组中的所有元素: 
+	* 每次收到时钟中断信号就将数组中的所有时间片生命周期-1: 
 	[code] |<
 	void intHandlerFromC_timer(char *esp) {
 		io_out8(PIC_OCW2, 0x60);

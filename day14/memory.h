@@ -5,6 +5,9 @@
 typedef unsigned int* memaddr32_t;
 typedef unsigned char* memaddr8_t;
 
+memaddr8_t get_addr_gdt(void);
+memaddr8_t get_code32_addr(void);
+
 // 内存管理函数
 void memset_8(memaddr8_t dest, unsigned char val, int n){
 	while(n--) *dest++ = val;

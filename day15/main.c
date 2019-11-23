@@ -7,7 +7,7 @@
 
 #define MOUSE_LAYER 0
 
-struct MOUSE_DEC mdec = {};
+struct MOUSE_DEC mdec = { 0 };
 
 struct BOOTINFO bootInfo = { (memaddr8_t)0xa0000, 320, 200 };
 struct BOOTINFO txtInfo_1 = { (memaddr8_t)0x0, 320, 200 };	// 文本图层
@@ -91,6 +91,8 @@ void intHandlerFromC_timer(char *esp) {
 	io_out8(PIC_OCW2, 0x60);
 	timerctl->count++;
 	int i;
+
+	int ts;
 	for (i = 0; i < MAX_TIMER; i++) {
 		if (timerctl->timer[i].flags == TIMER_FLAGS_USING) {
 			// 把数组中时钟对象的时间片减1
@@ -99,6 +101,14 @@ void intHandlerFromC_timer(char *esp) {
 				// 某个时钟的时间片已经消耗完毕, 往对应时钟的数据队列里写入一个数据
 				timerctl->timer[i].flags = TIMER_FLAGS_ALLOC;
 				fifo8_w(timerctl->timer[i].fifo, timerctl->timer[i].data);
+
+				if (&(timerctl->timer[i]) == mt_timer) {
+					ts = 1;	// 如果时间片是mt, 设置为1
+				}
+
+				if (ts != 0) {
+					mt_taskswitch();
+				}
 			}
 		}
 	}
@@ -123,13 +133,15 @@ const int txtSheet = 0x2;
 const int mousePosSheet = 0x3;
 const int bgSheet = 0x4;
 
-// 任务B逻辑
+/*
+ * 任务B入口
+ */
 void task_b_main(void){
 	Sheet* ts = getSheet(txtSheet);
 
 	// 初始化一个时钟
-	struct FIFO8 timerinfo_b;
-	char timerbuf_b[8];
+	static FIFO8 timerinfo_b;
+	static char timerbuf_b[8];
 	TIMER *timer_b = 0;
 
 	fifo8_init(&timerinfo_b, timerbuf_b, 8);	// 初始化消息队列
@@ -137,11 +149,13 @@ void task_b_main(void){
 	timer_b = timer_alloc();					// 添加到时钟管理器中, 自动减少
 	timer_init(timer_b, &timerinfo_b, 123);		// 发送数据123
 
-	timer_settime(timer_b, 500);				// 时间片为500
+	timer_settime(timer_b, 10);				// 时间片
 
 	int i = 0;
 	for(;;) {
 		io_cli();
+
+		// 打印
 		initCursor(&txtCursor);
 		SheetClear(ts, &bootInfo, COL8_TP);
 		SheetPrintf("enter task b", ts, &bootInfo, &txtCursor);
@@ -149,20 +163,25 @@ void task_b_main(void){
 		SheetPrintf(intToHexStr(timer_b->timeout), ts, &bootInfo, &txtCursor);
 		drawSheetList(&bootInfo);
 
+		// 取出数据
 		if (fifo8_isEmpty(&timerinfo_b)) {
 			io_sti();
 		} else {
 			i = fifo8_r(&timerinfo_b);
 			io_sti();
 			if (i == 123) {
-				SheetPrintf("switch back", ts, &bootInfo, &txtCursor);
+				SheetPrintf("B", ts, &bootInfo, &txtCursor);
 				drawSheetList(&bootInfo);
-				// 调度进程7, 即第7个tss, 进程A
-				taskswitch7();
+				// taskswitch7();
+				timer_settime(timer_b, 10);
 			}
 		}
 	}
 }
+
+/*
+ * Main入口
+ */
 
 void CMain(){
 
@@ -382,11 +401,11 @@ void CMain(){
 			unsigned char data = fifo8_r(&timerfifo);
 			redraw = 1;
 			if(data == 10){
-				SheetPrintln(ts, &bootInfo, &txtCursor);
-				redraw = 1;
+				// SheetPrintln(ts, &bootInfo, &txtCursor);
+				// redraw = 1;
 
 				// 切换进程B
-				taskswitch9();	// 9 << 3:0
+				// taskswitch9();	// 9 << 3:0
 			}else if(data == 2){
 				
 			}else {

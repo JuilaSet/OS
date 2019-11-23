@@ -135,7 +135,7 @@ public:
 		ifstream ifo(filename, ios::binary);
 
 		if (!ifo.is_open()) {
-			std::cerr << "file failed open" << std::endl;
+			std::cerr << "file " << filename << " failed open" << std::endl;
 			exit(1);
 		}
 

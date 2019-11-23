@@ -5,126 +5,126 @@
 ; Instruction set: 80386
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+global fifo8_init: function
+global fifo8_w: function
+global fifo8_r: function
+global fifo8_isEmpty: function
+global fifo8_isFull: function
+global strlen: function
+global charToHex: function
+global charToHexStr: function
+global intToHexStr: function
+global memset_8: function
+global memcpy_8: function
+global memcmb: function
+global getAddrRangeDescArray: function
+global memman_total: function
+global memman_alloc: function
+global memman_free: function
+global malloc_4k: function
+global malloc_8: function
+global free_8: function
+global set_pict: function
+global pict_init: function
+global boxfill8: function
+global getAddrOffsetAlpha: function
+global getAddrOffsetNumber: function
+global showFont8: function
+global putChar: function
+global putStr: function
+global charToPictColor: function
+global PrintRGB: function
+global fillAll: function
+global initCursor: function
+global clear: function
+global Println: function
+global PrintlnMult: function
+global Printf: function
+global PrintChar: function
+global PrintTab: function
+global showMemoryInfo: function
+global displayMem_8: function
+global insertSheet: function
+global insertToFirst: function
+global removeSheet: function
+global getSheet: function
+global alterSheetLayer: function
+global drawSheetList: function
+global SheetPrintln: function
+global SheetPrintf: function
+global SheetClear: function
+global SheetPrintTab: function
+global createWindow: function
+global showMsg: function
+global clearMsg: function
+global wait_KBC_sendready: function
+global init_keyboard: function
+global enable_mouse: function
+global mouse_decode: function
+global getKeyMakeChar: function
+global getKeyBreakChar: function
+global init_pit: function
+global getTimerController: function
+global timer_alloc: function
+global timer_free: function
+global timer_init: function
+global timer_settime: function
+global set_segmdesc: function
+global mt_init: function
+global mt_taskswitch: function
+global eraseMouse: function
+global computeMousePosition: function
+global intHandlerFromC_Spurious: function
+global intHandlerFromC_keyBoard: function
+global intHandlerFromC_timer: function
+global intHandlerFromC_mouse: function
+global task_b_main: function
+global CMain: function
+global cursor
+global imgHook
+global memman
+global HEAP_BASE_ADDR
+global pict
+global bootInfo
+global txtInfo_1
+global txtCursor
+global mouseinfoCursor
+global sheetman
+global mouse_buf
+global key_buf
+global MOUSE_FIFO8
+global KEY_FIFO8
+global MT_TR
+global mt_timer
+global mdec
+global mouseSheet
+global txtSheet
+global mousePosSheet
+global bgSheet
+
+extern io_stihlt                                        ; near
+extern taskswitch8                                      ; near
+extern load_tr                                          ; near
+extern get_code32_addr                                  ; near
+extern get_addr_gdt                                     ; near
+extern io_sti                                           ; near
+extern farjmp                                           ; near
+extern io_in8                                           ; near
+extern vsFont_colon                                     ; byte
+extern vsFont__                                         ; byte
+extern vsFont_ASK                                       ; byte
+extern vsFont_EMPTY                                     ; byte
+extern NUMBER_FONT_LIST                                 ; byte
+extern ALPHA_FONT_LIST                                  ; byte
+extern io_store_eflags                                  ; near
+extern io_out8                                          ; near
+extern io_cli                                           ; near
+extern io_load_eflags                                   ; near
+extern GET_MEMDESC_ADDR                                 ; near
+extern GET_MEMOTY_BLOCK_COUNT                           ; near
+
+
+SECTION .text   align=1 execute                         ; section number 1, code
 
 fifo8_init:; Function begin
         push    ebp                                     ; 0000 _ 55
@@ -4393,7 +4393,7 @@ CMain:  ; Function begin
 ; CMain End of function
 
 
-
+SECTION .data   align=32 noexecute                      ; section number 2, data
 
 cursor:                                                 ; byte
         db 2AH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH, 2EH       ; 0000 _ *.......
@@ -4511,7 +4511,7 @@ keyintToNumChar.2056:                                   ; byte
         db 39H, 30H, 2DH, 3DH, 08H                      ; 02B0 _ 90-=.
 
 
-
+SECTION .bss    align=32 noexecute                      ; section number 3, bss
 
 sheetman:                                               ; byte
         resd    48                                      ; 0000
@@ -4559,7 +4559,7 @@ timerbuf_b.2228:                                        ; qword
         resq    1                                       ; 02C0
 
 
-
+SECTION .rodata align=4 noexecute                       ; section number 4, const
 
 ?_199:                                                  ; byte
         db 62H, 61H, 73H, 65H, 41H, 64H, 64H, 72H       ; 0000 _ baseAddr

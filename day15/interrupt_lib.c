@@ -2,6 +2,8 @@
 #ifndef INTERRUPT_LIB_INCLUDE
 #define INTERRUPT_LIB_INCLUDE
 
+#include "fifo.h"
+
 /*
  * 辅助函数
  */
@@ -34,11 +36,11 @@ unsigned char mouse_buf[MOUSE_BUF_SIZE] = {};
 unsigned char key_buf[KEY_BUF_SIZE] = {};
 
 // 时钟中断
-static struct FIFO8 timerfifo;
+static FIFO8 timerfifo;
 static char timerbuf[8];
 
-struct FIFO8 MOUSE_FIFO8 = {};
-struct FIFO8 KEY_FIFO8 = {};
+FIFO8 MOUSE_FIFO8 = { (unsigned char*)0, 0, 0, 0, 0 };
+FIFO8 KEY_FIFO8 = { 0, 0, 0, 0, 0 };
 
 /*
  * 鼠标中断

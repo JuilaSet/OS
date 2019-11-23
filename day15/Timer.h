@@ -13,7 +13,7 @@ void init_pit(void);
 // 时钟对象
 typedef struct {
 	unsigned int timeout, flags;
-	struct FIFO8 *fifo;
+	FIFO8 *fifo;
 	unsigned char data;
 } TIMER;
 
@@ -29,7 +29,7 @@ static TIMERCTL* timerctl = 0;
 TIMERCTL* getTimerController();
 
 // 设定时间片
-// void settimer(unsigned int timeout, struct FIFO8 *fifo, unsigned char data);
+// void settimer(unsigned int timeout, FIFO8 *fifo, unsigned char data);
 
 // 分配一个TIMER对象: 从时钟控制器的TIMER数组中找到一个还没有被使用的对象, 将它的状态从free转换为alloc
 TIMER* timer_alloc(void);
@@ -38,7 +38,7 @@ TIMER* timer_alloc(void);
 void timer_free(TIMER *timer);
 
 // 初始化一个TIMER对象
-void timer_init(TIMER *timer, struct FIFO8 *fifo, unsigned char data) ;
+void timer_init(TIMER *timer, FIFO8 *fifo, unsigned char data) ;
 
 // 设定时间片
 void timer_settime(TIMER *timer, unsigned int timeout);
@@ -57,7 +57,7 @@ void init_pit(void) {
 	timerctl->count = 0;
 }
 
-// void settimer(unsigned int timeout, struct FIFO8 *fifo, unsigned char data) {
+// void settimer(unsigned int timeout, FIFO8 *fifo, unsigned char data) {
 // 	int eflags = io_load_eflags();
 // 	// 暂时停止接收中断信号
 // 	io_cli();
@@ -94,7 +94,7 @@ void timer_free(TIMER *timer) {
     return;
 }
 
-void timer_init(TIMER *timer, struct FIFO8 *fifo, unsigned char data) {
+void timer_init(TIMER *timer, FIFO8 *fifo, unsigned char data) {
     timer->fifo = fifo;
     timer->data = data;
     return;

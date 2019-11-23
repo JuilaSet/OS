@@ -3,5 +3,112 @@
  */
 #def [text~]
 ====================
-* : 
+* 效果: 每个进程各自执行打印语句, 如果足够快, 在用户看来就好像同时执行
+
+* 利用时钟中断实现自动切换: 
+[code] |<
+// TR 选择符, 用于指定下一个要切换的进程
+static int MT_TR;
+
+// 初始化时间片
+void mt_init();
+
+// 专门用于时钟中断的时钟
+TIMER *mt_timer;
+
+// 切换进程
+void mt_taskswitch();
+>| [uncode]
+
+=> 实现: 
+[code] |<
+void mt_init(void) {
+	mt_timer = timer_alloc();
+
+	timer_settime(mt_timer, 100);
+	MT_TR = 7 << 3;	// 从任务A开始
+	return;
+}
+
+void mt_taskswitch() {
+	// 把MT_TR在 7 << 3 和 9 << 3 之间切换, 然后通过调用 farjmp 跳转到对应的任务门
+	if (MT_TR == 7 << 3) {
+		MT_TR = 9 << 3;
+	} else {
+		MT_TR = 7 << 3;
+	}
+
+	timer_settime(mt_timer, 100);
+
+	// 通过Far JMP切换到MT_TR指向的进程位置, 从头开始执行
+	farjmp(0, MT_TR);
+	return;
+}
+>| [uncode]
+
+* farjmp: FAR 跳转
+	=> 在JMP FAR指令中, 可以指定一个内存地址, 
+	=> CPU会从指定的内存地址中读取4个字节的数据, 并将其存入EIP寄存器
+	=> 再继续读取2个字节的数据, 并将其存入CS寄存器
+[ex~] [code] |<
+farjmp:
+	JMP	FAR [esp + 4]	; esp + 4指向[ 0xff 0xff 0xff 0xff | 0xcc 0xcc ]
+	ret			;		(存入EIP寄存器)		(存入CS寄存器)
+>| [uncode]
+
+=> farJmp跳转: 
+[ex~]
+|| farjmp(0, 7 << 3) -> EIP = 0, cs = 7 << 3
+
+* 在时钟中断里进行调用, 进而实现进程切换: 
+[code] |<
+void intHandlerFromC_timer(char *esp) {
+	...
+	int ts = 0;
+	for(...){
+		...
+		if (timerctl->timer[i].flags == TIMER_FLAGS_USING) {
+			...
+			if (&timerctl.timer[i] == mt_timer) {
+				ts = 1;	// 如果时间片是mt, 设置为1
+			}
+		}
+
+		if (ts != 0) {
+			mt_taskswitch();
+		}
+	}
+	return;
+}
+>| [uncode]
+
+* TaskA主逻辑: 
+	=> 初始化时间片
+	=> 注释掉任务切换代码`taskswitch7`
+[code] |<
+...
+mt_init();
+...
+
+if(data == 10){
+	SheetPrintln(ts, &bootInfo, &txtCursor);
+	redraw = 1;
+
+	// 切换进程B
+	// taskswitch9();
+}else if(data == 2){
+...
+>| [uncode]
+
+* TaskB主逻辑: 
+	=> 注释掉任务切换代码`taskswitch7`
+	=> 同样构造一个1秒的时钟, 每次时钟超时的时候, 就在桌面上打印出字符B
+[code] |<
+if (i == 123) {
+	SheetPrintf("B", ts, &bootInfo, &txtCursor);
+	drawSheetList(&bootInfo);
+	// taskswitch7();
+	timer_settime(timer_b, 100);
+}
+>| [uncode]
 ====================

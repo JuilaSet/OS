@@ -1,0 +1,4 @@
+cd /home/luo/workspace/OSsy/OS15
+mput *.c
+mput *.h
+put makefile

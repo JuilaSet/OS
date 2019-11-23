@@ -1,6 +1,8 @@
 /*
  * Memory.h
  */
+#ifndef MEMORY_INCLUDE
+#define MEMORY_INCLUDE
 
 typedef unsigned int* memaddr32_t;
 typedef unsigned char* memaddr8_t;
@@ -194,4 +196,4 @@ int free_8(memaddr8_t addr, int size){
 	return memman_free(addr, size);
 }
 
-
+#endif

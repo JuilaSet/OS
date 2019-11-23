@@ -1,6 +1,9 @@
 // 
 // string.h 文件
 // 
+#ifndef STRINGH_INCLUDE
+#define STRINGH_INCLUDE
+
 int strlen(char* sptr){
 	int len = 0;
 	while(sptr[len++]);
@@ -37,3 +40,5 @@ char* intToHexStr(unsigned int d) {
 	}
 	return str;
 }
+
+#endif // !
